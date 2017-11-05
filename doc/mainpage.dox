@@ -30,7 +30,7 @@ implementation in hardware and software, <a href="https://eprint.iacr.org/2016/6
 The algorithm authors' <a href="https://sites.google.com/site/skinnycipher">web site</a>
 provides a <a href="https://sites.google.com/site/skinnycipher/downloads/skinny_reference.c">refererence implementation</a> in C, but it isn't terribly
 efficient - it is intended to be <i>correct</i> to make the algorithm
-easier to analyze.  And that's OK.
+easier to analyse.  And that's OK.
 
 The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a>
 provides an alternative implementation in ISO C99 that is designed for

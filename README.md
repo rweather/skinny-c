@@ -8,7 +8,7 @@ implementation in hardware and software, [paper](https://eprint.iacr.org/2016/66
 The algorithm author's [web site](https://sites.google.com/site/skinnycipher/) provides a
 [reference implementation](https://sites.google.com/site/skinnycipher/downloads/skinny_reference.c)
 in C, but it isn't terribly efficient - it is intended to be *correct*
-to make the algorithm easier to analyze.  And that's OK.
+to make the algorithm easier to analyse.  And that's OK.
 
 This repository provides an alternative implementation in ISO C99 that is
 designed for efficient operation on 32-bit and 64-bit platforms.
