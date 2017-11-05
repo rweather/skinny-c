@@ -117,7 +117,7 @@ int skinny64_set_key(Skinny64Key_t *ks, const void *key, unsigned size);
  *
  * \param ks The key schedule structure to populate.
  * \param key Points to the key.
- * \param key_size Size of the key, between 8 and 24 bytes.
+ * \param key_size Size of the key, between 8 and 16 bytes.
  * \param tweak Points to the initial tweak value, or NULL if zero.
  * \param tweak_size Size of the tweak value, between 1 and 8 bytes.
  *
