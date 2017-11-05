@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2017 Southern Storm Software, Pty Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+\file mainpage.dox
+\mainpage
+
+The SKINNY family of tweakable block ciphers is intended for lightweight
+implementation in hardware and software, <a href="https://eprint.iacr.org/2016/660.pdf">paper</a>.
+
+The algorithm author's <a href="https://sites.google.com/site/skinnycipher">web site</a>
+provides a <a href="https://sites.google.com/site/skinnycipher/downloads/skinny_reference.c">refererence implementation</a> in C, but it isn't terribly
+efficient - it is intended to be <i>correct</i> to make the algorithm
+easier to analyze.  And that's OK.
+
+The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a>
+provides an alternative implementation in ISO C99 that is designed for
+efficient operation on 32-bit and 64-bit platforms.  Assembly language and
+SIMD speed-ups are definitely possible, such as
+<a href="https://github.com/kste/skinny_avx">this</a> AVX2 implementation,
+and may be added later.
+
+This implementation is designed to have constant-time and constant-cache
+behaviour.  There are no lookup tables, particularly for the S-boxes.
+
+Skinny-C is distributed under the terms of the MIT license.
+
+\section main_build Building Skinny-C
+
+To build the code with gcc, simply type <tt>make</tt>.  Then type
+<tt>make check</tt> to run the test cases.
+
+\section main_using Using Skinny-C
+
+\section main_apiref API Reference
+
+\li \ref skinny128 "Skinny-128 API"
+\li \ref skinny64 "Skinny-64 API"
+
+\section main_contact Contact
+
+For more information on this code, to report bugs, or to suggest
+improvements, please contact the author Rhys Weatherley via
+<a href="mailto:rhys.weatherley@gmail.com">email</a>.
+
+*/
