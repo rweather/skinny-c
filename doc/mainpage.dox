@@ -27,7 +27,7 @@
 The SKINNY family of tweakable block ciphers is intended for lightweight
 implementation in hardware and software, <a href="https://eprint.iacr.org/2016/660.pdf">paper</a>.
 
-The algorithm author's <a href="https://sites.google.com/site/skinnycipher">web site</a>
+The algorithm authors' <a href="https://sites.google.com/site/skinnycipher">web site</a>
 provides a <a href="https://sites.google.com/site/skinnycipher/downloads/skinny_reference.c">refererence implementation</a> in C, but it isn't terribly
 efficient - it is intended to be <i>correct</i> to make the algorithm
 easier to analyze.  And that's OK.
@@ -46,10 +46,57 @@ Skinny-C is distributed under the terms of the MIT license.
 
 \section main_build Building Skinny-C
 
-To build the code with gcc, simply type <tt>make</tt>.  Then type
-<tt>make check</tt> to run the test cases.
+To build the code with gcc and gmake, simply type "make".  Then type
+"make check" to run the test cases.  Some modifications may be needed to
+the Makefile's to build on non-GNU platforms or with other compilers.
 
 \section main_using Using Skinny-C
+
+The API for Skinny-C provides ECB encryption on a block-by-block basis.
+The first step is to initialize the key schedule using the key.
+For this example we will use a 256-bit key with Skinny128:
+
+\code
+Skinny128Key_t ks;
+unsigned char key[32] = ...;
+skinny128_set_key(&ks, key, 32);
+\endcode
+
+Each block of the plaintext is then encrypted as follows:
+
+\code
+unsigned char plaintext[16] = ...;
+unsigned char ciphertext[16];
+skinny128_encrypt(ciphertext, plaintext, &ks);
+\endcode
+
+To decrypt a ciphertext back to the original plaintext:
+
+\code
+unsigned char ciphertext[16] = ...;
+unsigned char plaintext[16];
+skinny128_decrypt(plaintext, ciphertext, &ks);
+\endcode
+
+\note ECB mode is unsafe when used to directly encrypt bulk data.
+Applications should implement higher-level modes such as CTR,
+CBC, EAX, GCM, etc when handling bulk data.  Failure to do this will
+compromise the security of the application.
+
+\section main_examples Examples
+
+There are two example programs, "skinny-ctr" and "skinny-tweak", in the
+"examples" directory of the repository.  See the README.md file in that
+directory for information on using the examples.
+
+The "skinny-ctr" program is a simple example of encrypting and decrypting
+files using SKINNY in CTR mode.  Incrementing counter values are encrypted
+for each block and XOR'ed with the plaintext to create the ciphertext.
+
+The "skinny-tweak" program is similar to "skinny-ctr" except that it
+increments the tweak each block and encrypts the plaintext directly
+using the key and tweak.  This is intended as an example of using
+SKINNY as a true tweakable block cipher.
 
 \section main_apiref API Reference
 
