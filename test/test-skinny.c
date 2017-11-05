@@ -21,6 +21,7 @@
  */
 
 #include "skinny128-cipher.h"
+#include "skinny64-cipher.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -35,6 +36,30 @@ typedef struct
 } SkinnyTestVector;
 
 /* Test vectors from the SKINNY specification paper */
+static SkinnyTestVector const testVector64_64 = {
+    "Skinny-64-64",
+    {0x06, 0x03, 0x4f, 0x95, 0x77, 0x24, 0xd1, 0x9d},
+    {0xbb, 0x39, 0xdf, 0xb2, 0x42, 0x9b, 0x8a, 0xc7},
+    {0xf5, 0x26, 0x98, 0x26, 0xfc, 0x68, 0x12, 0x38},
+    8
+};
+static SkinnyTestVector const testVector64_128 = {
+    "Skinny-64-128",
+    {0xcf, 0x16, 0xcf, 0xe8, 0xfd, 0x0f, 0x98, 0xaa},
+    {0x6c, 0xed, 0xa1, 0xf4, 0x3d, 0xe9, 0x2b, 0x9e},
+    {0x9e, 0xb9, 0x36, 0x40, 0xd0, 0x88, 0xda, 0x63,
+     0x76, 0xa3, 0x9d, 0x1c, 0x8b, 0xea, 0x71, 0xe1},
+    16
+};
+static SkinnyTestVector const testVector64_192 = {
+    "Skinny-64-192",
+    {0x53, 0x0c, 0x61, 0xd3, 0x5e, 0x86, 0x63, 0xc3},
+    {0xdd, 0x2c, 0xf1, 0xa8, 0xf3, 0x30, 0x30, 0x3c},
+    {0xed, 0x00, 0xc8, 0x5b, 0x12, 0x0d, 0x68, 0x61,
+     0x87, 0x53, 0xe2, 0x4b, 0xfd, 0x90, 0x8f, 0x60,
+     0xb2, 0xdb, 0xb4, 0x1b, 0x42, 0x2d, 0xfc, 0xd0},
+    24
+};
 static SkinnyTestVector const testVector128_128 = {
     "Skinny-128-128",
     {0xf2, 0x0a, 0xdb, 0x0e, 0xb0, 0x8b, 0x64, 0x8a,
@@ -74,6 +99,32 @@ static SkinnyTestVector const testVector128_384 = {
 
 static int error = 0;
 
+static void skinny64Test(const SkinnyTestVector *test)
+{
+    Skinny64Key_t ks;
+    uint8_t plaintext[SKINNY64_BLOCK_SIZE];
+    uint8_t ciphertext[SKINNY64_BLOCK_SIZE];
+
+    skinny64_set_key(&ks, test->key, test->key_size);
+    skinny64_encrypt(ciphertext, test->plaintext, &ks);
+    skinny64_decrypt(plaintext, test->ciphertext, &ks);
+
+    printf("%s: ", test->name);
+    if (memcmp(plaintext, test->plaintext, SKINNY64_BLOCK_SIZE) == 0) {
+        printf("plaintext ok");
+    } else {
+        printf("plaintext INCORRECT");
+        error = 1;
+    }
+    if (memcmp(ciphertext, test->ciphertext, SKINNY64_BLOCK_SIZE) == 0) {
+        printf(", ciphertext ok");
+    } else {
+        printf(", ciphertext INCORRECT");
+        error = 1;
+    }
+    printf("\n");
+}
+
 static void skinny128Test(const SkinnyTestVector *test)
 {
     Skinny128Key_t ks;
@@ -109,6 +160,10 @@ void generate_sboxes(void);
 
 int main(int argc, char **argv)
 {
+    skinny64Test(&testVector64_64);
+    skinny64Test(&testVector64_128);
+    skinny64Test(&testVector64_192);
+
     skinny128Test(&testVector128_128);
     skinny128Test(&testVector128_256);
     skinny128Test(&testVector128_384);

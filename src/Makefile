@@ -5,7 +5,7 @@ CFLAGS += -Wall -O3 -std=c99 -I../include
 
 LIBRARY = libskinny.a
 
-OBJS = skinny128-cipher.o
+OBJS = skinny128-cipher.o skinny64-cipher.o
 
 all: $(LIBRARY)
 
@@ -19,3 +19,4 @@ clean:
 check: all
 
 skinny128-cipher.o: ../include/skinny128-cipher.h
+skinny64-cipher.o: ../include/skinny64-cipher.h
