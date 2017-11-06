@@ -316,7 +316,8 @@ STATIC_INLINE uint32_t skinny64_inv_sbox(uint32_t x)
     return SBOX_MIX(x);
 }
 
-void skinny64_encrypt(void *output, const void *input, const Skinny64Key_t *ks)
+void skinny64_ecb_encrypt
+    (void *output, const void *input, const Skinny64Key_t *ks)
 {
     Skinny64Cells_t state;
     const Skinny64HalfCells_t *schedule;
@@ -362,7 +363,8 @@ void skinny64_encrypt(void *output, const void *input, const Skinny64Key_t *ks)
     WRITE_WORD16(output, 6, state.row[3]);
 }
 
-void skinny64_decrypt(void *output, const void *input, const Skinny64Key_t *ks)
+void skinny64_ecb_decrypt
+    (void *output, const void *input, const Skinny64Key_t *ks)
 {
     Skinny64Cells_t state;
     const Skinny64HalfCells_t *schedule;

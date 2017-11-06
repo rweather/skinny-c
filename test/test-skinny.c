@@ -106,8 +106,8 @@ static void skinny64Test(const SkinnyTestVector *test)
     uint8_t ciphertext[SKINNY64_BLOCK_SIZE];
 
     skinny64_set_key(&ks, test->key, test->key_size);
-    skinny64_encrypt(ciphertext, test->plaintext, &ks);
-    skinny64_decrypt(plaintext, test->ciphertext, &ks);
+    skinny64_ecb_encrypt(ciphertext, test->plaintext, &ks);
+    skinny64_ecb_decrypt(plaintext, test->ciphertext, &ks);
 
     printf("%s: ", test->name);
     if (memcmp(plaintext, test->plaintext, SKINNY64_BLOCK_SIZE) == 0) {
@@ -132,8 +132,8 @@ static void skinny128Test(const SkinnyTestVector *test)
     uint8_t ciphertext[SKINNY128_BLOCK_SIZE];
 
     skinny128_set_key(&ks, test->key, test->key_size);
-    skinny128_encrypt(ciphertext, test->plaintext, &ks);
-    skinny128_decrypt(plaintext, test->ciphertext, &ks);
+    skinny128_ecb_encrypt(ciphertext, test->plaintext, &ks);
+    skinny128_ecb_decrypt(plaintext, test->ciphertext, &ks);
 
     printf("%s: ", test->name);
     if (memcmp(plaintext, test->plaintext, SKINNY128_BLOCK_SIZE) == 0) {

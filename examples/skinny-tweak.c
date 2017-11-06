@@ -77,14 +77,14 @@ int main(int argc, char *argv[])
             /* Encrypt/decrypt the block using the current key and tweak */
             if (encrypt) {
                 if (block_size == 8)
-                    skinny64_encrypt(buffer + posn, buffer + posn, &ks64.ks);
+                    skinny64_ecb_encrypt(buffer + posn, buffer + posn, &ks64.ks);
                 else
-                    skinny128_encrypt(buffer + posn, buffer + posn, &ks128.ks);
+                    skinny128_ecb_encrypt(buffer + posn, buffer + posn, &ks128.ks);
             } else {
                 if (block_size == 8)
-                    skinny64_decrypt(buffer + posn, buffer + posn, &ks64.ks);
+                    skinny64_ecb_decrypt(buffer + posn, buffer + posn, &ks64.ks);
                 else
-                    skinny128_decrypt(buffer + posn, buffer + posn, &ks128.ks);
+                    skinny128_ecb_decrypt(buffer + posn, buffer + posn, &ks128.ks);
             }
 
             /* Increment the tweak and set the new value on the key schedule */

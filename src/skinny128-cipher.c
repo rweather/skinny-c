@@ -440,7 +440,8 @@ STATIC_INLINE uint32_t skinny128_inv_sbox(uint32_t x)
 
 #endif
 
-void skinny128_encrypt(void *output, const void *input, const Skinny128Key_t *ks)
+void skinny128_ecb_encrypt
+    (void *output, const void *input, const Skinny128Key_t *ks)
 {
     Skinny128Cells_t state;
     const Skinny128HalfCells_t *schedule;
@@ -499,7 +500,8 @@ void skinny128_encrypt(void *output, const void *input, const Skinny128Key_t *ks
     WRITE_WORD32(output, 12, state.row[3]);
 }
 
-void skinny128_decrypt(void *output, const void *input, const Skinny128Key_t *ks)
+void skinny128_ecb_decrypt
+    (void *output, const void *input, const Skinny128Key_t *ks)
 {
     Skinny128Cells_t state;
     const Skinny128HalfCells_t *schedule;

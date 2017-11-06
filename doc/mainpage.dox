@@ -67,7 +67,7 @@ Each block of the plaintext is then encrypted as follows:
 \code
 unsigned char plaintext[16] = ...;
 unsigned char ciphertext[16];
-skinny128_encrypt(ciphertext, plaintext, &ks);
+skinny128_ecb_encrypt(ciphertext, plaintext, &ks);
 \endcode
 
 To decrypt a ciphertext back to the original plaintext:
@@ -75,7 +75,7 @@ To decrypt a ciphertext back to the original plaintext:
 \code
 unsigned char ciphertext[16] = ...;
 unsigned char plaintext[16];
-skinny128_decrypt(plaintext, ciphertext, &ks);
+skinny128_ecb_decrypt(plaintext, ciphertext, &ks);
 \endcode
 
 \note ECB mode is unsafe when used to directly encrypt bulk data.

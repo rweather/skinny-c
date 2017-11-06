@@ -89,9 +89,9 @@ int main(int argc, char *argv[])
         for (posn = 0; posn < read_size; posn += block_size) {
             /* Encrypt the counter to get the next keystream block */
             if (block_size == 8)
-                skinny64_encrypt(enc_counter, counter, &ks64);
+                skinny64_ecb_encrypt(enc_counter, counter, &ks64);
             else
-                skinny128_encrypt(enc_counter, counter, &ks128);
+                skinny128_ecb_encrypt(enc_counter, counter, &ks128);
 
             /* XOR the keystream block with the plaintext */
             xor_block(buffer + posn, enc_counter, block_size);

@@ -156,7 +156,7 @@ int skinny128_change_tweak
     (Skinny128TweakedKey_t *ks, const void *tweak, unsigned tweak_size);
 
 /**
- * \brief Encrypts a single block using the Skinny128 block cipher.
+ * \brief Encrypts a single block using the Skinny128 block cipher in ECB mode.
  *
  * \param output The output block, which must contain at least
  * SKINNY128_BLOCK_SIZE bytes of space for the ciphertext.
@@ -166,10 +166,11 @@ int skinny128_change_tweak
  *
  * The \a input and \a output blocks are allowed to overlap.
  */
-void skinny128_encrypt(void *output, const void *input, const Skinny128Key_t *ks);
+void skinny128_ecb_encrypt
+    (void *output, const void *input, const Skinny128Key_t *ks);
 
 /**
- * \brief Decrypts a single block using the Skinny128 block cipher.
+ * \brief Decrypts a single block using the Skinny128 block cipher in ECB mode.
  *
  * \param output The output block, which must contain at least
  * SKINNY128_BLOCK_SIZE bytes of space for the plaintext.
@@ -179,7 +180,8 @@ void skinny128_encrypt(void *output, const void *input, const Skinny128Key_t *ks
  *
  * The \a input and \a output blocks are allowed to overlap.
  */
-void skinny128_decrypt(void *output, const void *input, const Skinny128Key_t *ks);
+void skinny128_ecb_decrypt
+    (void *output, const void *input, const Skinny128Key_t *ks);
 
 /**@}*/
 

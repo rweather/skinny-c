@@ -156,7 +156,7 @@ int skinny64_change_tweak
     (Skinny64TweakedKey_t *ks, const void *tweak, unsigned tweak_size);
 
 /**
- * \brief Encrypts a single block using the Skinny64 block cipher.
+ * \brief Encrypts a single block using the Skinny64 block cipher in ECB mode.
  *
  * \param output The output block, which must contain at least
  * SKINNY64_BLOCK_SIZE bytes of space for the ciphertext.
@@ -166,10 +166,11 @@ int skinny64_change_tweak
  *
  * The \a input and \a output blocks are allowed to overlap.
  */
-void skinny64_encrypt(void *output, const void *input, const Skinny64Key_t *ks);
+void skinny64_ecb_encrypt
+    (void *output, const void *input, const Skinny64Key_t *ks);
 
 /**
- * \brief Decrypts a single block using the Skinny64 block cipher.
+ * \brief Decrypts a single block using the Skinny64 block cipher in ECB mode.
  *
  * \param output The output block, which must contain at least
  * SKINNY64_BLOCK_SIZE bytes of space for the plaintext.
@@ -179,7 +180,8 @@ void skinny64_encrypt(void *output, const void *input, const Skinny64Key_t *ks);
  *
  * The \a input and \a output blocks are allowed to overlap.
  */
-void skinny64_decrypt(void *output, const void *input, const Skinny64Key_t *ks);
+void skinny64_ecb_decrypt
+    (void *output, const void *input, const Skinny64Key_t *ks);
 
 /**@}*/
 
