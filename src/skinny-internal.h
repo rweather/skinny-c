@@ -34,4 +34,11 @@
 #define STATIC_INLINE static
 #endif
 
+/* Define SKINNY_64BIT to 1 if the CPU is natively 64-bit */
+#if defined(__WORDSIZE) && __WORDSIZE == 64
+#define SKINNY_64BIT 1
+#else
+#define SKINNY_64BIT 0
+#endif
+
 #endif /* SKINNY_INTERNAL_H */

@@ -23,13 +23,6 @@
 #include "skinny128-cipher.h"
 #include "skinny-internal.h"
 
-/* Define SKINNY128_64BIT to 1 if the CPU is natively 64-bit */
-#if defined(__WORDSIZE) && __WORDSIZE == 64
-#define SKINNY128_64BIT 1
-#else
-#define SKINNY128_64BIT 0
-#endif
-
 #define READ_BYTE(ptr,offset) \
     ((uint32_t)(((const uint8_t *)(ptr))[(offset)]))
 
@@ -45,7 +38,7 @@
      (((uint8_t *)(ptr))[(offset) + 2] = (uint8_t)((value) >> 16)), \
      (((uint8_t *)(ptr))[(offset) + 3] = (uint8_t)((value) >> 24)))
 
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
 
 STATIC_INLINE uint64_t skinny128_LFSR2(uint64_t x)
 {
@@ -153,7 +146,7 @@ static void skinny128_set_key_inner
     for (index = 0; index < ks->rounds; ++index) {
         /* Determine the subkey to use at this point in the key schedule
            by XOR'ing together the first two rows of each TKi element */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         if (count == 1) {
             ks->schedule[index].lrow = tk[0].lrow[0];
         } else if (count == 2) {
@@ -209,7 +202,7 @@ static void skinny128_set_key_inner
         }
 
         /* Update the TK2 and TK3 states with the LFSR's */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         tk[1].lrow[0] = skinny128_LFSR2(tk[1].lrow[0]);
         if (count == 3) {
             tk[2].lrow[0] = skinny128_LFSR3(tk[2].lrow[0]);
@@ -301,7 +294,7 @@ int skinny128_change_tweak
     ks->tweak = tk_next;
     for (index = 0; index < ks->ks.rounds; ++index) {
         /* Remove the previous tweak from the key schedule entry */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         ks->ks.schedule[index].lrow ^= tk_prev.lrow[0];
 #else
         ks->ks.schedule[index].row[0] ^= tk_prev.row[0];
@@ -309,7 +302,7 @@ int skinny128_change_tweak
 #endif
 
         /* Apply the new tweak to the key schedule entry */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         ks->ks.schedule[index].lrow ^= tk_next.lrow[0];
 #else
         ks->ks.schedule[index].row[0] ^= tk_next.row[0];
@@ -335,7 +328,7 @@ STATIC_INLINE uint32_t skinny128_rotate_right(uint32_t x, unsigned count)
     return (x << count) | (x >> (32 - count));
 }
 
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
 
 #define SBOX_MIX(x)  \
     (((~((((x) >> 1) | (x)) >> 2)) & 0x1111111111111111ULL) ^ (x))
@@ -449,7 +442,7 @@ void skinny128_ecb_encrypt
     schedule = ks->schedule;
     for (index = ks->rounds; index > 0; --index, ++schedule) {
         /* Apply the S-box to all bytes in the state */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         state.lrow[0] = skinny128_sbox(state.lrow[0]);
         state.lrow[1] = skinny128_sbox(state.lrow[1]);
 #else
@@ -460,7 +453,7 @@ void skinny128_ecb_encrypt
 #endif
 
         /* Apply the subkey for this round */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         state.lrow[0] ^= schedule->lrow;
         state.lrow[1] ^= 0x02;
 #else
@@ -523,7 +516,7 @@ void skinny128_ecb_decrypt
         state.row[3] = skinny128_rotate_right(state.row[3], 8);
 
         /* Apply the subkey for this round */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         state.lrow[0] ^= schedule->lrow;
 #else
         state.row[0] ^= schedule->row[0];
@@ -532,7 +525,7 @@ void skinny128_ecb_decrypt
         state.row[2] ^= 0x02;
 
         /* Apply the inverse of the S-box to all bytes in the state */
-#if SKINNY128_64BIT
+#if SKINNY_64BIT
         state.lrow[0] = skinny128_inv_sbox(state.lrow[0]);
         state.lrow[1] = skinny128_inv_sbox(state.lrow[1]);
 #else
