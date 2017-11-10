@@ -1,7 +1,7 @@
 
 .PHONY: all clean check
 
-CFLAGS += -Wall -O3 -std=c99 -I../include
+CFLAGS += -Wall -Wextra -Wno-unused-parameter -O3 -std=c99 -I../include
 LDFLAGS += -L../src -lskinny
 
 TARGET = test-skinny

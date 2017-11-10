@@ -88,7 +88,7 @@ STATIC_INLINE void mantis_unpack_block
 }
 
 STATIC_INLINE void mantis_unpack_rotated_block
-    (MantisCells_t *block, const uint8_t *buf, unsigned offset)
+    (MantisCells_t *block, const uint8_t *buf)
 {
     uint8_t rotated[MANTIS_BLOCK_SIZE];
     unsigned index;
@@ -121,10 +121,10 @@ int mantis_set_key
         /* Encryption */
         mantis_unpack_block(&(ks->k0), key, 0);
         mantis_unpack_block(&(ks->k1), key, 8);
-        mantis_unpack_rotated_block(&(ks->k0prime), key, 0);
+        mantis_unpack_rotated_block(&(ks->k0prime), key);
     } else {
         /* Decryption */
-        mantis_unpack_rotated_block(&(ks->k0), key, 0);
+        mantis_unpack_rotated_block(&(ks->k0), key);
         mantis_unpack_block(&(ks->k0prime), key, 0);
         mantis_unpack_block(&(ks->k1), key, 8);
         ks->k1.row[0] ^= ALPHA_ROW0;

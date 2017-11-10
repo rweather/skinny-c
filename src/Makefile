@@ -1,7 +1,7 @@
 
 .PHONY: all clean check
 
-CFLAGS += -Wall -O3 -std=c99 -I../include
+CFLAGS += -Wall -Wextra -O3 -std=c99 -I../include
 
 LIBRARY = libskinny.a
 
