@@ -65,11 +65,14 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /* Initialize the key schedule */
-    if (block_size == 8)
-        skinny64_set_key_and_tweak(&ks64, key, key_size, tweak, tweak_size);
-    else
-        skinny128_set_key_and_tweak(&ks128, key, key_size, tweak, tweak_size);
+    /* Initialize the key schedule and tweak */
+    if (block_size == 8) {
+        skinny64_set_tweaked_key(&ks64, key, key_size);
+        skinny64_set_tweak(&ks64, tweak, tweak_size);
+    } else {
+        skinny128_set_tweaked_key(&ks128, key, key_size);
+        skinny128_set_tweak(&ks128, tweak, tweak_size);
+    }
 
     /* Read and encrypt blocks from the file */
     while (!feof(infile) && (read_size = fread(buffer, 1, sizeof(buffer), infile)) > 0) {
@@ -90,9 +93,9 @@ int main(int argc, char *argv[])
             /* Increment the tweak and set the new value on the key schedule */
             increment_tweak();
             if (block_size == 8)
-                skinny64_change_tweak(&ks64, tweak, tweak_size);
+                skinny64_set_tweak(&ks64, tweak, tweak_size);
             else
-                skinny128_change_tweak(&ks128, tweak, tweak_size);
+                skinny128_set_tweak(&ks128, tweak, tweak_size);
         }
         fwrite(buffer, 1, posn, outfile);
     }

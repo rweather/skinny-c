@@ -143,8 +143,6 @@ int skinny128_set_key(Skinny128Key_t *ks, const void *key, unsigned size);
  * \param ks The key schedule structure to populate.
  * \param key Points to the key.
  * \param key_size Size of the key, between 16 and 32 bytes.
- * \param tweak Points to the initial tweak value, or NULL if zero.
- * \param tweak_size Size of the tweak value, between 1 and 16 bytes.
  *
  * \return Zero if there is something wrong with the parameters,
  * or 1 if the key and tweak were set.
@@ -154,13 +152,12 @@ int skinny128_set_key(Skinny128Key_t *ks, const void *key, unsigned size);
  * is less than 16 bytes in size, it will be padded with zeroes.
  *
  * Once the initial key and tweak have been set, the tweak can be changed
- * later by calling skinny128_change_tweak().
+ * later by calling skinny128_set_tweak().
  *
- * \sa skinny128_change_tweak()
+ * \sa skinny128_set_tweak()
  */
-int skinny128_set_key_and_tweak
-    (Skinny128TweakedKey_t *ks, const void *key, unsigned key_size,
-     const void *tweak, unsigned tweak_size);
+int skinny128_set_tweaked_key
+    (Skinny128TweakedKey_t *ks, const void *key, unsigned key_size);
 
 /**
  * \brief Changes the tweak value for a previously-initialized key schedule.
@@ -175,9 +172,9 @@ int skinny128_set_key_and_tweak
  * This function modifies the key schedule to change the tweak from its
  * previous value to the new value given by \a tweak.
  *
- * \sa skinny128_set_key_and_tweak()
+ * \sa skinny128_set_tweaked_key()
  */
-int skinny128_change_tweak
+int skinny128_set_tweak
     (Skinny128TweakedKey_t *ks, const void *tweak, unsigned tweak_size);
 
 /**

@@ -107,10 +107,10 @@ As before, we start by initializing the 128-bit key and the CTR
 control structure with Skinny64:
 
 \code
-Skinny64TweakedKey_t ks;
+Skinny64TweakedKey_t kt;
 Skinny64CTR_t ctr;
 unsigned char key[16] = ...;
-skinny64_set_key_and_tweak(&ks, key, 16, NULL, 0);
+skinny64_set_tweaked_key(&kt, key, 16);
 skinny64_ctr_init(&ctr);
 \endcode
 
@@ -128,15 +128,15 @@ seqbuf[4] = (unsigned char)(seqnum >> 24);
 seqbuf[5] = (unsigned char)(seqnum >> 16);
 seqbuf[6] = (unsigned char)(seqnum >> 8);
 seqbuf[7] = (unsigned char)seqnum;
-skinny128_change_tweak(&ks, seqbuf, sizeof(seqbuf));
-skinny128_ctr_set_counter(&ctr, NULL, 0);
+skinny64_set_tweak(&kt, seqbuf, sizeof(seqbuf));
+skinny64_ctr_set_counter(&ctr, NULL, 0);
 \endcode
 
 Packet encryption is similar to before:
 
 \code
 unsigned char packet[MAX_PACKET_SIZE] = ...;
-skinny64_ctr_encrypt(packet, packet, size, &ks.ks, &ctr);
+skinny64_ctr_encrypt(packet, packet, size, &kt.ks, &ctr);
 \endcode
 
 Finally, clean up when the session ends:

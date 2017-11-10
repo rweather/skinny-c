@@ -253,26 +253,24 @@ static void skinny128_read_tweak
     }
 }
 
-int skinny128_set_key_and_tweak
-    (Skinny128TweakedKey_t *ks, const void *key, unsigned key_size,
-     const void *tweak, unsigned tweak_size)
+int skinny128_set_tweaked_key
+    (Skinny128TweakedKey_t *ks, const void *key, unsigned key_size)
 {
     /* Validate the parameters */
     if (!ks || !key || key_size < SKINNY128_BLOCK_SIZE ||
-            key_size > (SKINNY128_BLOCK_SIZE * 2) ||
-            tweak_size < 1 || tweak_size > SKINNY128_BLOCK_SIZE) {
+            key_size > (SKINNY128_BLOCK_SIZE * 2)) {
         return 0;
     }
 
-    /* Read the initial tweak and convert from little-endian to host-endian */
-    skinny128_read_tweak(&(ks->tweak), tweak, tweak_size);
+    /* Set the initial tweak to all-zeroes */
+    memset(&(ks->tweak), 0, sizeof(ks->tweak));
 
     /* Set the initial key and tweak value */
     skinny128_set_key_inner(&(ks->ks), key, key_size, &(ks->tweak));
     return 1;
 }
 
-int skinny128_change_tweak
+int skinny128_set_tweak
     (Skinny128TweakedKey_t *ks, const void *tweak, unsigned tweak_size)
 {
     Skinny128Cells_t tk_prev;
