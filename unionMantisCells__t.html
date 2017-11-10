@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Skinny-C: Skinny64Key_t Struct Reference</title>
+<title>Skinny-C: MantisCells_t Union Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -84,59 +84,59 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">Skinny64Key_t Struct Reference<div class="ingroups"><a class="el" href="group__skinny64.html">Skinny-64 API</a></div></div>  </div>
+<div class="title">MantisCells_t Union Reference<div class="ingroups"><a class="el" href="group__mantis.html">Mantis API</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Key schedule for Skinny64 block ciphers.  
- <a href="structSkinny64Key__t.html#details">More...</a></p>
+<p>Union that describes a 64-bit 4x4 array of cells.  
+ <a href="unionMantisCells__t.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a19a99880e115f759b45fbc0426dbd099"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSkinny64Key__t.html#a19a99880e115f759b45fbc0426dbd099">rounds</a></td></tr>
-<tr class="separator:a19a99880e115f759b45fbc0426dbd099"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66355090594d452c6bdd688110206b59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionSkinny64HalfCells__t.html">Skinny64HalfCells_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSkinny64Key__t.html#a66355090594d452c6bdd688110206b59">schedule</a> [<a class="el" href="group__skinny64.html#ga8d04d824464bab7c19c2e98df833d676">SKINNY64_MAX_ROUNDS</a>]</td></tr>
-<tr class="separator:a66355090594d452c6bdd688110206b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa184cbd9917d05041560597892a4b873"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionMantisCells__t.html#aa184cbd9917d05041560597892a4b873">row</a> [4]</td></tr>
+<tr class="separator:aa184cbd9917d05041560597892a4b873"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d4456cdd7616b71047f7df4f95135d8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionMantisCells__t.html#a1d4456cdd7616b71047f7df4f95135d8">lrow</a> [2]</td></tr>
+<tr class="separator:a1d4456cdd7616b71047f7df4f95135d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Key schedule for Skinny64 block ciphers. </p>
+<div class="textblock"><p>Union that describes a 64-bit 4x4 array of cells. </p>
 
-<p>Definition at line <a class="el" href="skinny64-cipher_8h_source.html#l00076">76</a> of file <a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00096">96</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
 </div><h2 class="groupheader">Field Documentation</h2>
-<a class="anchor" id="a19a99880e115f759b45fbc0426dbd099"></a>
+<a class="anchor" id="a1d4456cdd7616b71047f7df4f95135d8"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned Skinny64Key_t::rounds</td>
+          <td class="memname">uint32_t MantisCells_t::lrow[2]</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Number of encryption/decryption rounds </p>
+<p>Cell rows in 32-bit units </p>
 
-<p>Definition at line <a class="el" href="skinny64-cipher_8h_source.html#l00079">79</a> of file <a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00099">99</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a66355090594d452c6bdd688110206b59"></a>
+<a class="anchor" id="aa184cbd9917d05041560597892a4b873"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="unionSkinny64HalfCells__t.html">Skinny64HalfCells_t</a> Skinny64Key_t::schedule[<a class="el" href="group__skinny64.html#ga8d04d824464bab7c19c2e98df833d676">SKINNY64_MAX_ROUNDS</a>]</td>
+          <td class="memname">uint16_t MantisCells_t::row[4]</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>All words of the key schedule </p>
+<p>Cell rows in 16-bit units </p>
 
-<p>Definition at line <a class="el" href="skinny64-cipher_8h_source.html#l00082">82</a> of file <a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00098">98</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li><a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a></li>
+<hr/>The documentation for this union was generated from the following file:<ul>
+<li><a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

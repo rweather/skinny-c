@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Skinny-C: Skinny64Key_t Struct Reference</title>
+<title>Skinny-C: MantisKey_t Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -84,59 +84,110 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">Skinny64Key_t Struct Reference<div class="ingroups"><a class="el" href="group__skinny64.html">Skinny-64 API</a></div></div>  </div>
+<div class="title">MantisKey_t Struct Reference<div class="ingroups"><a class="el" href="group__mantis.html">Mantis API</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Key schedule for Skinny64 block ciphers.  
- <a href="structSkinny64Key__t.html#details">More...</a></p>
+<p>Key schedule for Mantis block ciphers.  
+ <a href="structMantisKey__t.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a19a99880e115f759b45fbc0426dbd099"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSkinny64Key__t.html#a19a99880e115f759b45fbc0426dbd099">rounds</a></td></tr>
-<tr class="separator:a19a99880e115f759b45fbc0426dbd099"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66355090594d452c6bdd688110206b59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionSkinny64HalfCells__t.html">Skinny64HalfCells_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structSkinny64Key__t.html#a66355090594d452c6bdd688110206b59">schedule</a> [<a class="el" href="group__skinny64.html#ga8d04d824464bab7c19c2e98df833d676">SKINNY64_MAX_ROUNDS</a>]</td></tr>
-<tr class="separator:a66355090594d452c6bdd688110206b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7b2ffee4d53fdbd6ef98d7cb8782fcb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">k0</a></td></tr>
+<tr class="separator:ae7b2ffee4d53fdbd6ef98d7cb8782fcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3374aa26888eb1e25ede11ac0a4160ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">k0prime</a></td></tr>
+<tr class="separator:a3374aa26888eb1e25ede11ac0a4160ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c6cf99ef00a05a1b27e3f21b8ab1cce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">k1</a></td></tr>
+<tr class="separator:a2c6cf99ef00a05a1b27e3f21b8ab1cce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad35e43f03b51f54ee6253d4fd72fdb1e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">tweak</a></td></tr>
+<tr class="separator:ad35e43f03b51f54ee6253d4fd72fdb1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c78972dac254635c537588a9635ba65"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">rounds</a></td></tr>
+<tr class="separator:a3c78972dac254635c537588a9635ba65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Key schedule for Skinny64 block ciphers. </p>
+<div class="textblock"><p>Key schedule for Mantis block ciphers. </p>
 
-<p>Definition at line <a class="el" href="skinny64-cipher_8h_source.html#l00076">76</a> of file <a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00106">106</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
 </div><h2 class="groupheader">Field Documentation</h2>
-<a class="anchor" id="a19a99880e115f759b45fbc0426dbd099"></a>
+<a class="anchor" id="ae7b2ffee4d53fdbd6ef98d7cb8782fcb"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned Skinny64Key_t::rounds</td>
+          <td class="memname"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a> MantisKey_t::k0</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Number of encryption/decryption rounds </p>
+<p>First 64 bits of the incoming key </p>
 
-<p>Definition at line <a class="el" href="skinny64-cipher_8h_source.html#l00079">79</a> of file <a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00109">109</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a66355090594d452c6bdd688110206b59"></a>
+<a class="anchor" id="a3374aa26888eb1e25ede11ac0a4160ab"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="unionSkinny64HalfCells__t.html">Skinny64HalfCells_t</a> Skinny64Key_t::schedule[<a class="el" href="group__skinny64.html#ga8d04d824464bab7c19c2e98df833d676">SKINNY64_MAX_ROUNDS</a>]</td>
+          <td class="memname"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a> MantisKey_t::k0prime</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>All words of the key schedule </p>
+<p>Transformed version of the first 64 bits of the incoming key </p>
 
-<p>Definition at line <a class="el" href="skinny64-cipher_8h_source.html#l00082">82</a> of file <a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00112">112</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a2c6cf99ef00a05a1b27e3f21b8ab1cce"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a> MantisKey_t::k1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Second 64 bits of the incoming key </p>
+
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00115">115</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a3c78972dac254635c537588a9635ba65"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned MantisKey_t::rounds</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Number of encryption/decryption rounds (half the full amount) </p>
+
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00121">121</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad35e43f03b51f54ee6253d4fd72fdb1e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="unionMantisCells__t.html">MantisCells_t</a> MantisKey_t::tweak</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Current tweak value </p>
+
+<p>Definition at line <a class="el" href="mantis-cipher_8h_source.html#l00118">118</a> of file <a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li><a class="el" href="skinny64-cipher_8h_source.html">skinny64-cipher.h</a></li>
+<li><a class="el" href="mantis-cipher_8h_source.html">mantis-cipher.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
