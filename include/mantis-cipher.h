@@ -24,6 +24,7 @@
 #define MANTIS_CIPHER_h
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,6 +124,30 @@ typedef struct
 } MantisKey_t;
 
 /**
+ * \brief State information for Mantis in CTR mode.
+ *
+ * This structure should be treated as opaque.  The names and meaning
+ * of the fields below may not have identical behaviour between regular
+ * and vector-based implementations of CTR mode.
+ */
+typedef struct
+{
+    /** Counter value for the next block */
+    unsigned char counter[MANTIS_BLOCK_SIZE];
+
+    /** Encrypted counter value for encrypting the current block */
+    unsigned char ecounter[MANTIS_BLOCK_SIZE];
+
+    /** Offset into ecounter where the previous request left off */
+    unsigned offset;
+
+    /** Extension data.  May be used by vector-based implementations
+        to store multiple counter blocks for parallel encryption */
+    void *ext;
+
+} MantisCTR_t;
+
+/**
  * \brief Sets the key schedule for a Mantis block cipher.
  *
  * \param ks The key schedule structure to populate.
@@ -188,6 +213,71 @@ void mantis_swap_modes(MantisKey_t *ks);
  * The mode can also be altered on the fly by calling mantis_swap_modes().
  */
 void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks);
+
+/**
+ * \brief Initializes Mantis in CTR mode.
+ *
+ * \param ctr Points to the CTR control block to initialize.
+ *
+ * \return Zero if \a ctr is NULL or there is insufficient memory to
+ * create internal data structures, or non-zero if everything is OK.
+ *
+ * The counter block is initially set to all-zeroes.
+ *
+ * \sa mantis_ctr_set_counter(), mantis_ctr_encrypt()
+ */
+int mantis_ctr_init(MantisCTR_t *ctr);
+
+/**
+ * \brief Cleans up a CTR control block for Skinny-64.
+ *
+ * \param ctr Points to the CTR control block to clean up.
+ */
+void mantis_ctr_cleanup(MantisCTR_t *ctr);
+
+/**
+ * \brief Sets the counter value in a Skinny-64 CTR control block.
+ *
+ * \param ctr The CTR control block to modify.
+ * \param counter The counter value to set, which may be NULL
+ * to specify an all-zeroes counter.
+ * \param size The size of the counter in bytes, between 0 and
+ * MANTIS_BLOCK_SIZE.  Short counter blocks are padded on the
+ * left with zeroes to make up a full MANTIS_BLOCK_SIZE bytes.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the counter has been set.
+ *
+ * The counter is assumed to be in big-endian order, incremented
+ * from the right-most byte forward, as in the standard AES-CTR mode.
+ * Often the counter block will contain a packet sequence number or
+ * equivalent in the left-most bytes with the right-most bytes used
+ * to count blocks within the specified packet.
+ *
+ * Calling this function will also reset the keystream position so
+ * that the next call to mantis_ctr_encrypt() will start with the
+ * new counter value.  Usually this occurs at the start of a packet.
+ */
+int mantis_ctr_set_counter
+    (MantisCTR_t *ctr, const void *counter, unsigned size);
+
+/**
+ * \brief Encrypt a block of data using Skinny-64 in CTR mode.
+ *
+ * \param output The output buffer for the ciphertext.
+ * \param input The input buffer containing the plaintext.
+ * \param size The number of bytes to be encrypted.
+ * \param ks The key schedule to use to encrypt the counter values.
+ * \param ctr The CTR control block to use and update.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the data was encrypted.
+ *
+ * This function can also be used for CTR mode decryption.
+ */
+int mantis_ctr_encrypt
+    (void *output, const void *input, size_t size,
+     const MantisKey_t *ks, MantisCTR_t *ctr);
 
 /**@}*/
 

@@ -147,65 +147,240 @@ static MantisTestVector const testMantis8 = {
 
 static int error = 0;
 
-static void skinny64Test(const SkinnyTestVector *test)
+static void skinny64EcbTest(const SkinnyTestVector *test)
 {
     Skinny64Key_t ks;
     uint8_t plaintext[SKINNY64_BLOCK_SIZE];
     uint8_t ciphertext[SKINNY64_BLOCK_SIZE];
+    int plaintext_ok, ciphertext_ok;
+
+    printf("%s ECB: ", test->name);
+    fflush(stdout);
 
     skinny64_set_key(&ks, test->key, test->key_size);
     skinny64_ecb_encrypt(ciphertext, test->plaintext, &ks);
     skinny64_ecb_decrypt(plaintext, test->ciphertext, &ks);
 
-    printf("%s: ", test->name);
-    if (memcmp(plaintext, test->plaintext, SKINNY64_BLOCK_SIZE) == 0) {
-        printf("plaintext ok");
+    plaintext_ok = memcmp(plaintext, test->plaintext, SKINNY64_BLOCK_SIZE) == 0;
+    ciphertext_ok = memcmp(ciphertext, test->ciphertext, SKINNY64_BLOCK_SIZE) == 0;
+
+    if (plaintext_ok && ciphertext_ok) {
+        printf("ok");
     } else {
-        printf("plaintext INCORRECT");
         error = 1;
-    }
-    if (memcmp(ciphertext, test->ciphertext, SKINNY64_BLOCK_SIZE) == 0) {
-        printf(", ciphertext ok");
-    } else {
-        printf(", ciphertext INCORRECT");
-        error = 1;
+        if (plaintext_ok)
+            printf("plaintext ok");
+        else
+            printf("plaintext INCORRECT");
+        if (ciphertext_ok)
+            printf(", ciphertext ok");
+        else
+            printf(", ciphertext INCORRECT");
     }
     printf("\n");
 }
 
-static void skinny128Test(const SkinnyTestVector *test)
+#define CTR_BLOCK_COUNT 256
+
+static void skinny64CtrTest(const SkinnyTestVector *test)
+{
+    static uint8_t const base_counter[8] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef
+    };
+    Skinny64Key_t ks;
+    Skinny64CTR_t ctr;
+    uint8_t counter[SKINNY64_BLOCK_SIZE];
+    uint8_t plaintext[CTR_BLOCK_COUNT][SKINNY64_BLOCK_SIZE];
+    uint8_t ciphertext[CTR_BLOCK_COUNT][SKINNY64_BLOCK_SIZE];
+    uint8_t actual[CTR_BLOCK_COUNT][SKINNY64_BLOCK_SIZE];
+    unsigned index, carry, posn, inc, size;
+    int ok = 1;
+
+    printf("%s CTR: ", test->name);
+    fflush(stdout);
+
+    /* Simple implementation of counter mode to cross-check the real one */
+    skinny64_set_key(&ks, test->key, test->key_size);
+    for (index = 0; index < CTR_BLOCK_COUNT; ++index) {
+        carry = index;
+        for (posn = SKINNY64_BLOCK_SIZE; posn > 0; ) {
+            --posn;
+            carry += base_counter[posn];
+            counter[posn] = (uint8_t)carry;
+            carry >>= 8;
+        }
+        skinny64_ecb_encrypt(&(ciphertext[index]), counter, &ks);
+        for (posn = 0; posn < SKINNY64_BLOCK_SIZE; ++posn) {
+            plaintext[index][posn] =
+                test->plaintext[(posn + index) % SKINNY64_BLOCK_SIZE];
+            ciphertext[index][posn] ^= plaintext[index][posn];
+        }
+    }
+
+    /* Encrypt the entire plaintext in a single request */
+    memset(actual, 0, sizeof(actual));
+    skinny64_ctr_init(&ctr);
+    skinny64_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+    skinny64_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ks, &ctr);
+    if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
+        ok = 0;
+
+    /* Decrypt the ciphertext back to the plaintext, in-place */
+    skinny64_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+    skinny64_ctr_encrypt(actual, actual, sizeof(ciphertext), &ks, &ctr);
+    skinny64_ctr_cleanup(&ctr);
+    if (memcmp(plaintext, actual, sizeof(actual)) != 0)
+        ok = 0;
+
+    /* Use various size increments to check data that is not block-aligned */
+    for (inc = 1; inc <= (SKINNY64_BLOCK_SIZE * 3); ++inc) {
+        memset(actual, 0, sizeof(actual));
+        skinny64_ctr_init(&ctr);
+        skinny64_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+        for (posn = 0; posn < sizeof(plaintext); posn += inc) {
+            size = sizeof(plaintext) - posn;
+            if (size > inc)
+                size = inc;
+            skinny64_ctr_encrypt
+                (((uint8_t *)actual) + posn,
+                 ((uint8_t *)plaintext) + posn, size, &ks, &ctr);
+        }
+        skinny64_ctr_cleanup(&ctr);
+        if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
+            ok = 0;
+    }
+
+    /* Report the results */
+    if (ok) {
+        printf("ok\n");
+    } else {
+        printf("INCORRECT\n");
+        error = 1;
+    }
+}
+
+static void skinny128EcbTest(const SkinnyTestVector *test)
 {
     Skinny128Key_t ks;
     uint8_t plaintext[SKINNY128_BLOCK_SIZE];
     uint8_t ciphertext[SKINNY128_BLOCK_SIZE];
+    int plaintext_ok, ciphertext_ok;
+
+    printf("%s ECB: ", test->name);
+    fflush(stdout);
 
     skinny128_set_key(&ks, test->key, test->key_size);
     skinny128_ecb_encrypt(ciphertext, test->plaintext, &ks);
     skinny128_ecb_decrypt(plaintext, test->ciphertext, &ks);
 
-    printf("%s: ", test->name);
-    if (memcmp(plaintext, test->plaintext, SKINNY128_BLOCK_SIZE) == 0) {
-        printf("plaintext ok");
+    plaintext_ok = memcmp(plaintext, test->plaintext, SKINNY128_BLOCK_SIZE) == 0;
+    ciphertext_ok = memcmp(ciphertext, test->ciphertext, SKINNY128_BLOCK_SIZE) == 0;
+
+    if (plaintext_ok && ciphertext_ok) {
+        printf("ok");
     } else {
-        printf("plaintext INCORRECT");
         error = 1;
-    }
-    if (memcmp(ciphertext, test->ciphertext, SKINNY128_BLOCK_SIZE) == 0) {
-        printf(", ciphertext ok");
-    } else {
-        printf(", ciphertext INCORRECT");
-        error = 1;
+        if (plaintext_ok)
+            printf("plaintext ok");
+        else
+            printf("plaintext INCORRECT");
+        if (ciphertext_ok)
+            printf(", ciphertext ok");
+        else
+            printf(", ciphertext INCORRECT");
     }
     printf("\n");
 }
 
-static void mantisTest(const MantisTestVector *test)
+static void skinny128CtrTest(const SkinnyTestVector *test)
+{
+    static uint8_t const base_counter[16] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+        0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe
+    };
+    Skinny128Key_t ks;
+    Skinny128CTR_t ctr;
+    uint8_t counter[SKINNY128_BLOCK_SIZE];
+    uint8_t plaintext[CTR_BLOCK_COUNT][SKINNY128_BLOCK_SIZE];
+    uint8_t ciphertext[CTR_BLOCK_COUNT][SKINNY128_BLOCK_SIZE];
+    uint8_t actual[CTR_BLOCK_COUNT][SKINNY128_BLOCK_SIZE];
+    unsigned index, carry, posn, inc, size;
+    int ok = 1;
+
+    printf("%s CTR: ", test->name);
+    fflush(stdout);
+
+    /* Simple implementation of counter mode to cross-check the real one */
+    skinny128_set_key(&ks, test->key, test->key_size);
+    for (index = 0; index < CTR_BLOCK_COUNT; ++index) {
+        carry = index;
+        for (posn = SKINNY128_BLOCK_SIZE; posn > 0; ) {
+            --posn;
+            carry += base_counter[posn];
+            counter[posn] = (uint8_t)carry;
+            carry >>= 8;
+        }
+        skinny128_ecb_encrypt(&(ciphertext[index]), counter, &ks);
+        for (posn = 0; posn < SKINNY128_BLOCK_SIZE; ++posn) {
+            plaintext[index][posn] =
+                test->plaintext[(posn + index) % SKINNY128_BLOCK_SIZE];
+            ciphertext[index][posn] ^= plaintext[index][posn];
+        }
+    }
+
+    /* Encrypt the entire plaintext in a single request */
+    memset(actual, 0, sizeof(actual));
+    skinny128_ctr_init(&ctr);
+    skinny128_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+    skinny128_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ks, &ctr);
+    if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
+        ok = 0;
+
+    /* Decrypt the ciphertext back to the plaintext, in-place */
+    skinny128_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+    skinny128_ctr_encrypt(actual, actual, sizeof(ciphertext), &ks, &ctr);
+    skinny128_ctr_cleanup(&ctr);
+    if (memcmp(plaintext, actual, sizeof(actual)) != 0)
+        ok = 0;
+
+    /* Use various size increments to check data that is not block-aligned */
+    for (inc = 1; inc <= (SKINNY128_BLOCK_SIZE * 3); ++inc) {
+        memset(actual, 0, sizeof(actual));
+        skinny128_ctr_init(&ctr);
+        skinny128_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+        for (posn = 0; posn < sizeof(plaintext); posn += inc) {
+            size = sizeof(plaintext) - posn;
+            if (size > inc)
+                size = inc;
+            skinny128_ctr_encrypt
+                (((uint8_t *)actual) + posn,
+                 ((uint8_t *)plaintext) + posn, size, &ks, &ctr);
+        }
+        skinny128_ctr_cleanup(&ctr);
+        if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
+            ok = 0;
+    }
+
+    /* Report the results */
+    if (ok) {
+        printf("ok\n");
+    } else {
+        printf("INCORRECT\n");
+        error = 1;
+    }
+}
+
+static void mantisEcbTest(const MantisTestVector *test)
 {
     MantisKey_t ks;
     uint8_t plaintext1[MANTIS_BLOCK_SIZE];
     uint8_t ciphertext1[MANTIS_BLOCK_SIZE];
     uint8_t plaintext2[MANTIS_BLOCK_SIZE];
     uint8_t ciphertext2[MANTIS_BLOCK_SIZE];
+    int plaintext_ok, ciphertext_ok;
+
+    printf("%s ECB: ", test->name);
+    fflush(stdout);
 
     /* Start with the mode set to encrypt first */
     mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE,
@@ -224,22 +399,104 @@ static void mantisTest(const MantisTestVector *test)
     mantis_ecb_crypt(ciphertext2, test->plaintext, &ks);
 
     /* Check the results */
-    printf("%s: ", test->name);
-    if (memcmp(plaintext1, test->plaintext, MANTIS_BLOCK_SIZE) == 0 &&
-        memcmp(plaintext2, test->plaintext, MANTIS_BLOCK_SIZE) == 0) {
-        printf("plaintext ok");
+    plaintext_ok =
+        memcmp(plaintext1, test->plaintext, MANTIS_BLOCK_SIZE) == 0 &&
+        memcmp(plaintext2, test->plaintext, MANTIS_BLOCK_SIZE) == 0;
+    ciphertext_ok =
+        memcmp(ciphertext1, test->ciphertext, MANTIS_BLOCK_SIZE) == 0 &&
+        memcmp(ciphertext2, test->ciphertext, MANTIS_BLOCK_SIZE) == 0;
+    if (plaintext_ok && ciphertext_ok) {
+        printf("ok");
     } else {
-        printf("plaintext INCORRECT");
         error = 1;
-    }
-    if (memcmp(ciphertext1, test->ciphertext, MANTIS_BLOCK_SIZE) == 0 &&
-        memcmp(ciphertext2, test->ciphertext, MANTIS_BLOCK_SIZE) == 0) {
-        printf(", ciphertext ok");
-    } else {
-        printf(", ciphertext INCORRECT");
-        error = 1;
+        if (plaintext_ok)
+            printf("plaintext ok");
+        else
+            printf("plaintext INCORRECT");
+        if (ciphertext_ok)
+            printf(", ciphertext ok");
+        else
+            printf(", ciphertext INCORRECT");
     }
     printf("\n");
+}
+
+static void mantisCtrTest(const MantisTestVector *test)
+{
+    static uint8_t const base_counter[8] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef
+    };
+    MantisKey_t ks;
+    MantisCTR_t ctr;
+    uint8_t counter[MANTIS_BLOCK_SIZE];
+    uint8_t plaintext[CTR_BLOCK_COUNT][MANTIS_BLOCK_SIZE];
+    uint8_t ciphertext[CTR_BLOCK_COUNT][MANTIS_BLOCK_SIZE];
+    uint8_t actual[CTR_BLOCK_COUNT][MANTIS_BLOCK_SIZE];
+    unsigned index, carry, posn, inc, size;
+    int ok = 1;
+
+    printf("%s CTR: ", test->name);
+    fflush(stdout);
+
+    /* Simple implementation of counter mode to cross-check the real one */
+    mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE, test->rounds, MANTIS_ENCRYPT);
+    mantis_set_tweak(&ks, test->tweak, MANTIS_TWEAK_SIZE);
+    for (index = 0; index < CTR_BLOCK_COUNT; ++index) {
+        carry = index;
+        for (posn = MANTIS_BLOCK_SIZE; posn > 0; ) {
+            --posn;
+            carry += base_counter[posn];
+            counter[posn] = (uint8_t)carry;
+            carry >>= 8;
+        }
+        mantis_ecb_crypt(&(ciphertext[index]), counter, &ks);
+        for (posn = 0; posn < MANTIS_BLOCK_SIZE; ++posn) {
+            plaintext[index][posn] =
+                test->plaintext[(posn + index) % MANTIS_BLOCK_SIZE];
+            ciphertext[index][posn] ^= plaintext[index][posn];
+        }
+    }
+
+    /* Encrypt the entire plaintext in a single request */
+    memset(actual, 0, sizeof(actual));
+    mantis_ctr_init(&ctr);
+    mantis_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+    mantis_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ks, &ctr);
+    if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
+        ok = 0;
+
+    /* Decrypt the ciphertext back to the plaintext, in-place */
+    mantis_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+    mantis_ctr_encrypt(actual, actual, sizeof(ciphertext), &ks, &ctr);
+    mantis_ctr_cleanup(&ctr);
+    if (memcmp(plaintext, actual, sizeof(actual)) != 0)
+        ok = 0;
+
+    /* Use various size increments to check data that is not block-aligned */
+    for (inc = 1; inc <= (MANTIS_BLOCK_SIZE * 3); ++inc) {
+        memset(actual, 0, sizeof(actual));
+        mantis_ctr_init(&ctr);
+        mantis_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
+        for (posn = 0; posn < sizeof(plaintext); posn += inc) {
+            size = sizeof(plaintext) - posn;
+            if (size > inc)
+                size = inc;
+            mantis_ctr_encrypt
+                (((uint8_t *)actual) + posn,
+                 ((uint8_t *)plaintext) + posn, size, &ks, &ctr);
+        }
+        mantis_ctr_cleanup(&ctr);
+        if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
+            ok = 0;
+    }
+
+    /* Report the results */
+    if (ok) {
+        printf("ok\n");
+    } else {
+        printf("INCORRECT\n");
+        error = 1;
+    }
 }
 
 /* Define to 1 to include the sbox generator */
@@ -251,18 +508,31 @@ void generate_sboxes(void);
 
 int main(int argc, char **argv)
 {
-    skinny64Test(&testVector64_64);
-    skinny64Test(&testVector64_128);
-    skinny64Test(&testVector64_192);
+    skinny64EcbTest(&testVector64_64);
+    skinny64EcbTest(&testVector64_128);
+    skinny64EcbTest(&testVector64_192);
 
-    skinny128Test(&testVector128_128);
-    skinny128Test(&testVector128_256);
-    skinny128Test(&testVector128_384);
+    skinny64CtrTest(&testVector64_64);
+    skinny64CtrTest(&testVector64_128);
+    skinny64CtrTest(&testVector64_192);
 
-    mantisTest(&testMantis5);
-    mantisTest(&testMantis6);
-    mantisTest(&testMantis7);
-    mantisTest(&testMantis8);
+    skinny128EcbTest(&testVector128_128);
+    skinny128EcbTest(&testVector128_256);
+    skinny128EcbTest(&testVector128_384);
+
+    skinny128CtrTest(&testVector128_128);
+    skinny128CtrTest(&testVector128_256);
+    skinny128CtrTest(&testVector128_384);
+
+    mantisEcbTest(&testMantis5);
+    mantisEcbTest(&testMantis6);
+    mantisEcbTest(&testMantis7);
+    mantisEcbTest(&testMantis8);
+
+    mantisCtrTest(&testMantis5);
+    mantisCtrTest(&testMantis6);
+    mantisCtrTest(&testMantis7);
+    mantisCtrTest(&testMantis8);
 
 #if GEN_SBOX
     generate_sboxes();

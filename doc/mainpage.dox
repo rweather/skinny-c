@@ -40,7 +40,7 @@ SIMD speed-ups are definitely possible, such as
 and may be added later.
 
 This implementation is designed to have constant-time and constant-cache
-behaviour.  There are no lookup tables, particularly for the S-boxes.
+behaviour.  In particular, there are no lookup tables for the S-boxes.
 
 Skinny-C is distributed under the terms of the MIT license.
 
@@ -52,36 +52,7 @@ the Makefile's to build on non-GNU platforms or with other compilers.
 
 \section main_using Using Skinny-C
 
-The API for Skinny-C provides ECB encryption on a block-by-block basis.
-The first step is to initialize the key schedule using the key.
-For this example we will use a 256-bit key with Skinny128:
-
-\code
-Skinny128Key_t ks;
-unsigned char key[32] = ...;
-skinny128_set_key(&ks, key, 32);
-\endcode
-
-Each block of the plaintext is then encrypted as follows:
-
-\code
-unsigned char plaintext[16] = ...;
-unsigned char ciphertext[16];
-skinny128_ecb_encrypt(ciphertext, plaintext, &ks);
-\endcode
-
-To decrypt a ciphertext back to the original plaintext:
-
-\code
-unsigned char ciphertext[16] = ...;
-unsigned char plaintext[16];
-skinny128_ecb_decrypt(plaintext, ciphertext, &ks);
-\endcode
-
-\note ECB mode is unsafe when used to directly encrypt bulk data.
-Applications should implement higher-level modes such as CTR,
-CBC, EAX, GCM, etc when handling bulk data.  Failure to do this will
-compromise the security of the application.
+The API for Skinny-C is described on \ref using_skinny "this page".
 
 \section main_examples Examples
 
@@ -96,7 +67,8 @@ for each block and XOR'ed with the plaintext to create the ciphertext.
 The "skinny-tweak" program is similar to "skinny-ctr" except that it
 increments the tweak each block and encrypts the plaintext directly
 using the key and tweak.  This is intended as an example of using
-SKINNY as a true tweakable block cipher.
+SKINNY as a true tweakable block cipher, rather than a recommended
+method to use SKINNY in a realistic application.
 
 \section main_apiref API Reference
 

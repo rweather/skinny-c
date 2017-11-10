@@ -1,0 +1,182 @@
+/*
+ * Copyright (C) 2017 Southern Storm Software, Pty Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+\file using.dox
+\page using_skinny Using Skinny-C
+
+\section using_ctr CTR mode
+
+The API for Skinny-C provides CTR mode for bulk encryption of
+arbitrarily-sized data blocks.  The first step is to initialize the
+key schedule and the CTR control structure.  For this example we will
+use a 256-bit key with Skinny128:
+
+\code
+Skinny128Key_t ks;
+Skinny128CTR_t ctr;
+unsigned char key[32] = ...;
+skinny128_set_key(&ks, key, 32);
+skinny128_ctr_init(&ctr);
+\endcode
+
+The next step is to set the counter value for the current data block.
+Counter values are typically formed by combining a packet sequence
+number with an offset into the packet.  It is very important that
+the counter values be different from one packet to the next.
+
+The following is an example of setting the initial counter value
+based on a 32-bit packet sequence number:
+
+\code
+uint32_t seqnum = ...;
+unsigned char counter[16];
+memset(counter, 0, sizeof(counter));
+counter[0] = (unsigned char)(seqnum >> 24);
+counter[1] = (unsigned char)(seqnum >> 16);
+counter[2] = (unsigned char)(seqnum >> 8);
+counter[3] = (unsigned char)seqnum;
+skinny128_ctr_set_counter(&ctr, counter, sizeof(counter));
+\endcode
+
+The bytes at the end of the counter value will be incremented each
+time CTR mode needs a new 128-bit block of encrypted data.  In this
+example there are 12 bytes available for incrementing.
+
+If your application processes large amounts of data, then there is a
+risk that the sequence number might roll around.  If this is the case,
+then you should use a 64-bit sequence number, or abort the connection
+when the sequence number rolls around, or both.
+
+Encryption of packets is accomplished as follows:
+
+\code
+unsigned char packet[MAX_PACKET_SIZE] = ...;
+skinny128_ctr_encrypt(packet, packet, size, &ks, &ctr);
+\endcode
+
+The first two parameters are the output buffer for the ciphertext and
+the input buffer for the plaintext.  In this example we are encrypting
+the data in-place within the same buffer but they can be different.
+
+To encrypt the next packet, increment the sequence number and then
+call skinny128_ctr_set_counter() and skinny128_ctr_encrypt() again.
+
+In CTR mode, decryption and encryption are identical operations, so there
+is no "decrypt" function in the CTR API.  Use skinny128_ctr_encrypt().
+
+Once you have finished encrypting all packets, you should clean up
+the CTR control structure to free any dyanmically-allocated memory
+that was allocated by skinny128_ctr_init():
+
+\code
+skinny128_ctr_cleanup(&ctr);
+\endcode
+
+\section using_ctr_tweak CTR mode with per-packet tweaks
+
+SKINNY is a tweakable block cipher, so it is possible to encrypt packets
+with CTR mode in a slightly different way.  Instead of passing the sequence
+number in as part of the counter block, the sequence number can be
+provided as a per-packet tweak.
+
+This is definitely useful when encrypting packets with Skinny64 or Mantis
+as the 64-bit counter value is not large enough to contain both a 64-bit
+sequence number and a packet offset.
+
+As before, we start by initializing the 128-bit key and the CTR
+control structure with Skinny64:
+
+\code
+Skinny64TweakedKey_t ks;
+Skinny64CTR_t ctr;
+unsigned char key[16] = ...;
+skinny64_set_key_and_tweak(&ks, key, 16, NULL, 0);
+skinny64_ctr_init(&ctr);
+\endcode
+
+For each packet, the sequence number is provided as the tweak and the
+counter value is reset to all-zeroes:
+
+\code
+uint64_t seqnum = ...;
+unsigned char seqbuf[8];
+seqbuf[0] = (unsigned char)(seqnum >> 56);
+seqbuf[1] = (unsigned char)(seqnum >> 48);
+seqbuf[2] = (unsigned char)(seqnum >> 40);
+seqbuf[3] = (unsigned char)(seqnum >> 32);
+seqbuf[4] = (unsigned char)(seqnum >> 24);
+seqbuf[5] = (unsigned char)(seqnum >> 16);
+seqbuf[6] = (unsigned char)(seqnum >> 8);
+seqbuf[7] = (unsigned char)seqnum;
+skinny128_change_tweak(&ks, seqbuf, sizeof(seqbuf));
+skinny128_ctr_set_counter(&ctr, NULL, 0);
+\endcode
+
+Packet encryption is similar to before:
+
+\code
+unsigned char packet[MAX_PACKET_SIZE] = ...;
+skinny64_ctr_encrypt(packet, packet, size, &ks.ks, &ctr);
+\endcode
+
+Finally, clean up when the session ends:
+
+\code
+skinny64_ctr_cleanup(&ctr);
+\endcode
+
+\section using_ecb ECB mode
+
+\note ECB mode can be unsafe when used to directly encrypt bulk data
+if you don't know what you are doing.  Applications should use
+higher-level modes such as CTR, CBC, EAX, GCM, etc when handling
+bulk data.  Failure to do this may compromise the security of
+the application.
+
+The API for Skinny-C provides ECB encryption on a block-by-block basis.
+The first step is to initialize the key schedule using the key.
+For this example we will use a 256-bit key with Skinny128:
+
+\code
+Skinny128Key_t ks;
+unsigned char key[32] = ...;
+skinny128_set_key(&ks, key, 32);
+\endcode
+
+Each block of the plaintext is then encrypted as follows:
+
+\code
+unsigned char plaintext[16] = ...;
+unsigned char ciphertext[16];
+skinny128_ecb_encrypt(ciphertext, plaintext, &ks);
+\endcode
+
+To decrypt a ciphertext back to the original plaintext:
+
+\code
+unsigned char ciphertext[16] = ...;
+unsigned char plaintext[16];
+skinny128_ecb_decrypt(plaintext, ciphertext, &ks);
+\endcode
+
+*/
