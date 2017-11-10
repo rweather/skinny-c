@@ -5,7 +5,7 @@ CFLAGS += -Wall -O3 -std=c99 -I../include
 
 LIBRARY = libskinny.a
 
-OBJS = skinny128-cipher.o skinny64-cipher.o
+OBJS = skinny128-cipher.o skinny64-cipher.o mantis-cipher.o
 
 all: $(LIBRARY)
 
@@ -18,5 +18,6 @@ clean:
 
 check: all
 
-skinny128-cipher.o: ../include/skinny128-cipher.h
-skinny64-cipher.o: ../include/skinny64-cipher.h
+skinny128-cipher.o: ../include/skinny128-cipher.h skinny-internal.h
+skinny64-cipher.o: ../include/skinny64-cipher.h skinny-internal.h
+mantis-cipher.o: ../include/mantis-cipher.h skinny-internal.h

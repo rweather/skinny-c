@@ -21,16 +21,7 @@
  */
 
 #include "skinny128-cipher.h"
-#include <string.h>
-
-/* Figure out how to inline functions using this C compiler */
-#if defined(__STDC__) && __STDC_VERSION__ >= 199901L
-#define STATIC_INLINE static inline
-#elif defined(__GNUC__)
-#define STATIC_INLINE static __inline__
-#else
-#define STATIC_INLINE static
-#endif
+#include "skinny-internal.h"
 
 /* Define SKINNY128_64BIT to 1 if the CPU is natively 64-bit */
 #if defined(__WORDSIZE) && __WORDSIZE == 64

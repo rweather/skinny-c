@@ -102,6 +102,7 @@ SKINNY as a true tweakable block cipher.
 
 \li \ref skinny128 "Skinny-128 API"
 \li \ref skinny64 "Skinny-64 API"
+\li \ref mantis "Mantis API"
 
 \section main_contact Contact
 

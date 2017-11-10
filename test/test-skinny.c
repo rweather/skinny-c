@@ -22,6 +22,7 @@
 
 #include "skinny128-cipher.h"
 #include "skinny64-cipher.h"
+#include "mantis-cipher.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -34,6 +35,17 @@ typedef struct
     unsigned key_size;
 
 } SkinnyTestVector;
+
+typedef struct
+{
+    const char *name;
+    uint8_t plaintext[8];
+    uint8_t ciphertext[8];
+    uint8_t key[16];
+    uint8_t tweak[8];
+    unsigned rounds;
+
+} MantisTestVector;
 
 /* Test vectors from the SKINNY specification paper */
 static SkinnyTestVector const testVector64_64 = {
@@ -96,6 +108,42 @@ static SkinnyTestVector const testVector128_384 = {
      0x8c, 0xef, 0x95, 0x26, 0x18, 0xc3, 0xeb, 0xe8},
     48
 };
+static MantisTestVector const testMantis5 = {
+    "Mantis5",
+    {0x3b, 0x5c, 0x77, 0xa4, 0x92, 0x1f, 0x97, 0x18},
+    {0xd6, 0x52, 0x20, 0x35, 0xc1, 0xc0, 0xc6, 0xc1},
+    {0x92, 0xf0, 0x99, 0x52, 0xc6, 0x25, 0xe3, 0xe9,
+     0xd7, 0xa0, 0x60, 0xf7, 0x14, 0xc0, 0x29, 0x2b},
+    {0xba, 0x91, 0x2e, 0x6f, 0x10, 0x55, 0xfe, 0xd2},
+    5
+};
+static MantisTestVector const testMantis6 = {
+    "Mantis6",
+    {0xd6, 0x52, 0x20, 0x35, 0xc1, 0xc0, 0xc6, 0xc1},
+    {0x60, 0xe4, 0x34, 0x57, 0x31, 0x19, 0x36, 0xfd},
+    {0x92, 0xf0, 0x99, 0x52, 0xc6, 0x25, 0xe3, 0xe9,
+     0xd7, 0xa0, 0x60, 0xf7, 0x14, 0xc0, 0x29, 0x2b},
+    {0xba, 0x91, 0x2e, 0x6f, 0x10, 0x55, 0xfe, 0xd2},
+    6
+};
+static MantisTestVector const testMantis7 = {
+    "Mantis7",
+    {0x60, 0xe4, 0x34, 0x57, 0x31, 0x19, 0x36, 0xfd},
+    {0x30, 0x8e, 0x8a, 0x07, 0xf1, 0x68, 0xf5, 0x17},
+    {0x92, 0xf0, 0x99, 0x52, 0xc6, 0x25, 0xe3, 0xe9,
+     0xd7, 0xa0, 0x60, 0xf7, 0x14, 0xc0, 0x29, 0x2b},
+    {0xba, 0x91, 0x2e, 0x6f, 0x10, 0x55, 0xfe, 0xd2},
+    7
+};
+static MantisTestVector const testMantis8 = {
+    "Mantis8",
+    {0x30, 0x8e, 0x8a, 0x07, 0xf1, 0x68, 0xf5, 0x17},
+    {0x97, 0x1e, 0xa0, 0x1a, 0x86, 0xb4, 0x10, 0xbb},
+    {0x92, 0xf0, 0x99, 0x52, 0xc6, 0x25, 0xe3, 0xe9,
+     0xd7, 0xa0, 0x60, 0xf7, 0x14, 0xc0, 0x29, 0x2b},
+    {0xba, 0x91, 0x2e, 0x6f, 0x10, 0x55, 0xfe, 0xd2},
+    8
+};
 
 static int error = 0;
 
@@ -151,6 +199,49 @@ static void skinny128Test(const SkinnyTestVector *test)
     printf("\n");
 }
 
+static void mantisTest(const MantisTestVector *test)
+{
+    MantisKey_t ks;
+    uint8_t plaintext1[MANTIS_BLOCK_SIZE];
+    uint8_t ciphertext1[MANTIS_BLOCK_SIZE];
+    uint8_t plaintext2[MANTIS_BLOCK_SIZE];
+    uint8_t ciphertext2[MANTIS_BLOCK_SIZE];
+
+    /* Start with the mode set to encrypt first */
+    mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE,
+                   test->rounds, MANTIS_ENCRYPT);
+    mantis_set_tweak(&ks, test->tweak, MANTIS_TWEAK_SIZE);
+    mantis_ecb_crypt(ciphertext1, test->plaintext, &ks);
+    mantis_swap_modes(&ks); /* Switch to decryption */
+    mantis_ecb_crypt(plaintext1, test->ciphertext, &ks);
+
+    /* Perform the test again with the mode set to decrypt first */
+    mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE,
+                   test->rounds, MANTIS_DECRYPT);
+    mantis_set_tweak(&ks, test->tweak, MANTIS_TWEAK_SIZE);
+    mantis_ecb_crypt(plaintext2, test->ciphertext, &ks);
+    mantis_swap_modes(&ks); /* Switch to encryption */
+    mantis_ecb_crypt(ciphertext2, test->plaintext, &ks);
+
+    /* Check the results */
+    printf("%s: ", test->name);
+    if (memcmp(plaintext1, test->plaintext, MANTIS_BLOCK_SIZE) == 0 &&
+        memcmp(plaintext2, test->plaintext, MANTIS_BLOCK_SIZE) == 0) {
+        printf("plaintext ok");
+    } else {
+        printf("plaintext INCORRECT");
+        error = 1;
+    }
+    if (memcmp(ciphertext1, test->ciphertext, MANTIS_BLOCK_SIZE) == 0 &&
+        memcmp(ciphertext2, test->ciphertext, MANTIS_BLOCK_SIZE) == 0) {
+        printf(", ciphertext ok");
+    } else {
+        printf(", ciphertext INCORRECT");
+        error = 1;
+    }
+    printf("\n");
+}
+
 /* Define to 1 to include the sbox generator */
 #define GEN_SBOX 0
 
@@ -167,6 +258,11 @@ int main(int argc, char **argv)
     skinny128Test(&testVector128_128);
     skinny128Test(&testVector128_256);
     skinny128Test(&testVector128_384);
+
+    mantisTest(&testMantis5);
+    mantisTest(&testMantis6);
+    mantisTest(&testMantis7);
+    mantisTest(&testMantis8);
 
 #if GEN_SBOX
     generate_sboxes();
@@ -247,10 +343,43 @@ void generate_inv_sbox(void)
     printf("\n};\n\n");
 }
 
+#define NAND(x, y)  (~((x) & (y)))
+#define NOR(x, y)   (~((x) | (y)))
+
+void generate_mantis_sbox(void)
+{
+    int x, y, a, b, c, d;
+    int aout, bout, cout, dout;
+    printf("static unsigned char const mantis_sbox[14] = {\n");
+    for (x = 0; x <= 15; ++x) {
+        a = x >> 3;
+        b = x >> 2;
+        c = x >> 1;
+        d = x;
+        /* aout = NAND(NAND(~c, NAND(a, b)), (a | d)); */
+        aout = ~((c | (a & b)) & (a | d));
+
+        /* bout = NAND(NOR(NOR(a, d), (b & c)), NAND((a & c), d)); */
+        bout = (~(a | d)) | (b & c) | (a & c & d);
+
+        /* cout = NAND(NAND(b, d), (NOR(b, d) | a)); */
+        cout = (b & d) | ((b | d) & ~a);
+
+        /* dout = NOR(NOR(a, (b | c)), NAND(NAND(a, b), (c | d))); */
+        dout = (a | b | c) & (~(a & b)) & (c | d);
+
+        y = ((aout & 0x01) << 3) | ((bout & 0x01) << 2) |
+            ((cout & 0x01) << 1) | (dout & 0x01);
+        printf("%x, ", y);
+    }
+    printf("\n};\n\n");
+}
+
 void generate_sboxes(void)
 {
     generate_sbox();
     generate_inv_sbox();
+    generate_mantis_sbox();
 }
 
 #endif /* GEN_SBOX */

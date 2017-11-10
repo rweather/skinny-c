@@ -20,4 +20,4 @@ clean:
 check: all
 	./$(TARGET)
 
-test-skinny.o: ../include/skinny128-cipher.h ../include/skinny64-cipher.h
+test-skinny.o: ../include/skinny128-cipher.h ../include/skinny64-cipher.h ../include/mantis-cipher.h
