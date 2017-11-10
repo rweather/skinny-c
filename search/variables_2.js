@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['rounds',['rounds',['../structMantisKey__t.html#a3c78972dac254635c537588a9635ba65',1,'MantisKey_t::rounds()'],['../structSkinny128Key__t.html#a8ee9f0d085bf1cb33eb5f740b36855de',1,'Skinny128Key_t::rounds()'],['../structSkinny64Key__t.html#a19a99880e115f759b45fbc0426dbd099',1,'Skinny64Key_t::rounds()']]],
-  ['row',['row',['../unionMantisCells__t.html#aa184cbd9917d05041560597892a4b873',1,'MantisCells_t::row()'],['../unionSkinny128Cells__t.html#a506def89005e2a9712aed2a69714a150',1,'Skinny128Cells_t::row()'],['../unionSkinny128HalfCells__t.html#a8d652082605ec428f1757d9c18cd7657',1,'Skinny128HalfCells_t::row()'],['../unionSkinny64Cells__t.html#acc4fa089b6e14483385d5b72d2c6b1bf',1,'Skinny64Cells_t::row()'],['../unionSkinny64HalfCells__t.html#ad413932230a0d13d3a8b56cc24aa7912',1,'Skinny64HalfCells_t::row()']]]
+  ['k0',['k0',['../structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb',1,'MantisKey_t']]],
+  ['k0prime',['k0prime',['../structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab',1,'MantisKey_t']]],
+  ['k1',['k1',['../structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce',1,'MantisKey_t']]],
+  ['ks',['ks',['../structSkinny128TweakedKey__t.html#adc41c0bb1b85a9926c8cb7c0395cf5d1',1,'Skinny128TweakedKey_t::ks()'],['../structSkinny64TweakedKey__t.html#accdb233c33ed9356b9630ce8b0ae1a67',1,'Skinny64TweakedKey_t::ks()']]]
 ];

@@ -37,6 +37,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -68,7 +69,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Groups</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -113,75 +114,107 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define MANTIS_CIPHER_h</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor"></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">   58</a></span>&#160;<span class="preprocessor">#define MANTIS_BLOCK_SIZE 8</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00063"></a><span class="lineno"><a class="line" href="group__mantis.html#ga4a59313e69a30cd11f8530ddd8450833">   63</a></span>&#160;<span class="preprocessor">#define MANTIS_KEY_SIZE 16</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="group__mantis.html#ga34645b8cc8d2d89d2f5bdadb87eee16f">   68</a></span>&#160;<span class="preprocessor">#define MANTIS_TWEAK_SIZE 8</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="group__mantis.html#gab99d649d530bdaa3b5cde53e4dc96ee2">   76</a></span>&#160;<span class="preprocessor">#define MANTIS_MIN_ROUNDS 5</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="group__mantis.html#gac46f5fab8df104be99ef260154fb4581">   81</a></span>&#160;<span class="preprocessor">#define MANTIS_MAX_ROUNDS 8</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="group__mantis.html#ga23f70830ff919cf0317b44fb1e331cbe">   86</a></span>&#160;<span class="preprocessor">#define MANTIS_ENCRYPT 1</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="group__mantis.html#ga2bed5d540a21ce654622f05c1fb20a60">   91</a></span>&#160;<span class="preprocessor">#define MANTIS_DECRYPT 0</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00096"></a><span class="lineno"><a class="line" href="unionMantisCells__t.html">   96</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">union</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div>
-<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="unionMantisCells__t.html#aa184cbd9917d05041560597892a4b873">   98</a></span>&#160;    uint16_t row[4];        </div>
-<div class="line"><a name="l00099"></a><span class="lineno"><a class="line" href="unionMantisCells__t.html#a1d4456cdd7616b71047f7df4f95135d8">   99</a></span>&#160;    uint32_t lrow[2];       </div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;} <a class="code" href="unionMantisCells__t.html">MantisCells_t</a>;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
-<div class="line"><a name="l00106"></a><span class="lineno"><a class="line" href="structMantisKey__t.html">  106</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;{</div>
-<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">  109</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">k0</a>;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
-<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">  112</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">k0prime</a>;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;</div>
-<div class="line"><a name="l00115"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">  115</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">k1</a>;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
-<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">  118</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">tweak</a>;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
-<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">  121</a></span>&#160;    <span class="keywordtype">unsigned</span> <a class="code" href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">rounds</a>;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;} <a class="code" href="structMantisKey__t.html">MantisKey_t</a>;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540">mantis_set_key</a></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    (<a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks, <span class="keyword">const</span> <span class="keywordtype">void</span> *key, <span class="keywordtype">unsigned</span> size,</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;     <span class="keywordtype">unsigned</span> rounds, <span class="keywordtype">int</span> mode);</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga089196d01ff123a9c67fbfbf402405e9">mantis_set_tweak</a>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keywordtype">unsigned</span> size);</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127">mantis_swap_modes</a>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks);</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gad3bc1f794bd9db7ab04b914463d45160">mantis_ecb_crypt</a>(<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks);</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor"></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">   59</a></span>&#160;<span class="preprocessor">#define MANTIS_BLOCK_SIZE 8</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="group__mantis.html#ga4a59313e69a30cd11f8530ddd8450833">   64</a></span>&#160;<span class="preprocessor">#define MANTIS_KEY_SIZE 16</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="group__mantis.html#ga34645b8cc8d2d89d2f5bdadb87eee16f">   69</a></span>&#160;<span class="preprocessor">#define MANTIS_TWEAK_SIZE 8</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="group__mantis.html#gab99d649d530bdaa3b5cde53e4dc96ee2">   77</a></span>&#160;<span class="preprocessor">#define MANTIS_MIN_ROUNDS 5</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="group__mantis.html#gac46f5fab8df104be99ef260154fb4581">   82</a></span>&#160;<span class="preprocessor">#define MANTIS_MAX_ROUNDS 8</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="group__mantis.html#ga23f70830ff919cf0317b44fb1e331cbe">   87</a></span>&#160;<span class="preprocessor">#define MANTIS_ENCRYPT 1</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="group__mantis.html#ga2bed5d540a21ce654622f05c1fb20a60">   92</a></span>&#160;<span class="preprocessor">#define MANTIS_DECRYPT 0</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00097"></a><span class="lineno"><a class="line" href="unionMantisCells__t.html">   97</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">union</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;{</div>
+<div class="line"><a name="l00099"></a><span class="lineno"><a class="line" href="unionMantisCells__t.html#aa184cbd9917d05041560597892a4b873">   99</a></span>&#160;    uint16_t row[4];        </div>
+<div class="line"><a name="l00100"></a><span class="lineno"><a class="line" href="unionMantisCells__t.html#a1d4456cdd7616b71047f7df4f95135d8">  100</a></span>&#160;    uint32_t lrow[2];       </div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;} <a class="code" href="unionMantisCells__t.html">MantisCells_t</a>;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;</div>
+<div class="line"><a name="l00107"></a><span class="lineno"><a class="line" href="structMantisKey__t.html">  107</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;{</div>
+<div class="line"><a name="l00110"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">  110</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">k0</a>;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
+<div class="line"><a name="l00113"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">  113</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">k0prime</a>;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;</div>
+<div class="line"><a name="l00116"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">  116</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">k1</a>;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
+<div class="line"><a name="l00119"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">  119</a></span>&#160;    <a class="code" href="unionMantisCells__t.html">MantisCells_t</a> <a class="code" href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">tweak</a>;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
+<div class="line"><a name="l00122"></a><span class="lineno"><a class="line" href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">  122</a></span>&#160;    <span class="keywordtype">unsigned</span> <a class="code" href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">rounds</a>;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;} <a class="code" href="structMantisKey__t.html">MantisKey_t</a>;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;</div>
+<div class="line"><a name="l00133"></a><span class="lineno"><a class="line" href="structMantisCTR__t.html">  133</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;{</div>
+<div class="line"><a name="l00136"></a><span class="lineno"><a class="line" href="structMantisCTR__t.html#a2a085bdeeca641ace26e63bff96fc221">  136</a></span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> counter[<a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>];</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;</div>
+<div class="line"><a name="l00139"></a><span class="lineno"><a class="line" href="structMantisCTR__t.html#aae60cf57d5f0f36a2a4a126ade30adf0">  139</a></span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> ecounter[<a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>];</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;</div>
+<div class="line"><a name="l00142"></a><span class="lineno"><a class="line" href="structMantisCTR__t.html#a812bcc4a3dc47115595ed039b9ffd837">  142</a></span>&#160;    <span class="keywordtype">unsigned</span> <a class="code" href="structMantisCTR__t.html#a812bcc4a3dc47115595ed039b9ffd837">offset</a>;</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;</div>
+<div class="line"><a name="l00146"></a><span class="lineno"><a class="line" href="structMantisCTR__t.html#aebe0acd1adb3792534e3762bf644ba0a">  146</a></span>&#160;    <span class="keywordtype">void</span> *<a class="code" href="structMantisCTR__t.html#aebe0acd1adb3792534e3762bf644ba0a">ext</a>;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;} <a class="code" href="structMantisCTR__t.html">MantisCTR_t</a>;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540">mantis_set_key</a></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    (<a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks, <span class="keyword">const</span> <span class="keywordtype">void</span> *key, <span class="keywordtype">unsigned</span> size,</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;     <span class="keywordtype">unsigned</span> rounds, <span class="keywordtype">int</span> mode);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga089196d01ff123a9c67fbfbf402405e9">mantis_set_tweak</a>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keywordtype">unsigned</span> size);</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="preprocessor"></span>}</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127">mantis_swap_modes</a>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks);</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gad3bc1f794bd9db7ab04b914463d45160">mantis_ecb_crypt</a>(<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga08308e70caa4b72a930890410aa85665">mantis_ctr_init</a>(<a class="code" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr);</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gaabc50af2066734f0471cedb6d04ef7c5">mantis_ctr_cleanup</a>(<a class="code" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr);</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga67d1a30e74784823b35f4c1db1ccdc50">mantis_ctr_set_counter</a></div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    (<a class="code" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr, <span class="keyword">const</span> <span class="keywordtype">void</span> *counter, <span class="keywordtype">unsigned</span> size);</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga09e7d7656b7097f2155fb0657d1e97f5">mantis_ctr_encrypt</a></div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keywordtype">size_t</span> size,</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;     <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks, <a class="code" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr);</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;<span class="preprocessor"></span>}</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="structMantisCTR__t_html_a812bcc4a3dc47115595ed039b9ffd837"><div class="ttname"><a href="structMantisCTR__t.html#a812bcc4a3dc47115595ed039b9ffd837">MantisCTR_t::offset</a></div><div class="ttdeci">unsigned offset</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00142">mantis-cipher.h:142</a></div></div>
+<div class="ttc" id="structMantisCTR__t_html_aebe0acd1adb3792534e3762bf644ba0a"><div class="ttname"><a href="structMantisCTR__t.html#aebe0acd1adb3792534e3762bf644ba0a">MantisCTR_t::ext</a></div><div class="ttdeci">void * ext</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00146">mantis-cipher.h:146</a></div></div>
 <div class="ttc" id="group__mantis_html_gaeac06e3d3eab2bbded1b9c02d8037127"><div class="ttname"><a href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127">mantis_swap_modes</a></div><div class="ttdeci">void mantis_swap_modes(MantisKey_t *ks)</div><div class="ttdoc">Swaps the encryption and decryption modes on a Mantis key schedule. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00160">mantis-cipher.c:160</a></div></div>
 <div class="ttc" id="group__mantis_html_gad3bc1f794bd9db7ab04b914463d45160"><div class="ttname"><a href="group__mantis.html#gad3bc1f794bd9db7ab04b914463d45160">mantis_ecb_crypt</a></div><div class="ttdeci">void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)</div><div class="ttdoc">Encrypts or decrypts a single block using the Mantis block cipher in ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00289">mantis-cipher.c:289</a></div></div>
-<div class="ttc" id="structMantisKey__t_html_ad35e43f03b51f54ee6253d4fd72fdb1e"><div class="ttname"><a href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">MantisKey_t::tweak</a></div><div class="ttdeci">MantisCells_t tweak</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00118">mantis-cipher.h:118</a></div></div>
+<div class="ttc" id="structMantisKey__t_html_ad35e43f03b51f54ee6253d4fd72fdb1e"><div class="ttname"><a href="structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e">MantisKey_t::tweak</a></div><div class="ttdeci">MantisCells_t tweak</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00119">mantis-cipher.h:119</a></div></div>
 <div class="ttc" id="group__mantis_html_ga089196d01ff123a9c67fbfbf402405e9"><div class="ttname"><a href="group__mantis.html#ga089196d01ff123a9c67fbfbf402405e9">mantis_set_tweak</a></div><div class="ttdeci">int mantis_set_tweak(MantisKey_t *ks, const void *tweak, unsigned size)</div><div class="ttdoc">Sets the tweak value for a previously-initialized key schedule. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00144">mantis-cipher.c:144</a></div></div>
-<div class="ttc" id="structMantisKey__t_html_a2c6cf99ef00a05a1b27e3f21b8ab1cce"><div class="ttname"><a href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">MantisKey_t::k1</a></div><div class="ttdeci">MantisCells_t k1</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00115">mantis-cipher.h:115</a></div></div>
-<div class="ttc" id="structMantisKey__t_html_a3c78972dac254635c537588a9635ba65"><div class="ttname"><a href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">MantisKey_t::rounds</a></div><div class="ttdeci">unsigned rounds</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00121">mantis-cipher.h:121</a></div></div>
+<div class="ttc" id="structMantisKey__t_html_a2c6cf99ef00a05a1b27e3f21b8ab1cce"><div class="ttname"><a href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">MantisKey_t::k1</a></div><div class="ttdeci">MantisCells_t k1</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00116">mantis-cipher.h:116</a></div></div>
+<div class="ttc" id="group__mantis_html_gaf09160a0f1a21378517a67268c099a5f"><div class="ttname"><a href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a></div><div class="ttdeci">#define MANTIS_BLOCK_SIZE</div><div class="ttdoc">Size of a block for Mantis block ciphers. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00059">mantis-cipher.h:59</a></div></div>
+<div class="ttc" id="structMantisKey__t_html_a3c78972dac254635c537588a9635ba65"><div class="ttname"><a href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">MantisKey_t::rounds</a></div><div class="ttdeci">unsigned rounds</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00122">mantis-cipher.h:122</a></div></div>
+<div class="ttc" id="group__mantis_html_ga09e7d7656b7097f2155fb0657d1e97f5"><div class="ttname"><a href="group__mantis.html#ga09e7d7656b7097f2155fb0657d1e97f5">mantis_ctr_encrypt</a></div><div class="ttdeci">int mantis_ctr_encrypt(void *output, const void *input, size_t size, const MantisKey_t *ks, MantisCTR_t *ctr)</div><div class="ttdoc">Encrypt a block of data using Skinny-64 in CTR mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-ctr_8c_source.html#l00061">mantis-ctr.c:61</a></div></div>
+<div class="ttc" id="group__mantis_html_gaabc50af2066734f0471cedb6d04ef7c5"><div class="ttname"><a href="group__mantis.html#gaabc50af2066734f0471cedb6d04ef7c5">mantis_ctr_cleanup</a></div><div class="ttdeci">void mantis_ctr_cleanup(MantisCTR_t *ctr)</div><div class="ttdoc">Cleans up a CTR control block for Skinny-64. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-ctr_8c_source.html#l00036">mantis-ctr.c:36</a></div></div>
+<div class="ttc" id="group__mantis_html_ga08308e70caa4b72a930890410aa85665"><div class="ttname"><a href="group__mantis.html#ga08308e70caa4b72a930890410aa85665">mantis_ctr_init</a></div><div class="ttdeci">int mantis_ctr_init(MantisCTR_t *ctr)</div><div class="ttdoc">Initializes Mantis in CTR mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-ctr_8c_source.html#l00027">mantis-ctr.c:27</a></div></div>
 <div class="ttc" id="group__mantis_html_gabf16426f434b2f774bb6fd2bcfa52540"><div class="ttname"><a href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540">mantis_set_key</a></div><div class="ttdeci">int mantis_set_key(MantisKey_t *ks, const void *key, unsigned size, unsigned rounds, int mode)</div><div class="ttdoc">Sets the key schedule for a Mantis block cipher. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00107">mantis-cipher.c:107</a></div></div>
-<div class="ttc" id="structMantisKey__t_html_a3374aa26888eb1e25ede11ac0a4160ab"><div class="ttname"><a href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">MantisKey_t::k0prime</a></div><div class="ttdeci">MantisCells_t k0prime</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00112">mantis-cipher.h:112</a></div></div>
-<div class="ttc" id="structMantisKey__t_html"><div class="ttname"><a href="structMantisKey__t.html">MantisKey_t</a></div><div class="ttdoc">Key schedule for Mantis block ciphers. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00106">mantis-cipher.h:106</a></div></div>
-<div class="ttc" id="structMantisKey__t_html_ae7b2ffee4d53fdbd6ef98d7cb8782fcb"><div class="ttname"><a href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">MantisKey_t::k0</a></div><div class="ttdeci">MantisCells_t k0</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00109">mantis-cipher.h:109</a></div></div>
-<div class="ttc" id="unionMantisCells__t_html"><div class="ttname"><a href="unionMantisCells__t.html">MantisCells_t</a></div><div class="ttdoc">Union that describes a 64-bit 4x4 array of cells. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00096">mantis-cipher.h:96</a></div></div>
+<div class="ttc" id="structMantisKey__t_html_a3374aa26888eb1e25ede11ac0a4160ab"><div class="ttname"><a href="structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab">MantisKey_t::k0prime</a></div><div class="ttdeci">MantisCells_t k0prime</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00113">mantis-cipher.h:113</a></div></div>
+<div class="ttc" id="structMantisCTR__t_html"><div class="ttname"><a href="structMantisCTR__t.html">MantisCTR_t</a></div><div class="ttdoc">State information for Mantis in CTR mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00133">mantis-cipher.h:133</a></div></div>
+<div class="ttc" id="group__mantis_html_ga67d1a30e74784823b35f4c1db1ccdc50"><div class="ttname"><a href="group__mantis.html#ga67d1a30e74784823b35f4c1db1ccdc50">mantis_ctr_set_counter</a></div><div class="ttdeci">int mantis_ctr_set_counter(MantisCTR_t *ctr, const void *counter, unsigned size)</div><div class="ttdoc">Sets the counter value in a Skinny-64 CTR control block. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-ctr_8c_source.html#l00043">mantis-ctr.c:43</a></div></div>
+<div class="ttc" id="structMantisKey__t_html"><div class="ttname"><a href="structMantisKey__t.html">MantisKey_t</a></div><div class="ttdoc">Key schedule for Mantis block ciphers. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00107">mantis-cipher.h:107</a></div></div>
+<div class="ttc" id="structMantisKey__t_html_ae7b2ffee4d53fdbd6ef98d7cb8782fcb"><div class="ttname"><a href="structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb">MantisKey_t::k0</a></div><div class="ttdeci">MantisCells_t k0</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00110">mantis-cipher.h:110</a></div></div>
+<div class="ttc" id="unionMantisCells__t_html"><div class="ttname"><a href="unionMantisCells__t.html">MantisCells_t</a></div><div class="ttdoc">Union that describes a 64-bit 4x4 array of cells. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00097">mantis-cipher.h:97</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 10 2017 18:34:29 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Nov 11 2017 09:42:33 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

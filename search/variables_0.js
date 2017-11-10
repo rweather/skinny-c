@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['k0',['k0',['../structMantisKey__t.html#ae7b2ffee4d53fdbd6ef98d7cb8782fcb',1,'MantisKey_t']]],
-  ['k0prime',['k0prime',['../structMantisKey__t.html#a3374aa26888eb1e25ede11ac0a4160ab',1,'MantisKey_t']]],
-  ['k1',['k1',['../structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce',1,'MantisKey_t']]],
-  ['ks',['ks',['../structSkinny128TweakedKey__t.html#adc41c0bb1b85a9926c8cb7c0395cf5d1',1,'Skinny128TweakedKey_t::ks()'],['../structSkinny64TweakedKey__t.html#accdb233c33ed9356b9630ce8b0ae1a67',1,'Skinny64TweakedKey_t::ks()']]]
+  ['counter',['counter',['../structMantisCTR__t.html#a2a085bdeeca641ace26e63bff96fc221',1,'MantisCTR_t::counter()'],['../structSkinny128CTR__t.html#a03802520bcdffc9e156c7f38277b267b',1,'Skinny128CTR_t::counter()'],['../structSkinny64CTR__t.html#a2071f502d878066f041cbaa5cedc28bf',1,'Skinny64CTR_t::counter()']]]
 ];
