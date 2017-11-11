@@ -58,6 +58,7 @@ typedef union
 {
     uint16_t row[4];        /**< Cell rows in 16-bit units */
     uint32_t lrow[2];       /**< Cell rows in 32-bit units */
+    uint64_t llrow;         /**< Cell rows in 64-bit units */
 
 } Skinny64Cells_t;
 

@@ -50,6 +50,15 @@
 #define SKINNY_UNALIGNED 0
 #endif
 
+/* Define SKINNY_LITTLE_ENDIAN to 1 if the CPU is little-endian */
+#if defined(__x86_64) || defined(__x86_64__) || \
+    defined(__i386) || defined(__i386__) || \
+    defined(__arm) || defined(__arm__)
+#define SKINNY_LITTLE_ENDIAN 1
+#else
+#define SKINNY_LITTLE_ENDIAN 0
+#endif
+
 /* XOR two blocks together of arbitrary size and alignment */
 STATIC_INLINE void skinny_xor
     (void *output, const void *input1, const void *input2, size_t size)

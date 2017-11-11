@@ -23,6 +23,87 @@
 #include "mantis-cipher.h"
 #include "skinny-internal.h"
 
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+
+/* Size of each RC row value in bits */
+#define RC_ROW_SIZE 64
+
+/* Swap the bits in an RC constant to convert into host-endian */
+#define RC(x) \
+    (((((uint64_t)((x) >> 60)) & 0x0F)) | \
+     ((((uint64_t)((x) >> 56)) & 0x0F) << 4) | \
+     ((((uint64_t)((x) >> 52)) & 0x0F) << 8) | \
+     ((((uint64_t)((x) >> 48)) & 0x0F) << 12) | \
+     ((((uint64_t)((x) >> 44)) & 0x0F) << 16) | \
+     ((((uint64_t)((x) >> 40)) & 0x0F) << 20) | \
+     ((((uint64_t)((x) >> 36)) & 0x0F) << 24) | \
+     ((((uint64_t)((x) >> 32)) & 0x0F) << 28) | \
+     ((((uint64_t)((x) >> 28)) & 0x0F) << 32) | \
+     ((((uint64_t)((x) >> 24)) & 0x0F) << 36) | \
+     ((((uint64_t)((x) >> 20)) & 0x0F) << 40) | \
+     ((((uint64_t)((x) >> 16)) & 0x0F) << 44) | \
+     ((((uint64_t)((x) >> 12)) & 0x0F) << 48) | \
+     ((((uint64_t)((x) >>  8)) & 0x0F) << 52) | \
+     ((((uint64_t)((x) >>  4)) & 0x0F) << 56) | \
+     ((((uint64_t)((x)      )) & 0x0F) << 60))
+
+/* Alpha constant for adjusting k1 for the inverse rounds */
+#define ALPHA      (RC(0x243F6A8885A308D3ULL))
+
+/* Round constants for Mantis, split up into 64-bit row values */
+static uint64_t const rc[MANTIS_MAX_ROUNDS] = {
+    RC(0x13198A2E03707344ULL),
+    RC(0xA4093822299F31D0ULL),
+    RC(0x082EFA98EC4E6C89ULL),
+    RC(0x452821E638D01377ULL),
+    RC(0xBE5466CF34E90C6CULL),
+    RC(0xC0AC29B7C97C50DDULL),
+    RC(0x3F84D5B5B5470917ULL),
+    RC(0x9216D5D98979FB1BULL)
+};
+
+#elif SKINNY_LITTLE_ENDIAN
+
+/* Size of each RC row value in bits */
+#define RC_ROW_SIZE 32
+
+/* Extract the 32 bits for a row from a 64-bit round constant */
+#define RC_EXTRACT_ROW(x,shift) \
+    (((((uint32_t)((x) >> ((shift) + 28))) & 0x0F)) | \
+     ((((uint32_t)((x) >> ((shift) + 24))) & 0x0F) << 4) | \
+     ((((uint32_t)((x) >> ((shift) + 20))) & 0x0F) << 8) | \
+     ((((uint32_t)((x) >> ((shift) + 16))) & 0x0F) << 12) | \
+     ((((uint32_t)((x) >> ((shift) + 12))) & 0x0F) << 16) | \
+     ((((uint32_t)((x) >> ((shift) +  8))) & 0x0F) << 20) | \
+     ((((uint32_t)((x) >> ((shift) +  4))) & 0x0F) << 24) | \
+     ((((uint32_t)((x) >> ((shift))))      & 0x0F) << 28))
+
+/* Extract the rows from a 64-bit round constant */
+#define RC(x)    \
+    {RC_EXTRACT_ROW((x), 32), RC_EXTRACT_ROW((x), 0)}
+
+/* Alpha constant for adjusting k1 for the inverse rounds */
+#define ALPHA      0x243F6A8885A308D3ULL
+#define ALPHA_ROW0 (RC_EXTRACT_ROW(ALPHA, 32))
+#define ALPHA_ROW1 (RC_EXTRACT_ROW(ALPHA, 0))
+
+/* Round constants for Mantis, split up into 32-bit row values */
+static uint32_t const rc[MANTIS_MAX_ROUNDS][2] = {
+    RC(0x13198A2E03707344ULL),
+    RC(0xA4093822299F31D0ULL),
+    RC(0x082EFA98EC4E6C89ULL),
+    RC(0x452821E638D01377ULL),
+    RC(0xBE5466CF34E90C6CULL),
+    RC(0xC0AC29B7C97C50DDULL),
+    RC(0x3F84D5B5B5470917ULL),
+    RC(0x9216D5D98979FB1BULL)
+};
+
+#else
+
+/* Size of each RC row value in bits */
+#define RC_ROW_SIZE 16
+
 /* Extract the 16 bits for a row from a 64-bit round constant */
 #define RC_EXTRACT_ROW(x,shift) \
     (((((uint16_t)((x) >> ((shift) + 12))) & 0x0F)) | \
@@ -53,6 +134,8 @@ static uint16_t const rc[MANTIS_MAX_ROUNDS][4] = {
     RC(0x3F84D5B5B5470917ULL),
     RC(0x9216D5D98979FB1BULL)
 };
+
+#endif
 
 /* Note: The four cells in a 16-bit row are stored as 0x3210 in memory
    where the least significant nibble is cell 0.  However, the nibbles
@@ -127,10 +210,17 @@ int mantis_set_key
         mantis_unpack_rotated_block(&(ks->k0), key);
         mantis_unpack_block(&(ks->k0prime), key, 0);
         mantis_unpack_block(&(ks->k1), key, 8);
+#if RC_ROW_SIZE == 64
+        ks->k1.llrow ^= ALPHA;
+#elif RC_ROW_SIZE == 32
+        ks->k1.lrow[0] ^= ALPHA_ROW0;
+        ks->k1.lrow[1] ^= ALPHA_ROW1;
+#else
         ks->k1.row[0] ^= ALPHA_ROW0;
         ks->k1.row[1] ^= ALPHA_ROW1;
         ks->k1.row[2] ^= ALPHA_ROW2;
         ks->k1.row[3] ^= ALPHA_ROW3;
+#endif
     }
 
     /* Set up the default tweak of zero */
@@ -151,8 +241,12 @@ int mantis_set_tweak(MantisKey_t *ks, const void *tweak, unsigned size)
     if (tweak) {
         mantis_unpack_block(&(ks->tweak), tweak, 0);
     } else {
+#if SKINNY_64BIT
+        ks->tweak.llrow = 0;
+#else
         ks->tweak.lrow[0] = 0;
         ks->tweak.lrow[1] = 0;
+#endif
     }
     return 1;
 }
@@ -165,11 +259,47 @@ void mantis_swap_modes(MantisKey_t *ks)
     ks->k0prime = tmp;
 
     /* XOR k1 with the alpha constant */
+#if RC_ROW_SIZE == 64
+    ks->k1.llrow ^= ALPHA;
+#elif RC_ROW_SIZE == 32
+    ks->k1.lrow[0] ^= ALPHA_ROW0;
+    ks->k1.lrow[1] ^= ALPHA_ROW1;
+#else
     ks->k1.row[0] ^= ALPHA_ROW0;
     ks->k1.row[1] ^= ALPHA_ROW1;
     ks->k1.row[2] ^= ALPHA_ROW2;
     ks->k1.row[3] ^= ALPHA_ROW3;
+#endif
 }
+
+#if SKINNY_64BIT
+
+STATIC_INLINE uint64_t mantis_sbox(uint64_t d)
+{
+    /*
+     * MIDORI Sb0 from section 4.2 of https://eprint.iacr.org/2015/1142.pdf
+     *
+     * {a, b, c, d} -> {aout, bout, cout, dout} where a/aout is the MSB.
+     *
+     * aout = NAND(NAND(~c, NAND(a, b)), (a | d))
+     * bout = NAND(NOR(NOR(a, d), (b & c)), NAND((a & c), d))
+     * cout = NAND(NAND(b, d), (NOR(b, d) | a))
+     * dout = NOR(NOR(a, (b | c)), NAND(NAND(a, b), (c | d)))
+     */
+    uint64_t a = (d >> 3);
+    uint64_t b = (d >> 2);
+    uint64_t c = (d >> 1);
+    uint64_t aout = ~((c | (a & b)) & (a | d));
+    uint64_t bout = (~(a | d)) | (b & c) | (a & c & d);
+    uint64_t cout = (b & d) | ((b | d) & ~a);
+    uint64_t dout = (a | b | c) & (~(a & b)) & (c | d);
+    return ((aout & 0x1111111111111111U) << 3) |
+           ((bout & 0x1111111111111111U) << 2) |
+           ((cout & 0x1111111111111111U) << 1) |
+            (dout & 0x1111111111111111U);
+}
+
+#else
 
 STATIC_INLINE uint32_t mantis_sbox(uint32_t d)
 {
@@ -193,6 +323,8 @@ STATIC_INLINE uint32_t mantis_sbox(uint32_t d)
     return ((aout & 0x11111111U) << 3) | ((bout & 0x11111111U) << 2) |
            ((cout & 0x11111111U) << 1) |  (dout & 0x11111111U);
 }
+
+#endif
 
 STATIC_INLINE void mantis_update_tweak(MantisCells_t *tweak)
 {
@@ -288,7 +420,13 @@ STATIC_INLINE void mantis_mix_columns(MantisCells_t *state)
 
 void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
 {
+#if RC_ROW_SIZE == 64
+    const uint64_t *r = &(rc[0]);
+#elif RC_ROW_SIZE == 32
+    const uint32_t *r = rc[0];
+#else
     const uint16_t *r = rc[0];
+#endif
     MantisCells_t tweak = ks->tweak;
     MantisCells_t k1 = ks->k1;
     MantisCells_t state;
@@ -302,8 +440,12 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
 
     /* XOR the initial whitening key k0 with the state,
        together with k1 and the initial tweak value */
+#if SKINNY_64BIT
+    state.llrow ^= ks->k0.llrow ^ k1.llrow ^ tweak.llrow;
+#else
     state.lrow[0] ^= ks->k0.lrow[0] ^ k1.lrow[0] ^ tweak.lrow[0];
     state.lrow[1] ^= ks->k0.lrow[1] ^ k1.lrow[1] ^ tweak.lrow[1];
+#endif
 
     /* Perform all forward rounds */
     for (index = ks->rounds; index > 0; --index) {
@@ -311,19 +453,36 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
         mantis_update_tweak(&tweak);
 
         /* Apply the S-box */
+#if SKINNY_64BIT
+        state.llrow = mantis_sbox(state.llrow);
+#else
         state.lrow[0] = mantis_sbox(state.lrow[0]);
         state.lrow[1] = mantis_sbox(state.lrow[1]);
+#endif
 
         /* Add the round constant */
+#if RC_ROW_SIZE == 64
+        state.llrow ^= r[0];
+        ++r;
+#elif RC_ROW_SIZE == 32
+        state.lrow[0] ^= r[0];
+        state.lrow[1] ^= r[1];
+        r += 2;
+#else
         state.row[0] ^= r[0];
         state.row[1] ^= r[1];
         state.row[2] ^= r[2];
         state.row[3] ^= r[3];
         r += 4;
+#endif
 
         /* XOR with the key and tweak */
+#if SKINNY_64BIT
+        state.llrow ^= k1.llrow ^ tweak.llrow;
+#else
         state.lrow[0] ^= k1.lrow[0] ^ tweak.lrow[0];
         state.lrow[1] ^= k1.lrow[1] ^ tweak.lrow[1];
+#endif
 
         /* Shift the rows */
         mantis_shift_rows(&state);
@@ -333,17 +492,30 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
     }
 
     /* Half-way there: sbox, mix, sbox */
+#if SKINNY_64BIT
+    state.llrow = mantis_sbox(state.llrow);
+    mantis_mix_columns(&state);
+    state.llrow = mantis_sbox(state.llrow);
+#else
     state.lrow[0] = mantis_sbox(state.lrow[0]);
     state.lrow[1] = mantis_sbox(state.lrow[1]);
     mantis_mix_columns(&state);
     state.lrow[0] = mantis_sbox(state.lrow[0]);
     state.lrow[1] = mantis_sbox(state.lrow[1]);
+#endif
 
     /* Convert k1 into k1 XOR alpha for the reverse rounds */
+#if RC_ROW_SIZE == 64
+    k1.llrow ^= ALPHA;
+#elif RC_ROW_SIZE == 32
+    k1.lrow[0] ^= ALPHA_ROW0;
+    k1.lrow[1] ^= ALPHA_ROW1;
+#else
     k1.row[0] ^= ALPHA_ROW0;
     k1.row[1] ^= ALPHA_ROW1;
     k1.row[2] ^= ALPHA_ROW2;
     k1.row[3] ^= ALPHA_ROW3;
+#endif
 
     /* Perform all reverse rounds */
     for (index = ks->rounds; index > 0; --index) {
@@ -354,19 +526,36 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
         mantis_shift_rows_inverse(&state);
 
         /* XOR with the key and tweak */
+#if SKINNY_64BIT
+        state.llrow ^= k1.llrow ^ tweak.llrow;
+#else
         state.lrow[0] ^= k1.lrow[0] ^ tweak.lrow[0];
         state.lrow[1] ^= k1.lrow[1] ^ tweak.lrow[1];
+#endif
 
         /* Add the round constant */
+#if RC_ROW_SIZE == 64
+        --r;
+        state.llrow ^= r[0];
+#elif RC_ROW_SIZE == 32
+        r -= 2;
+        state.lrow[0] ^= r[0];
+        state.lrow[1] ^= r[1];
+#else
         r -= 4;
         state.row[0] ^= r[0];
         state.row[1] ^= r[1];
         state.row[2] ^= r[2];
         state.row[3] ^= r[3];
+#endif
 
         /* Apply the inverse S-box (which is the same as the forward S-box) */
+#if SKINNY_64BIT
+        state.llrow = mantis_sbox(state.llrow);
+#else
         state.lrow[0] = mantis_sbox(state.lrow[0]);
         state.lrow[1] = mantis_sbox(state.lrow[1]);
+#endif
 
         /* Update the tweak with the reverse h function */
         mantis_update_tweak_inverse(&tweak);
@@ -374,8 +563,12 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
 
     /* XOR the final whitening key k0prime with the state,
        together with k1alpha and the final tweak value */
+#if SKINNY_64BIT
+    state.llrow ^= ks->k0prime.llrow ^ k1.llrow ^ tweak.llrow;
+#else
     state.lrow[0] ^= ks->k0prime.lrow[0] ^ k1.lrow[0] ^ tweak.lrow[0];
     state.lrow[1] ^= ks->k0prime.lrow[1] ^ k1.lrow[1] ^ tweak.lrow[1];
+#endif
 
     /* Convert host-endian back into little-endian in the output buffer */
     WRITE_WORD16(output, 0, state.row[0]);
