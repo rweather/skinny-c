@@ -1,23 +1,33 @@
 
-.PHONY: all clean check
+.PHONY: all clean check perf
 
-CFLAGS += -Wall -Wextra -Wno-unused-parameter -O3 -std=c99 -I../include
+CFLAGS += -Wall -Wextra -Wno-unused-parameter -O3 -I../include
 LDFLAGS += -L../src -lskinny
 
-TARGET = test-skinny
+TARGET1 = test-skinny
+TARGET2 = test-perf
 
-OBJS = test-skinny.o
+OBJS1 = test-skinny.o
+OBJS2 = test-perf.o
+
 DEPS = ../src/libskinny.a
 
-all: $(TARGET)
+all: $(TARGET1) $(TARGET2)
 
-$(TARGET): $(OBJS) $(DEPS)
-	$(CC) -o $(TARGET) $(OBJS) $(LDFLAGS)
+$(TARGET1): $(OBJS1) $(DEPS)
+	$(CC) -o $(TARGET1) $(OBJS1) $(LDFLAGS)
+
+$(TARGET2): $(OBJS2) $(DEPS)
+	$(CC) -o $(TARGET2) $(OBJS2) $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET1) $(TARGET2) $(OBJS1) $(OBJS2)
 
-check: all
-	./$(TARGET)
+check: $(TARGET1)
+	./$(TARGET1)
+
+perf: $(TARGET2)
+	./$(TARGET2)
 
 test-skinny.o: ../include/skinny128-cipher.h ../include/skinny64-cipher.h ../include/mantis-cipher.h
+test-perf.o: ../include/skinny128-cipher.h ../include/skinny64-cipher.h ../include/mantis-cipher.h
