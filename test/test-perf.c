@@ -151,8 +151,9 @@ void skinny64_perf(const char *name, unsigned key_size)
     RUN_MB(dec, skinny64_ecb_encrypt(block, block, &ks), 8, 8);
 
     skinny64_ctr_init(&c);
+    skinny64_ctr_set_key(&c, key_data, key_size);
     memset(buffer, 0xBA, sizeof(buffer));
-    RUN_MB(ctr, skinny64_ctr_encrypt(buffer, buffer, 1024, &ks, &c), 1024, 8);
+    RUN_MB(ctr, skinny64_ctr_encrypt(buffer, buffer, 1024, &c), 1024, 8);
     skinny64_ctr_cleanup(&c);
 
     report(name, set_key, enc, dec, ctr);
@@ -172,8 +173,9 @@ void skinny128_perf(const char *name, unsigned key_size)
     RUN_MB(dec, skinny128_ecb_encrypt(block, block, &ks), 16, 16);
 
     skinny128_ctr_init(&c);
+    skinny128_ctr_set_key(&c, key_data, key_size);
     memset(buffer, 0xBA, sizeof(buffer));
-    RUN_MB(ctr, skinny128_ctr_encrypt(buffer, buffer, 1024, &ks, &c), 1024, 16);
+    RUN_MB(ctr, skinny128_ctr_encrypt(buffer, buffer, 1024, &c), 1024, 16);
     skinny128_ctr_cleanup(&c);
 
     report(name, set_key, enc, dec, ctr);
@@ -193,8 +195,9 @@ void mantis_perf(const char *name, unsigned rounds)
     RUN_MB(dec, mantis_ecb_crypt(block, block, &ks), 8, 8);
 
     mantis_ctr_init(&c);
+    mantis_ctr_set_key(&c, key_data, 16, rounds);
     memset(buffer, 0xBA, sizeof(buffer));
-    RUN_MB(ctr, mantis_ctr_encrypt(buffer, buffer, 1024, &ks, &c), 1024, 8);
+    RUN_MB(ctr, mantis_ctr_encrypt(buffer, buffer, 1024, &c), 1024, 8);
     mantis_ctr_cleanup(&c);
 
     report(name, -1, enc, dec, ctr);

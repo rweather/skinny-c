@@ -22,78 +22,151 @@
 
 #include "mantis-cipher.h"
 #include "skinny-internal.h"
-#include <string.h>
+#include <stdlib.h>
+
+/** Internal state information for Mantis in CTR mode */
+typedef struct
+{
+    /** Key schedule for Mantis */
+    MantisKey_t ks;
+
+    /** Counter value for the next block */
+    unsigned char counter[MANTIS_BLOCK_SIZE];
+
+    /** Encrypted counter value for encrypting the current block */
+    unsigned char ecounter[MANTIS_BLOCK_SIZE];
+
+    /** Offset into ecounter where the previous request left off */
+    unsigned offset;
+
+} MantisCTRCtx_t;
 
 int mantis_ctr_init(MantisCTR_t *ctr)
 {
+    MantisCTRCtx_t *ctx;
     if (!ctr)
         return 0;
-    memset(ctr, 0, sizeof(MantisCTR_t));
-    ctr->offset = MANTIS_BLOCK_SIZE;
+    if ((ctx = calloc(1, sizeof(MantisCTRCtx_t))) == NULL)
+        return 0;
+    ctx->offset = MANTIS_BLOCK_SIZE;
+    ctr->ctx = ctx;
     return 1;
 }
 
 void mantis_ctr_cleanup(MantisCTR_t *ctr)
 {
-    if (ctr)
-        memset(ctr, 0, sizeof(MantisCTR_t));
+    if (ctr && ctr->ctx) {
+        skinny_cleanse(ctr->ctx, sizeof(MantisCTRCtx_t));
+        free(ctr->ctx);
+        ctr->ctx = 0;
+    }
+}
+
+int mantis_ctr_set_key
+    (MantisCTR_t *ctr, const void *key, unsigned size, unsigned rounds)
+{
+    MantisCTRCtx_t *ctx;
+
+    /* Validate the parameters */
+    if (!ctr || !key)
+        return 0;
+    ctx = ctr->ctx;
+    if (!ctx)
+        return 0;
+
+    /* Populate the underlying key schedule */
+    if (!mantis_set_key(&(ctx->ks), key, size, rounds, MANTIS_ENCRYPT))
+        return 0;
+
+    /* Reset the keystream */
+    ctx->offset = MANTIS_BLOCK_SIZE;
+    return 1;
+}
+
+int mantis_ctr_set_tweak
+    (MantisCTR_t *ctr, const void *tweak, unsigned tweak_size)
+{
+    MantisCTRCtx_t *ctx;
+
+    /* Validate the parameters */
+    if (!ctr)
+        return 0;
+    ctx = ctr->ctx;
+    if (!ctx)
+        return 0;
+
+    /* Populate the underlying tweak */
+    if (!mantis_set_tweak(&(ctx->ks), tweak, tweak_size))
+        return 0;
+
+    /* Reset the keystream */
+    ctx->offset = MANTIS_BLOCK_SIZE;
+    return 1;
 }
 
 int mantis_ctr_set_counter
     (MantisCTR_t *ctr, const void *counter, unsigned size)
 {
+    MantisCTRCtx_t *ctx;
+
     /* Validate the parameters */
     if (!ctr || size > MANTIS_BLOCK_SIZE)
+        return 0;
+    ctx = ctr->ctx;
+    if (!ctx)
         return 0;
 
     /* Set the counter and reset the keystream to a block boundary */
     if (counter) {
-        memset(ctr->counter, 0, MANTIS_BLOCK_SIZE - size);
-        memcpy(ctr->counter + MANTIS_BLOCK_SIZE - size, counter, size);
+        memset(ctx->counter, 0, MANTIS_BLOCK_SIZE - size);
+        memcpy(ctx->counter + MANTIS_BLOCK_SIZE - size, counter, size);
     } else {
-        memset(ctr->counter, 0, MANTIS_BLOCK_SIZE);
+        memset(ctx->counter, 0, MANTIS_BLOCK_SIZE);
     }
-    ctr->offset = MANTIS_BLOCK_SIZE;
+    ctx->offset = MANTIS_BLOCK_SIZE;
     return 1;
 }
 
 int mantis_ctr_encrypt
-    (void *output, const void *input, size_t size,
-     const MantisKey_t *ks, MantisCTR_t *ctr)
+    (void *output, const void *input, size_t size, MantisCTR_t *ctr)
 {
+    MantisCTRCtx_t *ctx;
     uint8_t *out = (uint8_t *)output;
     const uint8_t *in = (const uint8_t *)input;
 
     /* Validate the parameters */
-    if (!output || !input || !ks || !ctr)
+    if (!output || !input || !ctr)
+        return 0;
+    ctx = ctr->ctx;
+    if (!ctx)
         return 0;
 
     /* Encrypt the input in CTR mode to create the output */
     while (size > 0) {
-        if (ctr->offset >= MANTIS_BLOCK_SIZE) {
+        if (ctx->offset >= MANTIS_BLOCK_SIZE) {
             /* We need a new keystream block */
-            mantis_ecb_crypt(ctr->ecounter, ctr->counter, ks);
-            skinny64_inc_counter(ctr->counter, 1);
+            mantis_ecb_crypt(ctx->ecounter, ctx->counter, &(ctx->ks));
+            skinny64_inc_counter(ctx->counter, 1);
 
             /* XOR an entire keystream block in one go if possible */
             if (size >= MANTIS_BLOCK_SIZE) {
-                skinny64_xor(out, in, ctr->ecounter);
+                skinny64_xor(out, in, ctx->ecounter);
                 out += MANTIS_BLOCK_SIZE;
                 in += MANTIS_BLOCK_SIZE;
                 size -= MANTIS_BLOCK_SIZE;
             } else {
                 /* Last partial block in the request */
-                skinny_xor(out, in, ctr->ecounter, size);
-                ctr->offset = size;
+                skinny_xor(out, in, ctx->ecounter, size);
+                ctx->offset = size;
                 break;
             }
         } else {
             /* Left-over keystream data from the last request */
-            size_t temp = MANTIS_BLOCK_SIZE - ctr->offset;
+            size_t temp = MANTIS_BLOCK_SIZE - ctx->offset;
             if (temp > size)
                 temp = size;
-            skinny_xor(out, in, ctr->ecounter + ctr->offset, temp);
-            ctr->offset += temp;
+            skinny_xor(out, in, ctx->ecounter + ctx->offset, temp);
+            ctx->offset += temp;
             out += temp;
             in += temp;
             size -= temp;

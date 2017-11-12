@@ -99,25 +99,11 @@ typedef struct
 
 /**
  * \brief State information for Skinny-128 in CTR mode.
- *
- * This structure should be treated as opaque.  The names and meaning
- * of the fields below may not have identical behaviour between regular
- * and vector-based implementations of CTR mode.
  */
 typedef struct
 {
-    /** Counter value for the next block */
-    unsigned char counter[SKINNY128_BLOCK_SIZE];
-
-    /** Encrypted counter value for encrypting the current block */
-    unsigned char ecounter[SKINNY128_BLOCK_SIZE];
-
-    /** Offset into ecounter where the previous request left off */
-    unsigned offset;
-
-    /** Extension data.  May be used by vector-based implementations
-        to store multiple counter blocks for parallel encryption */
-    void *ext;
+    /** Dynamically-allocated context information */
+    void *ctx;
 
 } Skinny128CTR_t;
 
@@ -133,12 +119,12 @@ typedef struct
  *
  * The primary key sizes are 16, 32, and 48.  In-between sizes will be
  * padded with zero bytes to the next primary key size.
- */ 
+ */
 int skinny128_set_key(Skinny128Key_t *ks, const void *key, unsigned size);
 
 /**
- * \brief Sets the key schedule for a Skinny128 block cipher, plus an
- * initial tweak value.
+ * \brief Sets the key schedule for a Skinny128 block cipher,
+ * and prepare for tweaked encryption.
  *
  * \param ks The key schedule structure to populate.
  * \param key Points to the key.
@@ -148,8 +134,8 @@ int skinny128_set_key(Skinny128Key_t *ks, const void *key, unsigned size);
  * or 1 if the key and tweak were set.
  *
  * The primary key sizes are 16 and 32.  In-between sizes will be
- * padded with zero bytes to the next primary key size.  If the tweak
- * is less than 16 bytes in size, it will be padded with zeroes.
+ * padded with zero bytes to the next primary key size.  The initial
+ * tweak will be all-zeroes.
  *
  * Once the initial key and tweak have been set, the tweak can be changed
  * later by calling skinny128_set_tweak().
@@ -227,6 +213,74 @@ int skinny128_ctr_init(Skinny128CTR_t *ctr);
 void skinny128_ctr_cleanup(Skinny128CTR_t *ctr);
 
 /**
+ * \brief Sets the key schedule for a Skinny128 block cipher in CTR mode.
+ *
+ * \param ctr The CTR control block to set the key on.
+ * \param key Points to the key.
+ * \param size Size of the key, between 16 and 48 bytes.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the key has been set.
+ *
+ * The primary key sizes are 16, 32, and 48.  In-between sizes will be
+ * padded with zero bytes to the next primary key size.
+ *
+ * Calling this function will also reset the keystream position so
+ * that the next call to skinny128_ctr_encrypt() will start with the
+ * new key.  Usually this occurs at the start of a packet.
+ */
+int skinny128_ctr_set_key(Skinny128CTR_t *ctr, const void *key, unsigned size);
+
+/**
+ * \brief Sets the key schedule for a Skinny128 block cipher in CTR mode,
+ * and prepare for tweaked encryption.
+ *
+ * \param ctr The CTR control block to set the key on.
+ * \param key Points to the key.
+ * \param key_size Size of the key, between 16 and 32 bytes.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the key and tweak were set.
+ *
+ * The primary key sizes are 16 and 32.  In-between sizes will be
+ * padded with zero bytes to the next primary key size.  The initial
+ * tweak will be all-zeroes.
+ *
+ * Once the initial key and tweak have been set, the tweak can be changed
+ * later by calling skinny128_ctr_set_tweak().
+ *
+ * Calling this function will also reset the keystream position so
+ * that the next call to skinny128_ctr_encrypt() will start with the
+ * new tweak.  Usually this occurs at the start of a packet.
+ *
+ * \sa skinny128_ctr_set_tweak()
+ */
+int skinny128_ctr_set_tweaked_key
+    (Skinny128CTR_t *ctr, const void *key, unsigned key_size);
+
+/**
+ * \brief Changes the tweak value for a previously-initialized key schedule.
+ *
+ * \param ctr The CTR control block to set the tweak on.
+ * \param tweak The new tweak value, or NULL for a zero tweak.
+ * \param tweak_size Size of the new tweak value; between 1 and 16 bytes.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the tweak was changed.
+ *
+ * This function modifies the key schedule to change the tweak from its
+ * previous value to the new value given by \a tweak.
+ *
+ * Calling this function will also reset the keystream position so
+ * that the next call to skinny128_ctr_encrypt() will start with the
+ * new counter value.  Usually this occurs at the start of a packet.
+ *
+ * \sa skinny128_ctr_set_tweaked_key()
+ */
+int skinny128_ctr_set_tweak
+    (Skinny128CTR_t *ctr, const void *tweak, unsigned tweak_size);
+
+/**
  * \brief Sets the counter value in a Skinny-128 CTR control block.
  *
  * \param ctr The CTR control block to modify.
@@ -258,7 +312,6 @@ int skinny128_ctr_set_counter
  * \param output The output buffer for the ciphertext.
  * \param input The input buffer containing the plaintext.
  * \param size The number of bytes to be encrypted.
- * \param ks The key schedule to use to encrypt the counter values.
  * \param ctr The CTR control block to use and update.
  *
  * \return Zero if there is something wrong with the parameters,
@@ -267,8 +320,7 @@ int skinny128_ctr_set_counter
  * This function can also be used for CTR mode decryption.
  */
 int skinny128_ctr_encrypt
-    (void *output, const void *input, size_t size,
-     const Skinny128Key_t *ks, Skinny128CTR_t *ctr);
+    (void *output, const void *input, size_t size, Skinny128CTR_t *ctr);
 
 /**@}*/
 

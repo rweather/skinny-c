@@ -31,9 +31,7 @@ int main(int argc, char *argv[])
     FILE *outfile;
     uint8_t buffer[1024];
     size_t read_size;
-    Skinny128Key_t ks128 = {0};
     Skinny128CTR_t ctr128;
-    Skinny64Key_t ks64 = {0};
     Skinny64CTR_t ctr64;
 
     /* Parse the command-line options */
@@ -53,14 +51,14 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize the key schedule */
-    if (block_size == 8)
-        skinny64_set_key(&ks64, key, key_size);
-    else
-        skinny128_set_key(&ks128, key, key_size);
-
-    /* Initialise the counter block from the command-line tweak parameter */
     skinny64_ctr_init(&ctr64);
     skinny128_ctr_init(&ctr128);
+    if (block_size == 8)
+        skinny64_ctr_set_key(&ctr64, key, key_size);
+    else
+        skinny128_ctr_set_key(&ctr128, key, key_size);
+
+    /* Initialise the counter block from the command-line tweak parameter */
     if (block_size == 8)
         skinny64_ctr_set_counter(&ctr64, tweak, tweak_size);
     else
@@ -69,9 +67,9 @@ int main(int argc, char *argv[])
     /* Read and encrypt blocks from the file */
     while (!feof(infile) && (read_size = fread(buffer, 1, sizeof(buffer), infile)) > 0) {
         if (block_size == 8)
-            skinny64_ctr_encrypt(buffer, buffer, read_size, &ks64, &ctr64);
+            skinny64_ctr_encrypt(buffer, buffer, read_size, &ctr64);
         else
-            skinny128_ctr_encrypt(buffer, buffer, read_size, &ks128, &ctr128);
+            skinny128_ctr_encrypt(buffer, buffer, read_size, &ctr128);
         fwrite(buffer, 1, read_size, outfile);
     }
 

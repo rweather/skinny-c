@@ -28,15 +28,14 @@
 
 The API for Skinny-C provides CTR mode for bulk encryption of
 arbitrarily-sized data blocks.  The first step is to initialize the
-key schedule and the CTR control structure.  For this example we will
+CTR control structure with the key.  For this example we will
 use a 256-bit key with Skinny128:
 
 \code
-Skinny128Key_t ks;
 Skinny128CTR_t ctr;
 unsigned char key[32] = ...;
-skinny128_set_key(&ks, key, 32);
 skinny128_ctr_init(&ctr);
+skinny128_ctr_set_key(&ctr, key, 32);
 \endcode
 
 The next step is to set the counter value for the current data block.
@@ -71,7 +70,7 @@ Encryption of packets is accomplished as follows:
 
 \code
 unsigned char packet[MAX_PACKET_SIZE] = ...;
-skinny128_ctr_encrypt(packet, packet, size, &ks, &ctr);
+skinny128_ctr_encrypt(packet, packet, size, &ctr);
 \endcode
 
 The first two parameters are the output buffer for the ciphertext and
@@ -107,11 +106,10 @@ As before, we start by initializing the 128-bit key and the CTR
 control structure with Skinny64:
 
 \code
-Skinny64TweakedKey_t kt;
 Skinny64CTR_t ctr;
 unsigned char key[16] = ...;
-skinny64_set_tweaked_key(&kt, key, 16);
 skinny64_ctr_init(&ctr);
+skinny64_ctr_set_tweaked_key(&ctr, key, 16);
 \endcode
 
 For each packet, the sequence number is provided as the tweak and the
@@ -128,7 +126,7 @@ seqbuf[4] = (unsigned char)(seqnum >> 24);
 seqbuf[5] = (unsigned char)(seqnum >> 16);
 seqbuf[6] = (unsigned char)(seqnum >> 8);
 seqbuf[7] = (unsigned char)seqnum;
-skinny64_set_tweak(&kt, seqbuf, sizeof(seqbuf));
+skinny64_ctr_set_tweak(&ctr, seqbuf, sizeof(seqbuf));
 skinny64_ctr_set_counter(&ctr, NULL, 0);
 \endcode
 
@@ -136,7 +134,7 @@ Packet encryption is similar to before:
 
 \code
 unsigned char packet[MAX_PACKET_SIZE] = ...;
-skinny64_ctr_encrypt(packet, packet, size, &kt.ks, &ctr);
+skinny64_ctr_encrypt(packet, packet, size, &ctr);
 \endcode
 
 Finally, clean up when the session ends:

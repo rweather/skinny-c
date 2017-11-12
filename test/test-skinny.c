@@ -220,14 +220,15 @@ static void skinny64CtrTest(const SkinnyTestVector *test)
     /* Encrypt the entire plaintext in a single request */
     memset(actual, 0, sizeof(actual));
     skinny64_ctr_init(&ctr);
+    skinny64_ctr_set_key(&ctr, test->key, test->key_size);
     skinny64_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
-    skinny64_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ks, &ctr);
+    skinny64_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ctr);
     if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
         ok = 0;
 
     /* Decrypt the ciphertext back to the plaintext, in-place */
     skinny64_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
-    skinny64_ctr_encrypt(actual, actual, sizeof(ciphertext), &ks, &ctr);
+    skinny64_ctr_encrypt(actual, actual, sizeof(ciphertext), &ctr);
     skinny64_ctr_cleanup(&ctr);
     if (memcmp(plaintext, actual, sizeof(actual)) != 0)
         ok = 0;
@@ -236,6 +237,7 @@ static void skinny64CtrTest(const SkinnyTestVector *test)
     for (inc = 1; inc <= (SKINNY64_BLOCK_SIZE * 3); ++inc) {
         memset(actual, 0, sizeof(actual));
         skinny64_ctr_init(&ctr);
+        skinny64_ctr_set_key(&ctr, test->key, test->key_size);
         skinny64_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
         for (posn = 0; posn < sizeof(plaintext); posn += inc) {
             size = sizeof(plaintext) - posn;
@@ -243,7 +245,7 @@ static void skinny64CtrTest(const SkinnyTestVector *test)
                 size = inc;
             skinny64_ctr_encrypt
                 (((uint8_t *)actual) + posn,
-                 ((uint8_t *)plaintext) + posn, size, &ks, &ctr);
+                 ((uint8_t *)plaintext) + posn, size, &ctr);
         }
         skinny64_ctr_cleanup(&ctr);
         if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
@@ -331,14 +333,15 @@ static void skinny128CtrTest(const SkinnyTestVector *test)
     /* Encrypt the entire plaintext in a single request */
     memset(actual, 0, sizeof(actual));
     skinny128_ctr_init(&ctr);
+    skinny128_ctr_set_key(&ctr, test->key, test->key_size);
     skinny128_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
-    skinny128_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ks, &ctr);
+    skinny128_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ctr);
     if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
         ok = 0;
 
     /* Decrypt the ciphertext back to the plaintext, in-place */
     skinny128_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
-    skinny128_ctr_encrypt(actual, actual, sizeof(ciphertext), &ks, &ctr);
+    skinny128_ctr_encrypt(actual, actual, sizeof(ciphertext), &ctr);
     skinny128_ctr_cleanup(&ctr);
     if (memcmp(plaintext, actual, sizeof(actual)) != 0)
         ok = 0;
@@ -347,6 +350,7 @@ static void skinny128CtrTest(const SkinnyTestVector *test)
     for (inc = 1; inc <= (SKINNY128_BLOCK_SIZE * 3); ++inc) {
         memset(actual, 0, sizeof(actual));
         skinny128_ctr_init(&ctr);
+        skinny128_ctr_set_key(&ctr, test->key, test->key_size);
         skinny128_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
         for (posn = 0; posn < sizeof(plaintext); posn += inc) {
             size = sizeof(plaintext) - posn;
@@ -354,7 +358,7 @@ static void skinny128CtrTest(const SkinnyTestVector *test)
                 size = inc;
             skinny128_ctr_encrypt
                 (((uint8_t *)actual) + posn,
-                 ((uint8_t *)plaintext) + posn, size, &ks, &ctr);
+                 ((uint8_t *)plaintext) + posn, size, &ctr);
         }
         skinny128_ctr_cleanup(&ctr);
         if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
@@ -460,14 +464,16 @@ static void mantisCtrTest(const MantisTestVector *test)
     /* Encrypt the entire plaintext in a single request */
     memset(actual, 0, sizeof(actual));
     mantis_ctr_init(&ctr);
+    mantis_ctr_set_key(&ctr, test->key, MANTIS_KEY_SIZE, test->rounds);
+    mantis_ctr_set_tweak(&ctr, test->tweak, MANTIS_TWEAK_SIZE);
     mantis_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
-    mantis_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ks, &ctr);
+    mantis_ctr_encrypt(actual, plaintext, sizeof(plaintext), &ctr);
     if (memcmp(ciphertext, actual, sizeof(actual)) != 0)
         ok = 0;
 
     /* Decrypt the ciphertext back to the plaintext, in-place */
     mantis_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
-    mantis_ctr_encrypt(actual, actual, sizeof(ciphertext), &ks, &ctr);
+    mantis_ctr_encrypt(actual, actual, sizeof(ciphertext), &ctr);
     mantis_ctr_cleanup(&ctr);
     if (memcmp(plaintext, actual, sizeof(actual)) != 0)
         ok = 0;
@@ -476,6 +482,8 @@ static void mantisCtrTest(const MantisTestVector *test)
     for (inc = 1; inc <= (MANTIS_BLOCK_SIZE * 3); ++inc) {
         memset(actual, 0, sizeof(actual));
         mantis_ctr_init(&ctr);
+        mantis_ctr_set_key(&ctr, test->key, MANTIS_KEY_SIZE, test->rounds);
+        mantis_ctr_set_tweak(&ctr, test->tweak, MANTIS_TWEAK_SIZE);
         mantis_ctr_set_counter(&ctr, base_counter, sizeof(base_counter));
         for (posn = 0; posn < sizeof(plaintext); posn += inc) {
             size = sizeof(plaintext) - posn;
@@ -483,7 +491,7 @@ static void mantisCtrTest(const MantisTestVector *test)
                 size = inc;
             mantis_ctr_encrypt
                 (((uint8_t *)actual) + posn,
-                 ((uint8_t *)plaintext) + posn, size, &ks, &ctr);
+                 ((uint8_t *)plaintext) + posn, size, &ctr);
         }
         mantis_ctr_cleanup(&ctr);
         if (memcmp(ciphertext, actual, sizeof(actual)) != 0)

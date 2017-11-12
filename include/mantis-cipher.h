@@ -126,25 +126,11 @@ typedef struct
 
 /**
  * \brief State information for Mantis in CTR mode.
- *
- * This structure should be treated as opaque.  The names and meaning
- * of the fields below may not have identical behaviour between regular
- * and vector-based implementations of CTR mode.
  */
 typedef struct
 {
-    /** Counter value for the next block */
-    unsigned char counter[MANTIS_BLOCK_SIZE];
-
-    /** Encrypted counter value for encrypting the current block */
-    unsigned char ecounter[MANTIS_BLOCK_SIZE];
-
-    /** Offset into ecounter where the previous request left off */
-    unsigned offset;
-
-    /** Extension data.  May be used by vector-based implementations
-        to store multiple counter blocks for parallel encryption */
-    void *ext;
+    /** Dynamically-allocated context information */
+    void *ctx;
 
 } MantisCTR_t;
 
@@ -230,14 +216,57 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks);
 int mantis_ctr_init(MantisCTR_t *ctr);
 
 /**
- * \brief Cleans up a CTR control block for Skinny-64.
+ * \brief Cleans up a CTR control block for Mantis.
  *
  * \param ctr Points to the CTR control block to clean up.
  */
 void mantis_ctr_cleanup(MantisCTR_t *ctr);
 
 /**
- * \brief Sets the counter value in a Skinny-64 CTR control block.
+ * \brief Sets the key schedule for a Mantis block cipher in CTR mode.
+ *
+ * \param ctr The CTR control block to set the key on.
+ * \param key Points to the key.
+ * \param size Size of the key, which must be MANTIS_KEY_SIZE.
+ * \param rounds The number of rounds to use, between MANTIS_MIN_ROUNDS and
+ * MANTIS_MAX_ROUNDS.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the key has been set.  The tweak will be set to zero.
+ *
+ * Calling this function will also reset the keystream position so
+ * that the next call to mantis_ctr_encrypt() will start with the
+ * new key.  Usually this occurs at the start of a packet.
+ *
+ * \sa mantis_ctr_set_tweak()
+ */
+int mantis_ctr_set_key
+    (MantisCTR_t *ctr, const void *key, unsigned size, unsigned rounds);
+
+/**
+ * \brief Changes the tweak value for a previously-initialized key schedule.
+ *
+ * \param ctr The CTR control block to set the tweak on.
+ * \param tweak The new tweak value, or NULL for a zero tweak.
+ * \param tweak_size Size of the new tweak value; between 1 and 16 bytes.
+ *
+ * \return Zero if there is something wrong with the parameters,
+ * or 1 if the tweak was changed.
+ *
+ * This function modifies the key schedule to change the tweak from its
+ * previous value to the new value given by \a tweak.
+ *
+ * Calling this function will also reset the keystream position so
+ * that the next call to mantis_ctr_encrypt() will start with the
+ * new counter value.  Usually this occurs at the start of a packet.
+ *
+ * \sa mantis_ctr_set_key()
+ */
+int mantis_ctr_set_tweak
+    (MantisCTR_t *ctr, const void *tweak, unsigned tweak_size);
+
+/**
+ * \brief Sets the counter value in a Mantis CTR control block.
  *
  * \param ctr The CTR control block to modify.
  * \param counter The counter value to set, which may be NULL
@@ -263,12 +292,11 @@ int mantis_ctr_set_counter
     (MantisCTR_t *ctr, const void *counter, unsigned size);
 
 /**
- * \brief Encrypt a block of data using Skinny-64 in CTR mode.
+ * \brief Encrypt a block of data using Mantis in CTR mode.
  *
  * \param output The output buffer for the ciphertext.
  * \param input The input buffer containing the plaintext.
  * \param size The number of bytes to be encrypted.
- * \param ks The key schedule to use to encrypt the counter values.
  * \param ctr The CTR control block to use and update.
  *
  * \return Zero if there is something wrong with the parameters,
@@ -277,8 +305,7 @@ int mantis_ctr_set_counter
  * This function can also be used for CTR mode decryption.
  */
 int mantis_ctr_encrypt
-    (void *output, const void *input, size_t size,
-     const MantisKey_t *ks, MantisCTR_t *ctr);
+    (void *output, const void *input, size_t size, MantisCTR_t *ctr);
 
 /**@}*/
 

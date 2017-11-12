@@ -205,8 +205,12 @@ int mantis_set_key
     }
 
     /* Set up the default tweak of zero */
+#if SKINNY_64BIT
+    ks->tweak.llrow = 0;
+#else
     ks->tweak.lrow[0] = 0;
     ks->tweak.lrow[1] = 0;
+#endif
 
     /* Ready to go */
     return 1;
