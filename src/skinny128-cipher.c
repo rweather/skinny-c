@@ -23,21 +23,6 @@
 #include "skinny128-cipher.h"
 #include "skinny-internal.h"
 
-#define READ_BYTE(ptr,offset) \
-    ((uint32_t)(((const uint8_t *)(ptr))[(offset)]))
-
-#define READ_WORD32(ptr,offset) \
-    (((uint32_t)(((const uint8_t *)(ptr))[(offset)])) | \
-    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 1])) << 8) | \
-    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 2])) << 16) | \
-    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 3])) << 24))
-
-#define WRITE_WORD32(ptr,offset,value) \
-    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \
-     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) >> 8)), \
-     (((uint8_t *)(ptr))[(offset) + 2] = (uint8_t)((value) >> 16)), \
-     (((uint8_t *)(ptr))[(offset) + 3] = (uint8_t)((value) >> 24)))
-
 #if SKINNY_64BIT
 
 STATIC_INLINE uint64_t skinny128_LFSR2(uint64_t x)

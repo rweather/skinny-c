@@ -23,39 +23,6 @@
 #include "skinny64-cipher.h"
 #include "skinny-internal.h"
 
-/* Note: The four cells in a 16-bit row are stored as 0x3210 in memory
-   where the least significant nibble is cell 0.  However, the nibbles
-   in the serialized representation are stored reversed as 0x01 0x23.
-   We correct for this when reading and writing the serialized form. */
-
-STATIC_INLINE uint8_t skinny64_read_byte(const uint8_t *ptr)
-{
-    uint8_t value = *ptr;
-    return (value >> 4) | (value << 4);
-}
-
-STATIC_INLINE uint16_t skinny64_read_word16(const uint8_t *ptr)
-{
-    uint16_t value = ((uint16_t)(ptr[0])) | (((uint16_t)(ptr[1])) << 8);
-    return ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-}
-
-STATIC_INLINE void skinny64_write_word16(uint8_t *ptr, uint16_t value)
-{
-    value = ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-    ptr[0] = (uint8_t)value;
-    ptr[1] = (uint8_t)(value >> 8);
-}
-
-#define READ_BYTE(ptr,offset) \
-    (skinny64_read_byte(((const uint8_t *)(ptr)) + (offset)))
-
-#define READ_WORD16(ptr,offset) \
-    (skinny64_read_word16(((const uint8_t *)(ptr)) + (offset)))
-
-#define WRITE_WORD16(ptr,offset,value) \
-    (skinny64_write_word16(((uint8_t *)(ptr)) + (offset), (value)))
-
 STATIC_INLINE uint32_t skinny64_LFSR2(uint32_t x)
 {
     return ((x << 1) & 0xEEEEEEEEU) ^ ((x >> 3) & 0x11111111U) ^
@@ -112,9 +79,9 @@ static void skinny64_set_key_inner
         memset(tk, 0, sizeof(tk));
         for (index = 0; index < key_size; index += 2) {
             if ((index + 2) <= key_size) {
-                word = READ_WORD16(key, index);
+                word = READ_WORD16_SWAPPED(key, index);
             } else {
-                word = READ_BYTE(key, index);
+                word = READ_BYTE_SWAPPED(key, index);
             }
             tk[index / SKINNY64_BLOCK_SIZE].row[(index / 2) & 0x03] = word;
         }
@@ -124,9 +91,9 @@ static void skinny64_set_key_inner
         memset(&(tk[1]), 0, sizeof(Skinny64Cells_t) * 2);
         for (index = 0; index < key_size; index += 2) {
             if ((index + 2) <= key_size) {
-                word = READ_WORD16(key, index);
+                word = READ_WORD16_SWAPPED(key, index);
             } else {
-                word = READ_BYTE(key, index);
+                word = READ_BYTE_SWAPPED(key, index);
             }
             tk[(index / SKINNY64_BLOCK_SIZE) + 1].row[(index / 2) & 0x03] = word;
         }
@@ -204,9 +171,9 @@ static void skinny64_read_tweak
     if (tweak) {
         for (index = 0; index < tweak_size; index += 2) {
             if ((index + 2) <= tweak_size) {
-                word = READ_WORD16(tweak, index);
+                word = READ_WORD16_SWAPPED(tweak, index);
             } else {
-                word = READ_BYTE(tweak, index);
+                word = READ_BYTE_SWAPPED(tweak, index);
             }
             tk->row[(index / 2) & 0x03] = word;
         }
@@ -351,10 +318,17 @@ void skinny64_ecb_encrypt
     uint32_t temp;
 
     /* Read the input buffer and convert little-endian to host-endian */
-    state.row[0] = READ_WORD16(input, 0);
-    state.row[1] = READ_WORD16(input, 2);
-    state.row[2] = READ_WORD16(input, 4);
-    state.row[3] = READ_WORD16(input, 6);
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    state.llrow = READ_WORD64_SWAPPED(input, 0);
+#elif SKINNY_LITTLE_ENDIAN
+    state.lrow[0] = READ_WORD32_SWAPPED(input, 0);
+    state.lrow[1] = READ_WORD32_SWAPPED(input, 4);
+#else
+    state.row[0] = READ_WORD16_SWAPPED(input, 0);
+    state.row[1] = READ_WORD16_SWAPPED(input, 2);
+    state.row[2] = READ_WORD16_SWAPPED(input, 4);
+    state.row[3] = READ_WORD16_SWAPPED(input, 6);
+#endif
 
     /* Perform all encryption rounds */
     schedule = ks->schedule;
@@ -391,10 +365,17 @@ void skinny64_ecb_encrypt
     }
 
     /* Convert host-endian back into little-endian in the output buffer */
-    WRITE_WORD16(output, 0, state.row[0]);
-    WRITE_WORD16(output, 2, state.row[1]);
-    WRITE_WORD16(output, 4, state.row[2]);
-    WRITE_WORD16(output, 6, state.row[3]);
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    WRITE_WORD64_SWAPPED(output, 0, state.llrow);
+#elif SKINNY_LITTLE_ENDIAN
+    WRITE_WORD32_SWAPPED(output, 0, state.lrow[0]);
+    WRITE_WORD32_SWAPPED(output, 4, state.lrow[1]);
+#else
+    WRITE_WORD16_SWAPPED(output, 0, state.row[0]);
+    WRITE_WORD16_SWAPPED(output, 2, state.row[1]);
+    WRITE_WORD16_SWAPPED(output, 4, state.row[2]);
+    WRITE_WORD16_SWAPPED(output, 6, state.row[3]);
+#endif
 }
 
 void skinny64_ecb_decrypt
@@ -406,10 +387,17 @@ void skinny64_ecb_decrypt
     uint32_t temp;
 
     /* Read the input buffer and convert little-endian to host-endian */
-    state.row[0] = READ_WORD16(input, 0);
-    state.row[1] = READ_WORD16(input, 2);
-    state.row[2] = READ_WORD16(input, 4);
-    state.row[3] = READ_WORD16(input, 6);
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    state.llrow = READ_WORD64_SWAPPED(input, 0);
+#elif SKINNY_LITTLE_ENDIAN
+    state.lrow[0] = READ_WORD32_SWAPPED(input, 0);
+    state.lrow[1] = READ_WORD32_SWAPPED(input, 4);
+#else
+    state.row[0] = READ_WORD16_SWAPPED(input, 0);
+    state.row[1] = READ_WORD16_SWAPPED(input, 2);
+    state.row[2] = READ_WORD16_SWAPPED(input, 4);
+    state.row[3] = READ_WORD16_SWAPPED(input, 6);
+#endif
 
     /* Perform all decryption rounds */
     schedule = &(ks->schedule[ks->rounds - 1]);
@@ -446,8 +434,15 @@ void skinny64_ecb_decrypt
     }
 
     /* Convert host-endian back into little-endian in the output buffer */
-    WRITE_WORD16(output, 0, state.row[0]);
-    WRITE_WORD16(output, 2, state.row[1]);
-    WRITE_WORD16(output, 4, state.row[2]);
-    WRITE_WORD16(output, 6, state.row[3]);
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    WRITE_WORD64_SWAPPED(output, 0, state.llrow);
+#elif SKINNY_LITTLE_ENDIAN
+    WRITE_WORD32_SWAPPED(output, 0, state.lrow[0]);
+    WRITE_WORD32_SWAPPED(output, 4, state.lrow[1]);
+#else
+    WRITE_WORD16_SWAPPED(output, 0, state.row[0]);
+    WRITE_WORD16_SWAPPED(output, 2, state.row[1]);
+    WRITE_WORD16_SWAPPED(output, 4, state.row[2]);
+    WRITE_WORD16_SWAPPED(output, 6, state.row[3]);
+#endif
 }

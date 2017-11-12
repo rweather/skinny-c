@@ -137,37 +137,18 @@ static uint16_t const rc[MANTIS_MAX_ROUNDS][4] = {
 
 #endif
 
-/* Note: The four cells in a 16-bit row are stored as 0x3210 in memory
-   where the least significant nibble is cell 0.  However, the nibbles
-   in the serialized representation are stored reversed as 0x01 0x23.
-   We correct for this when reading and writing the serialized form. */
-
-STATIC_INLINE uint16_t mantis_read_word16(const uint8_t *ptr)
-{
-    uint16_t value = ((uint16_t)(ptr[0])) | (((uint16_t)(ptr[1])) << 8);
-    return ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-}
-
-STATIC_INLINE void mantis_write_word16(uint8_t *ptr, uint16_t value)
-{
-    value = ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-    ptr[0] = (uint8_t)value;
-    ptr[1] = (uint8_t)(value >> 8);
-}
-
-#define READ_WORD16(ptr,offset) \
-    (mantis_read_word16(((const uint8_t *)(ptr)) + (offset)))
-
-#define WRITE_WORD16(ptr,offset,value) \
-    (mantis_write_word16(((uint8_t *)(ptr)) + (offset), (value)))
-
 STATIC_INLINE void mantis_unpack_block
     (MantisCells_t *block, const uint8_t *buf, unsigned offset)
 {
-    block->row[0] = READ_WORD16(buf, offset);
-    block->row[1] = READ_WORD16(buf, offset + 2);
-    block->row[2] = READ_WORD16(buf, offset + 4);
-    block->row[3] = READ_WORD16(buf, offset + 6);
+#if SKINNY_LITTLE_ENDIAN
+    block->lrow[0] = READ_WORD32_SWAPPED(buf, offset);
+    block->lrow[1] = READ_WORD32_SWAPPED(buf, offset + 4);
+#else
+    block->row[0] = READ_WORD16_SWAPPED(buf, offset);
+    block->row[1] = READ_WORD16_SWAPPED(buf, offset + 2);
+    block->row[2] = READ_WORD16_SWAPPED(buf, offset + 4);
+    block->row[3] = READ_WORD16_SWAPPED(buf, offset + 6);
+#endif
 }
 
 STATIC_INLINE void mantis_unpack_rotated_block
@@ -433,10 +414,17 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
     unsigned index;
 
     /* Read the input buffer and convert little-endian to host-endian */
-    state.row[0] = READ_WORD16(input, 0);
-    state.row[1] = READ_WORD16(input, 2);
-    state.row[2] = READ_WORD16(input, 4);
-    state.row[3] = READ_WORD16(input, 6);
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    state.llrow = READ_WORD64_SWAPPED(input, 0);
+#elif SKINNY_LITTLE_ENDIAN
+    state.lrow[0] = READ_WORD32_SWAPPED(input, 0);
+    state.lrow[1] = READ_WORD32_SWAPPED(input, 4);
+#else
+    state.row[0] = READ_WORD16_SWAPPED(input, 0);
+    state.row[1] = READ_WORD16_SWAPPED(input, 2);
+    state.row[2] = READ_WORD16_SWAPPED(input, 4);
+    state.row[3] = READ_WORD16_SWAPPED(input, 6);
+#endif
 
     /* XOR the initial whitening key k0 with the state,
        together with k1 and the initial tweak value */
@@ -571,8 +559,15 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
 #endif
 
     /* Convert host-endian back into little-endian in the output buffer */
-    WRITE_WORD16(output, 0, state.row[0]);
-    WRITE_WORD16(output, 2, state.row[1]);
-    WRITE_WORD16(output, 4, state.row[2]);
-    WRITE_WORD16(output, 6, state.row[3]);
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    WRITE_WORD64_SWAPPED(output, 0, state.llrow);
+#elif SKINNY_LITTLE_ENDIAN
+    WRITE_WORD32_SWAPPED(output, 0, state.lrow[0]);
+    WRITE_WORD32_SWAPPED(output, 4, state.lrow[1]);
+#else
+    WRITE_WORD16_SWAPPED(output, 0, state.row[0]);
+    WRITE_WORD16_SWAPPED(output, 2, state.row[1]);
+    WRITE_WORD16_SWAPPED(output, 4, state.row[2]);
+    WRITE_WORD16_SWAPPED(output, 6, state.row[3]);
+#endif
 }
