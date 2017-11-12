@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['offset',['offset',['../structMantisCTR__t.html#a812bcc4a3dc47115595ed039b9ffd837',1,'MantisCTR_t::offset()'],['../structSkinny128CTR__t.html#a6224f6aa6444b6cc577ecb6527e22252',1,'Skinny128CTR_t::offset()'],['../structSkinny64CTR__t.html#a2bc599815978ff7bca82680dd6aba500',1,'Skinny64CTR_t::offset()']]]
+  ['offset',['offset',['../structMantisCTRCtx__t.html#a6f177a185cb65cb879ec6eed3e404c94',1,'MantisCTRCtx_t::offset()'],['../structSkinny128CTRCtx__t.html#ad5299a49484c40deffcee337adb8bf69',1,'Skinny128CTRCtx_t::offset()'],['../structSkinny64CTRCtx__t.html#a17a0a950314ac9586379ec9be5655a09',1,'Skinny64CTRCtx_t::offset()']]]
 ];

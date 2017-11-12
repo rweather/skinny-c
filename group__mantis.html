@@ -147,14 +147,20 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga08308e70caa4b72a930890410aa85665"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes Mantis in CTR mode.  <a href="#ga08308e70caa4b72a930890410aa85665">More...</a><br/></td></tr>
 <tr class="separator:ga08308e70caa4b72a930890410aa85665"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaabc50af2066734f0471cedb6d04ef7c5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mantis.html#gaabc50af2066734f0471cedb6d04ef7c5">mantis_ctr_cleanup</a> (<a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr)</td></tr>
-<tr class="memdesc:gaabc50af2066734f0471cedb6d04ef7c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cleans up a CTR control block for Skinny-64.  <a href="#gaabc50af2066734f0471cedb6d04ef7c5">More...</a><br/></td></tr>
+<tr class="memdesc:gaabc50af2066734f0471cedb6d04ef7c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cleans up a CTR control block for Mantis.  <a href="#gaabc50af2066734f0471cedb6d04ef7c5">More...</a><br/></td></tr>
 <tr class="separator:gaabc50af2066734f0471cedb6d04ef7c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga07bfe63c8150d84a1cc68fcd3e2f420c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mantis.html#ga07bfe63c8150d84a1cc68fcd3e2f420c">mantis_ctr_set_key</a> (<a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr, const void *key, unsigned size, unsigned rounds)</td></tr>
+<tr class="memdesc:ga07bfe63c8150d84a1cc68fcd3e2f420c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the key schedule for a Mantis block cipher in CTR mode.  <a href="#ga07bfe63c8150d84a1cc68fcd3e2f420c">More...</a><br/></td></tr>
+<tr class="separator:ga07bfe63c8150d84a1cc68fcd3e2f420c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacbc4bd24b94fd99e6df4b725886b5379"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mantis.html#gacbc4bd24b94fd99e6df4b725886b5379">mantis_ctr_set_tweak</a> (<a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr, const void *tweak, unsigned tweak_size)</td></tr>
+<tr class="memdesc:gacbc4bd24b94fd99e6df4b725886b5379"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changes the tweak value for a previously-initialized key schedule.  <a href="#gacbc4bd24b94fd99e6df4b725886b5379">More...</a><br/></td></tr>
+<tr class="separator:gacbc4bd24b94fd99e6df4b725886b5379"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga67d1a30e74784823b35f4c1db1ccdc50"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mantis.html#ga67d1a30e74784823b35f4c1db1ccdc50">mantis_ctr_set_counter</a> (<a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr, const void *counter, unsigned size)</td></tr>
-<tr class="memdesc:ga67d1a30e74784823b35f4c1db1ccdc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the counter value in a Skinny-64 CTR control block.  <a href="#ga67d1a30e74784823b35f4c1db1ccdc50">More...</a><br/></td></tr>
+<tr class="memdesc:ga67d1a30e74784823b35f4c1db1ccdc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the counter value in a Mantis CTR control block.  <a href="#ga67d1a30e74784823b35f4c1db1ccdc50">More...</a><br/></td></tr>
 <tr class="separator:ga67d1a30e74784823b35f4c1db1ccdc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga09e7d7656b7097f2155fb0657d1e97f5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mantis.html#ga09e7d7656b7097f2155fb0657d1e97f5">mantis_ctr_encrypt</a> (void *output, const void *input, size_t size, const <a class="el" href="structMantisKey__t.html">MantisKey_t</a> *ks, <a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr)</td></tr>
-<tr class="memdesc:ga09e7d7656b7097f2155fb0657d1e97f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt a block of data using Skinny-64 in CTR mode.  <a href="#ga09e7d7656b7097f2155fb0657d1e97f5">More...</a><br/></td></tr>
-<tr class="separator:ga09e7d7656b7097f2155fb0657d1e97f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga07fa144b67a2bc34f1e2c1ea62a508c0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0">mantis_ctr_encrypt</a> (void *output, const void *input, size_t size, <a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *ctr)</td></tr>
+<tr class="memdesc:ga07fa144b67a2bc34f1e2c1ea62a508c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt a block of data using Mantis in CTR mode.  <a href="#ga07fa144b67a2bc34f1e2c1ea62a508c0">More...</a><br/></td></tr>
+<tr class="separator:ga07fa144b67a2bc34f1e2c1ea62a508c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>MANTIS tweakable block cipher with 64-bit blocks. </p>
@@ -194,7 +200,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Cleans up a CTR control block for Skinny-64. </p>
+<p>Cleans up a CTR control block for Mantis. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ctr</td><td>Points to the CTR control block to clean up. </td></tr>
@@ -202,11 +208,11 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00036">36</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00056">56</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ga09e7d7656b7097f2155fb0657d1e97f5"></a>
+<a class="anchor" id="ga07fa144b67a2bc34f1e2c1ea62a508c0"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -231,12 +237,6 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structMantisKey__t.html">MantisKey_t</a> *&#160;</td>
-          <td class="paramname"><em>ks</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *&#160;</td>
           <td class="paramname"><em>ctr</em>&#160;</td>
         </tr>
@@ -248,13 +248,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Encrypt a block of data using Skinny-64 in CTR mode. </p>
+<p>Encrypt a block of data using Mantis in CTR mode. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">output</td><td>The output buffer for the ciphertext. </td></tr>
     <tr><td class="paramname">input</td><td>The input buffer containing the plaintext. </td></tr>
     <tr><td class="paramname">size</td><td>The number of bytes to be encrypted. </td></tr>
-    <tr><td class="paramname">ks</td><td>The key schedule to use to encrypt the counter values. </td></tr>
     <tr><td class="paramname">ctr</td><td>The CTR control block to use and update.</td></tr>
   </table>
   </dd>
@@ -262,7 +261,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the data was encrypted.</dd></dl>
 <p>This function can also be used for CTR mode decryption. </p>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00061">61</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00131">131</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -289,9 +288,9 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Zero if <em>ctr</em> is NULL or there is insufficient memory to create internal data structures, or non-zero if everything is OK.</dd></dl>
 <p>The counter block is initially set to all-zeroes.</p>
-<dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#ga67d1a30e74784823b35f4c1db1ccdc50" title="Sets the counter value in a Skinny-64 CTR control block. ">mantis_ctr_set_counter()</a>, <a class="el" href="group__mantis.html#ga09e7d7656b7097f2155fb0657d1e97f5" title="Encrypt a block of data using Skinny-64 in CTR mode. ">mantis_ctr_encrypt()</a> </dd></dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#ga67d1a30e74784823b35f4c1db1ccdc50" title="Sets the counter value in a Mantis CTR control block. ">mantis_ctr_set_counter()</a>, <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00027">27</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00044">44</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -325,7 +324,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets the counter value in a Skinny-64 CTR control block. </p>
+<p>Sets the counter value in a Mantis CTR control block. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ctr</td><td>The CTR control block to modify. </td></tr>
@@ -336,9 +335,111 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the counter has been set.</dd></dl>
 <p>The counter is assumed to be in big-endian order, incremented from the right-most byte forward, as in the standard AES-CTR mode. Often the counter block will contain a packet sequence number or equivalent in the left-most bytes with the right-most bytes used to count blocks within the specified packet.</p>
-<p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga09e7d7656b7097f2155fb0657d1e97f5" title="Encrypt a block of data using Skinny-64 in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet. </p>
+<p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet. </p>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00043">43</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00108">108</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ga07bfe63c8150d84a1cc68fcd3e2f420c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mantis_ctr_set_key </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *&#160;</td>
+          <td class="paramname"><em>ctr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>rounds</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the key schedule for a Mantis block cipher in CTR mode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctr</td><td>The CTR control block to set the key on. </td></tr>
+    <tr><td class="paramname">key</td><td>Points to the key. </td></tr>
+    <tr><td class="paramname">size</td><td>Size of the key, which must be MANTIS_KEY_SIZE. </td></tr>
+    <tr><td class="paramname">rounds</td><td>The number of rounds to use, between MANTIS_MIN_ROUNDS and MANTIS_MAX_ROUNDS.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the key has been set. The tweak will be set to zero.</dd></dl>
+<p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new key. Usually this occurs at the start of a packet.</p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#gacbc4bd24b94fd99e6df4b725886b5379" title="Changes the tweak value for a previously-initialized key schedule. ">mantis_ctr_set_tweak()</a> </dd></dl>
+
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00066">66</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="gacbc4bd24b94fd99e6df4b725886b5379"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mantis_ctr_set_tweak </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMantisCTR__t.html">MantisCTR_t</a> *&#160;</td>
+          <td class="paramname"><em>ctr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>tweak</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tweak_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Changes the tweak value for a previously-initialized key schedule. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctr</td><td>The CTR control block to set the tweak on. </td></tr>
+    <tr><td class="paramname">tweak</td><td>The new tweak value, or NULL for a zero tweak. </td></tr>
+    <tr><td class="paramname">tweak_size</td><td>Size of the new tweak value; between 1 and 16 bytes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the tweak was changed.</dd></dl>
+<p>This function modifies the key schedule to change the tweak from its previous value to the new value given by <em>tweak</em>.</p>
+<p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet.</p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#ga07bfe63c8150d84a1cc68fcd3e2f420c" title="Sets the key schedule for a Mantis block cipher in CTR mode. ">mantis_ctr_set_key()</a> </dd></dl>
+
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00087">87</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -384,7 +485,7 @@ Functions</h2></td></tr>
 <p>The <em>input</em> and <em>output</em> blocks are allowed to overlap.</p>
 <p>The encryption or decryption mode is selected when the key schedule is setup by <a class="el" href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540" title="Sets the key schedule for a Mantis block cipher. ">mantis_set_key()</a> or mantis_set_key_and_tweak(). The mode can also be altered on the fly by calling <a class="el" href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127" title="Swaps the encryption and decryption modes on a Mantis key schedule. ">mantis_swap_modes()</a>. </p>
 
-<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00289">289</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00406">406</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
 
 </div>
 </div>
@@ -446,7 +547,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>The <em>rounds</em> value will be doubled to get the actual round count. Mantis consists of a set of forward rounds followed by an equal number of reverse rounds.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#ga089196d01ff123a9c67fbfbf402405e9" title="Sets the tweak value for a previously-initialized key schedule. ">mantis_set_tweak()</a>, <a class="el" href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127" title="Swaps the encryption and decryption modes on a Mantis key schedule. ">mantis_swap_modes()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00107">107</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00171">171</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
 
 </div>
 </div>
@@ -492,7 +593,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the tweak was changed.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540" title="Sets the key schedule for a Mantis block cipher. ">mantis_set_key()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00144">144</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00219">219</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
 
 </div>
 </div>
@@ -518,14 +619,14 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00160">160</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-cipher_8c_source.html#l00239">239</a> of file <a class="el" href="mantis-cipher_8c_source.html">mantis-cipher.c</a>.</p>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 11 2017 09:42:33 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 12 2017 14:08:38 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
