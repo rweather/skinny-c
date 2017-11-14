@@ -4,7 +4,7 @@ include ../options.mak
 .PHONY: all clean check perf
 
 CFLAGS += $(COMMON_CFLAGS) -Wno-unused-parameter -I../include
-LDFLAGS += -L../src -lskinny
+LDFLAGS += $(COMMON_LDFLAGS) -L../src -lskinny
 
 TARGET1 = test-skinny
 TARGET2 = test-perf

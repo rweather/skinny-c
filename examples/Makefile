@@ -4,7 +4,7 @@ include ../options.mak
 .PHONY: all clean check
 
 CFLAGS += $(COMMON_CFLAGS) $(STDC_CFLAGS) -I../include
-LDFLAGS += -L../src -lskinny
+LDFLAGS += $(COMMON_LDFLAGS) -L../src -lskinny
 
 TARGET1 = skinny-ctr
 TARGET2 = skinny-tweak
