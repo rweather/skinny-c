@@ -1,7 +1,9 @@
 
+include ../options.mak
+
 .PHONY: all clean check perf
 
-CFLAGS += -Wall -Wextra -Wno-unused-parameter -O3 -I../include
+CFLAGS += $(COMMON_CFLAGS) -Wno-unused-parameter -I../include
 LDFLAGS += -L../src -lskinny
 
 TARGET1 = test-skinny

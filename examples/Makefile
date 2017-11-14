@@ -1,7 +1,9 @@
 
+include ../options.mak
+
 .PHONY: all clean check
 
-CFLAGS += -Wall -Wextra -O3 -std=c99 -I../include
+CFLAGS += $(COMMON_CFLAGS) $(STDC_CFLAGS) -I../include
 LDFLAGS += -L../src -lskinny
 
 TARGET1 = skinny-ctr

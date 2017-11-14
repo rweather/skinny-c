@@ -21,6 +21,7 @@
  */
 
 #include "skinny128-cipher.h"
+#include "skinny128-ctr-internal.h"
 #include "skinny-internal.h"
 #include <stdlib.h>
 
@@ -41,11 +42,9 @@ typedef struct
 
 } Skinny128CTRCtx_t;
 
-int skinny128_ctr_init(Skinny128CTR_t *ctr)
+static int skinny128_ctr_def_init(Skinny128CTR_t *ctr)
 {
     Skinny128CTRCtx_t *ctx;
-    if (!ctr)
-        return 0;
     if ((ctx = calloc(1, sizeof(Skinny128CTRCtx_t))) == NULL)
         return 0;
     ctx->offset = SKINNY128_BLOCK_SIZE;
@@ -53,21 +52,21 @@ int skinny128_ctr_init(Skinny128CTR_t *ctr)
     return 1;
 }
 
-void skinny128_ctr_cleanup(Skinny128CTR_t *ctr)
+static void skinny128_ctr_def_cleanup(Skinny128CTR_t *ctr)
 {
-    if (ctr && ctr->ctx) {
+    if (ctr->ctx) {
         skinny_cleanse(ctr->ctx, sizeof(Skinny128CTRCtx_t));
         free(ctr->ctx);
         ctr->ctx = 0;
     }
 }
 
-int skinny128_ctr_set_key(Skinny128CTR_t *ctr, const void *key, unsigned size)
+static int skinny128_ctr_def_set_key(Skinny128CTR_t *ctr, const void *key, unsigned size)
 {
     Skinny128CTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr || !key)
+    if (!key)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -82,13 +81,13 @@ int skinny128_ctr_set_key(Skinny128CTR_t *ctr, const void *key, unsigned size)
     return 1;
 }
 
-int skinny128_ctr_set_tweaked_key
+static int skinny128_ctr_def_set_tweaked_key
     (Skinny128CTR_t *ctr, const void *key, unsigned key_size)
 {
     Skinny128CTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr || !key)
+    if (!key)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -103,14 +102,12 @@ int skinny128_ctr_set_tweaked_key
     return 1;
 }
 
-int skinny128_ctr_set_tweak
+static int skinny128_ctr_def_set_tweak
     (Skinny128CTR_t *ctr, const void *tweak, unsigned tweak_size)
 {
     Skinny128CTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr)
-        return 0;
     ctx = ctr->ctx;
     if (!ctx)
         return 0;
@@ -124,13 +121,13 @@ int skinny128_ctr_set_tweak
     return 1;
 }
 
-int skinny128_ctr_set_counter
+static int skinny128_ctr_def_set_counter
     (Skinny128CTR_t *ctr, const void *counter, unsigned size)
 {
     Skinny128CTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr || size > SKINNY128_BLOCK_SIZE)
+    if (size > SKINNY128_BLOCK_SIZE)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -147,7 +144,7 @@ int skinny128_ctr_set_counter
     return 1;
 }
 
-int skinny128_ctr_encrypt
+static int skinny128_ctr_def_encrypt
     (void *output, const void *input, size_t size, Skinny128CTR_t *ctr)
 {
     Skinny128CTRCtx_t *ctx;
@@ -155,7 +152,7 @@ int skinny128_ctr_encrypt
     const uint8_t *in = (const uint8_t *)input;
 
     /* Validate the parameters */
-    if (!output || !input || !ctr)
+    if (!output || !input)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -193,4 +190,99 @@ int skinny128_ctr_encrypt
         }
     }
     return 1;
+}
+
+/** Vtable for the default Skinny-128-CTR implementation */
+static Skinny128CTRVtable_t const skinny128_ctr_def = {
+    skinny128_ctr_def_init,
+    skinny128_ctr_def_cleanup,
+    skinny128_ctr_def_set_key,
+    skinny128_ctr_def_set_tweaked_key,
+    skinny128_ctr_def_set_tweak,
+    skinny128_ctr_def_set_counter,
+    skinny128_ctr_def_encrypt
+};
+
+/* Public API, which redirects to the specific backend implementation */
+
+int skinny128_ctr_init(Skinny128CTR_t *ctr)
+{
+    const Skinny128CTRVtable_t *vtable;
+
+    /* Validate the parameter */
+    if (!ctr)
+        return 0;
+
+    /* Choose a backend implementation */
+    vtable = &skinny128_ctr_def;
+#if SKINNY_VEC128_MATH
+    if (_skinny_has_vec128())
+        vtable = &_skinny128_ctr_vec128;
+#endif
+#if SKINNY_VEC256_MATH
+    if (_skinny_has_vec256())
+        vtable = &_skinny128_ctr_vec256;
+#endif
+    ctr->vtable = vtable;
+
+    /* Initialize the CTR mode context */
+    return (*(vtable->init))(ctr);
+}
+
+void skinny128_ctr_cleanup(Skinny128CTR_t *ctr)
+{
+    if (ctr && ctr->vtable) {
+        const Skinny128CTRVtable_t *vtable = ctr->vtable;
+        (*(vtable->cleanup))(ctr);
+        ctr->vtable = 0;
+    }
+}
+
+int skinny128_ctr_set_key(Skinny128CTR_t *ctr, const void *key, unsigned size)
+{
+    if (ctr && ctr->vtable) {
+        const Skinny128CTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_key))(ctr, key, size);
+    }
+    return 0;
+}
+
+int skinny128_ctr_set_tweaked_key
+    (Skinny128CTR_t *ctr, const void *key, unsigned key_size)
+{
+    if (ctr && ctr->vtable) {
+        const Skinny128CTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_tweaked_key))(ctr, key, key_size);
+    }
+    return 0;
+}
+
+int skinny128_ctr_set_tweak
+    (Skinny128CTR_t *ctr, const void *tweak, unsigned tweak_size)
+{
+    if (ctr && ctr->vtable) {
+        const Skinny128CTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_tweak))(ctr, tweak, tweak_size);
+    }
+    return 0;
+}
+
+int skinny128_ctr_set_counter
+    (Skinny128CTR_t *ctr, const void *counter, unsigned size)
+{
+    if (ctr && ctr->vtable) {
+        const Skinny128CTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_counter))(ctr, counter, size);
+    }
+    return 0;
+}
+
+int skinny128_ctr_encrypt
+    (void *output, const void *input, size_t size, Skinny128CTR_t *ctr)
+{
+    if (ctr && ctr->vtable) {
+        const Skinny128CTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->encrypt))(output, input, size, ctr);
+    }
+    return 0;
 }

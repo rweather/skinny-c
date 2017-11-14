@@ -129,6 +129,9 @@ typedef struct
  */
 typedef struct
 {
+    /** Vtable pointer for the actual CTR implementation */
+    const void *vtable;
+
     /** Dynamically-allocated context information */
     void *ctx;
 

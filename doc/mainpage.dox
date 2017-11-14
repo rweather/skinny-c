@@ -34,10 +34,13 @@ easier to analyse.  And that's OK.
 
 The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a>
 provides an alternative implementation in ISO C99 that is designed for
-efficient operation on 32-bit and 64-bit platforms.  Assembly language and
-SIMD speed-ups are definitely possible, such as
-<a href="https://github.com/kste/skinny_avx">this</a> AVX2 implementation,
-and may be added later.
+efficient operation on 32-bit and 64-bit platforms.  Alternative backends
+for CTR mode are also provided that can make use of <a href="https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html">GCC Vector Extensions</a>
+or equivalent on systems that support 128-bit SIMD and 256-bit SIMD operations.
+
+Other assembly language and SIMD speed-ups are definitely possible, such as
+<a href="https://github.com/kste/skinny_avx">this</a> blindingly fast AVX2
+implementation, and may be added later.
 
 This implementation is designed to have constant-time and constant-cache
 behaviour.  In particular, there are no lookup tables for the S-boxes.
@@ -47,8 +50,18 @@ Skinny-C is distributed under the terms of the MIT license.
 \section main_build Building Skinny-C
 
 To build the code with gcc and gmake, simply type "make".  Then type
-"make check" to run the test cases.  Some modifications may be needed to
-the Makefile's to build on non-GNU platforms or with other compilers.
+"make check" to run the test cases and "make perf" to run the performance
+tests.  Some modifications may be needed to the Makefile's and the
+"options.mak" file to build on non-GNU platforms or with other compilers.
+
+The definitions in the "options.mak" file can be used to tune the compiler
+options for enabling various features like SSE2, NEON, or AVX2 instructions.
+The files "src/skinny-internal.h" and "src/skinny-internal.c" also contain
+definitions that can be tuned to get better performance on your platform.
+
+I mainly use gcc on a Linux x86-64 platform.  There is some support in
+the code for compiling with clang.  Patches are welcome to tune the
+library for other platforms and compilers.
 
 \section main_using Using Skinny-C
 

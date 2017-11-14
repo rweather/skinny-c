@@ -21,6 +21,7 @@
  */
 
 #include "mantis-cipher.h"
+#include "mantis-ctr-internal.h"
 #include "skinny-internal.h"
 #include <stdlib.h>
 
@@ -41,11 +42,9 @@ typedef struct
 
 } MantisCTRCtx_t;
 
-int mantis_ctr_init(MantisCTR_t *ctr)
+static int mantis_ctr_def_init(MantisCTR_t *ctr)
 {
     MantisCTRCtx_t *ctx;
-    if (!ctr)
-        return 0;
     if ((ctx = calloc(1, sizeof(MantisCTRCtx_t))) == NULL)
         return 0;
     ctx->offset = MANTIS_BLOCK_SIZE;
@@ -53,22 +52,22 @@ int mantis_ctr_init(MantisCTR_t *ctr)
     return 1;
 }
 
-void mantis_ctr_cleanup(MantisCTR_t *ctr)
+static void mantis_ctr_def_cleanup(MantisCTR_t *ctr)
 {
-    if (ctr && ctr->ctx) {
+    if (ctr->ctx) {
         skinny_cleanse(ctr->ctx, sizeof(MantisCTRCtx_t));
         free(ctr->ctx);
         ctr->ctx = 0;
     }
 }
 
-int mantis_ctr_set_key
+static int mantis_ctr_def_set_key
     (MantisCTR_t *ctr, const void *key, unsigned size, unsigned rounds)
 {
     MantisCTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr || !key)
+    if (!key)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -83,14 +82,12 @@ int mantis_ctr_set_key
     return 1;
 }
 
-int mantis_ctr_set_tweak
+static int mantis_ctr_def_set_tweak
     (MantisCTR_t *ctr, const void *tweak, unsigned tweak_size)
 {
     MantisCTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr)
-        return 0;
     ctx = ctr->ctx;
     if (!ctx)
         return 0;
@@ -104,13 +101,13 @@ int mantis_ctr_set_tweak
     return 1;
 }
 
-int mantis_ctr_set_counter
+static int mantis_ctr_def_set_counter
     (MantisCTR_t *ctr, const void *counter, unsigned size)
 {
     MantisCTRCtx_t *ctx;
 
     /* Validate the parameters */
-    if (!ctr || size > MANTIS_BLOCK_SIZE)
+    if (size > MANTIS_BLOCK_SIZE)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -127,7 +124,7 @@ int mantis_ctr_set_counter
     return 1;
 }
 
-int mantis_ctr_encrypt
+static int mantis_ctr_def_encrypt
     (void *output, const void *input, size_t size, MantisCTR_t *ctr)
 {
     MantisCTRCtx_t *ctx;
@@ -135,7 +132,7 @@ int mantis_ctr_encrypt
     const uint8_t *in = (const uint8_t *)input;
 
     /* Validate the parameters */
-    if (!output || !input || !ctr)
+    if (!output || !input)
         return 0;
     ctx = ctr->ctx;
     if (!ctx)
@@ -173,4 +170,85 @@ int mantis_ctr_encrypt
         }
     }
     return 1;
+}
+
+/** Vtable for the default Mantis-CTR implementation */
+static MantisCTRVtable_t const mantis_ctr_def = {
+    mantis_ctr_def_init,
+    mantis_ctr_def_cleanup,
+    mantis_ctr_def_set_key,
+    mantis_ctr_def_set_tweak,
+    mantis_ctr_def_set_counter,
+    mantis_ctr_def_encrypt
+};
+
+/* Public API, which redirects to the specific backend implementation */
+
+int mantis_ctr_init(MantisCTR_t *ctr)
+{
+    const MantisCTRVtable_t *vtable;
+
+    /* Validate the parameter */
+    if (!ctr)
+        return 0;
+
+    /* Choose a backend implementation */
+    vtable = &mantis_ctr_def;
+#if SKINNY_VEC128_MATH
+    if (_skinny_has_vec128())
+        vtable = &_mantis_ctr_vec128;
+#endif
+    ctr->vtable = vtable;
+
+    /* Initialize the CTR mode context */
+    return (*(vtable->init))(ctr);
+}
+
+void mantis_ctr_cleanup(MantisCTR_t *ctr)
+{
+    if (ctr && ctr->vtable) {
+        const MantisCTRVtable_t *vtable = ctr->vtable;
+        (*(vtable->cleanup))(ctr);
+        ctr->vtable = 0;
+    }
+}
+
+int mantis_ctr_set_key
+    (MantisCTR_t *ctr, const void *key, unsigned size, unsigned rounds)
+{
+    if (ctr && ctr->vtable) {
+        const MantisCTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_key))(ctr, key, size, rounds);
+    }
+    return 0;
+}
+
+int mantis_ctr_set_tweak
+    (MantisCTR_t *ctr, const void *tweak, unsigned tweak_size)
+{
+    if (ctr && ctr->vtable) {
+        const MantisCTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_tweak))(ctr, tweak, tweak_size);
+    }
+    return 0;
+}
+
+int mantis_ctr_set_counter
+    (MantisCTR_t *ctr, const void *counter, unsigned size)
+{
+    if (ctr && ctr->vtable) {
+        const MantisCTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->set_counter))(ctr, counter, size);
+    }
+    return 0;
+}
+
+int mantis_ctr_encrypt
+    (void *output, const void *input, size_t size, MantisCTR_t *ctr)
+{
+    if (ctr && ctr->vtable) {
+        const MantisCTRVtable_t *vtable = ctr->vtable;
+        return (*(vtable->encrypt))(output, input, size, ctr);
+    }
+    return 0;
 }

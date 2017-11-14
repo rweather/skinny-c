@@ -38,6 +38,11 @@ skinny128_ctr_init(&ctr);
 skinny128_ctr_set_key(&ctr, key, 32);
 \endcode
 
+The skinny128_ctr_init() function chooses the best CTR mode implementation
+for your platform at runtime.  For example, the AVX2 backend will be used
+if your CPU supports AVX2 and the library was compiled with AVX2 support
+enabled.
+
 The next step is to set the counter value for the current data block.
 Counter values are typically formed by combining a packet sequence
 number with an offset into the packet.  It is very important that

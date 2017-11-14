@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
     uint8_t buffer[1024];
     size_t read_size;
     size_t posn;
-    Skinny128TweakedKey_t ks128 = { .ks = {0} };
-    Skinny64TweakedKey_t ks64 = { .ks = {0} };
+    Skinny128TweakedKey_t ks128;
+    Skinny64TweakedKey_t ks64;
 
     /* Parse the command-line options */
     if (!parse_options(argc, argv, 1)) {
@@ -66,6 +66,8 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize the key schedule and tweak */
+    memset(&ks128, 0, sizeof(ks128));
+    memset(&ks64, 0, sizeof(ks64));
     if (block_size == 8) {
         skinny64_set_tweaked_key(&ks64, key, key_size);
         skinny64_set_tweak(&ks64, tweak, tweak_size);

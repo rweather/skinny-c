@@ -29,7 +29,7 @@
 /* Figure out how to inline functions using this C compiler */
 #if defined(__STDC__) && __STDC_VERSION__ >= 199901L
 #define STATIC_INLINE static inline
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__)
 #define STATIC_INLINE static __inline__
 #else
 #define STATIC_INLINE static
@@ -57,6 +57,36 @@
 #define SKINNY_LITTLE_ENDIAN 1
 #else
 #define SKINNY_LITTLE_ENDIAN 0
+#endif
+
+/* Define SKINNY_VEC128_MATH to 1 if we have 128-bit SIMD Vector Extensions */
+#if defined(__GNUC__) || defined(__clang__)
+#if defined(__SSE2__) || defined(__ARM_NEON) || \
+    defined(__ARM_NEON__) || defined(__ARM_NEON_FP)
+#define SKINNY_VEC128_MATH 1
+#else
+#define SKINNY_VEC128_MATH 0
+#endif
+#else
+#define SKINNY_VEC128_MATH 0
+#endif
+
+/* Define SKINNY_VEC256_MATH to 1 if we have 256-bit SIMD Vector Extensions */
+#if defined(__GNUC__) || defined(__clang__)
+#if defined(__AVX2__)
+#define SKINNY_VEC256_MATH 1
+#else
+#define SKINNY_VEC256_MATH 0
+#endif
+#else
+#define SKINNY_VEC256_MATH 0
+#endif
+
+/* Attribute for declaring a vector type with this compiler */
+#if defined(__clang__)
+#define SKINNY_VECTOR_ATTR(words, bytes) __attribute__((ext_vector_type(words)))
+#else
+#define SKINNY_VECTOR_ATTR(words, bytes) __attribute__((vector_size(bytes)))
 #endif
 
 /* XOR two blocks together of arbitrary size and alignment */
@@ -246,5 +276,11 @@ STATIC_INLINE void skinny_cleanse(void *ptr, size_t size)
     }
 #endif
 }
+
+/* Determine if this platform supports 128-bit SIMD vector operations */
+int _skinny_has_vec128(void);
+
+/* Determine if this platform supports 256-bit SIMD vector operations */
+int _skinny_has_vec256(void);
 
 #endif /* SKINNY_INTERNAL_H */
