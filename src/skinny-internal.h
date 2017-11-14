@@ -122,7 +122,7 @@ STATIC_INLINE void skinny128_xor
     unsigned posn;
     for (posn = 0; posn < 16; ++posn) {
         ((uint8_t *)output)[posn] = ((const uint8_t *)input1)[posn] ^
-                                    ((const uint8_t *)input2)[size];
+                                    ((const uint8_t *)input2)[posn];
     }
 #endif
 }
@@ -143,7 +143,7 @@ STATIC_INLINE void skinny64_xor
     unsigned posn;
     for (posn = 0; posn < 8; ++posn) {
         ((uint8_t *)output)[posn] = ((const uint8_t *)input1)[posn] ^
-                                    ((const uint8_t *)input2)[size];
+                                    ((const uint8_t *)input2)[posn];
     }
 #endif
 }
