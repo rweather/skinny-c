@@ -86,7 +86,8 @@ CTR mode</h1>
 <div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> key[32] = ...;</div>
 <div class="line"><a class="code" href="group__skinny128.html#gad8bc5eb97099bcadeba9552c069eab3d">skinny128_ctr_init</a>(&amp;ctr);</div>
 <div class="line"><a class="code" href="group__skinny128.html#gabdc400daf6e869e79d6d452f1521d0bd">skinny128_ctr_set_key</a>(&amp;ctr, key, 32);</div>
-</div><!-- fragment --><p>The next step is to set the counter value for the current data block. Counter values are typically formed by combining a packet sequence number with an offset into the packet. It is very important that the counter values be different from one packet to the next.</p>
+</div><!-- fragment --><p>The <a class="el" href="group__skinny128.html#gad8bc5eb97099bcadeba9552c069eab3d" title="Initializes Skinny-128 in CTR mode. ">skinny128_ctr_init()</a> function chooses the best CTR mode implementation for your platform at runtime. For example, the AVX2 backend will be used if your CPU supports AVX2 and the library was compiled with AVX2 support enabled.</p>
+<p>The next step is to set the counter value for the current data block. Counter values are typically formed by combining a packet sequence number with an offset into the packet. It is very important that the counter values be different from one packet to the next.</p>
 <p>The following is an example of setting the initial counter value based on a 32-bit packet sequence number:</p>
 <div class="fragment"><div class="line">uint32_t seqnum = ...;</div>
 <div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> counter[16];</div>
@@ -151,7 +152,7 @@ ECB mode</h1>
 </div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 12 2017 14:08:38 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 14 2017 18:25:30 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

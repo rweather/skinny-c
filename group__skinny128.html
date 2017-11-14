@@ -181,7 +181,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00056">56</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00232">232</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -234,7 +234,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the data was encrypted.</dd></dl>
 <p>This function can also be used for CTR mode decryption. </p>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00151">151</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00281">281</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -263,7 +263,7 @@ Functions</h2></td></tr>
 <p>The counter block is initially set to all-zeroes.</p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__skinny128.html#ga53ce0b454ce6892b4846db9b6d5a0cdd" title="Sets the counter value in a Skinny-128 CTR control block. ">skinny128_ctr_set_counter()</a>, <a class="el" href="group__skinny128.html#ga98250043e8ca6f59966a55c03029d3ec" title="Encrypt a block of data using Skinny-128 in CTR mode. ">skinny128_ctr_encrypt()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00044">44</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00208">208</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -310,7 +310,7 @@ Functions</h2></td></tr>
 <p>The counter is assumed to be in big-endian order, incremented from the right-most byte forward, as in the standard AES-CTR mode. Often the counter block will contain a packet sequence number or equivalent in the left-most bytes with the right-most bytes used to count blocks within the specified packet.</p>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__skinny128.html#ga98250043e8ca6f59966a55c03029d3ec" title="Encrypt a block of data using Skinny-128 in CTR mode. ">skinny128_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet. </p>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00128">128</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00271">271</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -357,7 +357,7 @@ Functions</h2></td></tr>
 <p>The primary key sizes are 16, 32, and 48. In-between sizes will be padded with zero bytes to the next primary key size.</p>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__skinny128.html#ga98250043e8ca6f59966a55c03029d3ec" title="Encrypt a block of data using Skinny-128 in CTR mode. ">skinny128_ctr_encrypt()</a> will start with the new key. Usually this occurs at the start of a packet. </p>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00065">65</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00241">241</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -405,7 +405,7 @@ Functions</h2></td></tr>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__skinny128.html#ga98250043e8ca6f59966a55c03029d3ec" title="Encrypt a block of data using Skinny-128 in CTR mode. ">skinny128_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet.</p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__skinny128.html#ga3c621d46003c2512c0fdfb1c42658dd4" title="Sets the key schedule for a Skinny128 block cipher in CTR mode, and prepare for tweaked encryption...">skinny128_ctr_set_tweaked_key()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00107">107</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00261">261</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -454,7 +454,7 @@ Functions</h2></td></tr>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__skinny128.html#ga98250043e8ca6f59966a55c03029d3ec" title="Encrypt a block of data using Skinny-128 in CTR mode. ">skinny128_ctr_encrypt()</a> will start with the new tweak. Usually this occurs at the start of a packet.</p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__skinny128.html#gaff5baa6f2f3303f17a83aebb7ac7bf88" title="Changes the tweak value for a previously-initialized key schedule. ">skinny128_ctr_set_tweak()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00086">86</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="skinny128-ctr_8c_source.html#l00251">251</a> of file <a class="el" href="skinny128-ctr_8c_source.html">skinny128-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -692,7 +692,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 12 2017 14:08:38 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 14 2017 18:25:30 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

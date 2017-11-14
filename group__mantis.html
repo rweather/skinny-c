@@ -208,7 +208,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00056">56</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00207">207</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -261,7 +261,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Zero if there is something wrong with the parameters, or 1 if the data was encrypted.</dd></dl>
 <p>This function can also be used for CTR mode decryption. </p>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00131">131</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00247">247</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -290,7 +290,7 @@ Functions</h2></td></tr>
 <p>The counter block is initially set to all-zeroes.</p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#ga67d1a30e74784823b35f4c1db1ccdc50" title="Sets the counter value in a Mantis CTR control block. ">mantis_ctr_set_counter()</a>, <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00044">44</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00187">187</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -337,7 +337,7 @@ Functions</h2></td></tr>
 <p>The counter is assumed to be in big-endian order, incremented from the right-most byte forward, as in the standard AES-CTR mode. Often the counter block will contain a packet sequence number or equivalent in the left-most bytes with the right-most bytes used to count blocks within the specified packet.</p>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet. </p>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00108">108</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00237">237</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -391,7 +391,7 @@ Functions</h2></td></tr>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new key. Usually this occurs at the start of a packet.</p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#gacbc4bd24b94fd99e6df4b725886b5379" title="Changes the tweak value for a previously-initialized key schedule. ">mantis_ctr_set_tweak()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00066">66</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00217">217</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -439,7 +439,7 @@ Functions</h2></td></tr>
 <p>Calling this function will also reset the keystream position so that the next call to <a class="el" href="group__mantis.html#ga07fa144b67a2bc34f1e2c1ea62a508c0" title="Encrypt a block of data using Mantis in CTR mode. ">mantis_ctr_encrypt()</a> will start with the new counter value. Usually this occurs at the start of a packet.</p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__mantis.html#ga07bfe63c8150d84a1cc68fcd3e2f420c" title="Sets the key schedule for a Mantis block cipher in CTR mode. ">mantis_ctr_set_key()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00087">87</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
+<p>Definition at line <a class="el" href="mantis-ctr_8c_source.html#l00227">227</a> of file <a class="el" href="mantis-ctr_8c_source.html">mantis-ctr.c</a>.</p>
 
 </div>
 </div>
@@ -626,7 +626,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 12 2017 14:08:38 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 14 2017 18:25:30 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

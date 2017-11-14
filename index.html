@@ -81,12 +81,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="textblock"><p>The SKINNY family of tweakable block ciphers is intended for lightweight implementation in hardware and software, <a href="https://eprint.iacr.org/2016/660.pdf">paper</a>.</p>
 <p>The algorithm authors' <a href="https://sites.google.com/site/skinnycipher">web site</a> provides a <a href="https://sites.google.com/site/skinnycipher/downloads/skinny_reference.c">refererence implementation</a> in C, but it isn't terribly efficient - it is intended to be <em>correct</em> to make the algorithm easier to analyse. And that's OK.</p>
-<p>The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a> provides an alternative implementation in ISO C99 that is designed for efficient operation on 32-bit and 64-bit platforms. Assembly language and SIMD speed-ups are definitely possible, such as <a href="https://github.com/kste/skinny_avx">this</a> AVX2 implementation, and may be added later.</p>
+<p>The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a> provides an alternative implementation in ISO C99 that is designed for efficient operation on 32-bit and 64-bit platforms. Alternative backends for CTR mode are also provided that can make use of <a href="https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html">GCC Vector Extensions</a> or equivalent on systems that support 128-bit SIMD and 256-bit SIMD operations.</p>
+<p>Other assembly language and SIMD speed-ups are definitely possible, such as <a href="https://github.com/kste/skinny_avx">this</a> blindingly fast AVX2 implementation, and may be added later.</p>
 <p>This implementation is designed to have constant-time and constant-cache behaviour. In particular, there are no lookup tables for the S-boxes.</p>
 <p>Skinny-C is distributed under the terms of the MIT license.</p>
 <h1><a class="anchor" id="main_build"></a>
 Building Skinny-C</h1>
-<p>To build the code with gcc and gmake, simply type "make". Then type "make check" to run the test cases. Some modifications may be needed to the Makefile's to build on non-GNU platforms or with other compilers.</p>
+<p>To build the code with gcc and gmake, simply type "make". Then type "make check" to run the test cases and "make perf" to run the performance tests. Some modifications may be needed to the Makefile's and the "options.mak" file to build on non-GNU platforms or with other compilers.</p>
+<p>The definitions in the "options.mak" file can be used to tune the compiler options for enabling various features like SSE2, NEON, or AVX2 instructions. The files "src/skinny-internal.h" and "src/skinny-internal.c" also contain definitions that can be tuned to get better performance on your platform.</p>
+<p>I mainly use gcc on a Linux x86-64 platform. There is some support in the code for compiling with clang. Patches are welcome to tune the library for other platforms and compilers.</p>
 <h1><a class="anchor" id="main_using"></a>
 Using Skinny-C</h1>
 <p>The API for Skinny-C is described on <a class="el" href="using_skinny.html">this page</a>.</p>
@@ -108,7 +111,7 @@ Contact</h1>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 12 2017 14:08:38 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 14 2017 18:25:30 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
