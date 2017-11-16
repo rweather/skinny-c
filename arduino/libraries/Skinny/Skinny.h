@@ -24,5 +24,6 @@
 #define SKINNY_API_H
 
 #include "Crypto.h"
+#include "Skinny128.h"
 
 #endif

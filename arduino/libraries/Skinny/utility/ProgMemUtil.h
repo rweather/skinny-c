@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Southern Storm Software, Pty Ltd.
+ * Copyright (C) 2015 Southern Storm Software, Pty Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,17 +20,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <Skinny.h>
+#ifndef CRYPTO_PROGMEMUTIL_H
+#define CRYPTO_PROGMEMUTIL_H
 
-void setup()
-{
-    Serial.begin(9600);
+#if defined(__AVR__)
+#include <avr/pgmspace.h>
+#define pgm_read_qword(x)   \
+    (__extension__ ({ \
+        const uint32_t *_temp = (const uint32_t *)(x); \
+        ((uint64_t)pgm_read_dword(_temp)) | \
+        (((uint64_t)pgm_read_dword(_temp + 1)) << 32); \
+    }))
+#elif defined(ESP8266)
+#include <pgmspace.h>
+#define pgm_read_qword(x)   \
+    (__extension__ ({ \
+        const uint32_t *_temp = (const uint32_t *)(x); \
+        ((uint64_t)pgm_read_dword(_temp)) | \
+        (((uint64_t)pgm_read_dword(_temp + 1)) << 32); \
+    }))
+#else
+#include <string.h>
+#define PROGMEM
+#define pgm_read_byte(x)    (*(x))
+#define pgm_read_word(x)    (*(x))
+#define pgm_read_dword(x)   (*(x))
+#define pgm_read_qword(x)   (*(x))
+#define memcpy_P(d,s,l)     memcpy((d), (s), (l))
+#endif
 
-    Serial.println();
-
-    // TODO
-}
-
-void loop()
-{
-}
+#endif
