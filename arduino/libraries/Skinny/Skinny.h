@@ -25,5 +25,6 @@
 
 #include "Crypto.h"
 #include "Skinny128.h"
+#include "Skinny64.h"
 
 #endif
