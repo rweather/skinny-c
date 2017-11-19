@@ -20,12 +20,37 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SKINNY_API_H
-#define SKINNY_API_H
+#ifndef CRYPTO_MANTIS8_h
+#define CRYPTO_MANTIS8_h
 
-#include "Crypto.h"
-#include "Skinny128.h"
-#include "Skinny64.h"
-#include "Mantis8.h"
+#include "BlockCipher.h"
+
+class Mantis8 : public BlockCipher
+{
+public:
+    Mantis8();
+    virtual ~Mantis8();
+
+    size_t blockSize() const;
+    size_t keySize() const;
+
+    bool setKey(const uint8_t *key, size_t len);
+    bool setTweak(const uint8_t *tweak, size_t len);
+
+    void swapModes();
+
+    void encryptBlock(uint8_t *output, const uint8_t *input);
+    void decryptBlock(uint8_t *output, const uint8_t *input);
+
+    void clear();
+
+private:
+    struct {
+        uint32_t k0[2];
+        uint32_t k0prime[2];
+        uint32_t k1[2];
+        uint32_t tweak[2];
+    } st;
+};
 
 #endif

@@ -191,7 +191,7 @@ static uint8_t const sbox_inv[256] PROGMEM = {
     "add r30," reg "\n" \
     "adc r31,__zero_reg__\n" \
     "adc r24,__zero_reg__\n" \
-    "out %5,r24\n"
+    "out %5,r24\n" \
     "elpm r0,Z\n" \
     "sub r30," reg "\n" \
     "sbc r31,__zero_reg__\n" \
