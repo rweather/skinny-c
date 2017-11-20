@@ -212,7 +212,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="preprocessor"></span>    <span class="keywordtype">unsigned</span> posn;</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="keywordflow">for</span> (posn = 0; posn &lt; 16; ++posn) {</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        ((uint8_t *)output)[posn] = ((<span class="keyword">const</span> uint8_t *)input1)[posn] ^</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                                    ((<span class="keyword">const</span> uint8_t *)input2)[size];</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                                    ((<span class="keyword">const</span> uint8_t *)input2)[posn];</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    }</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="preprocessor"></span>}</div>
@@ -233,7 +233,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;<span class="preprocessor"></span>    <span class="keywordtype">unsigned</span> posn;</div>
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordflow">for</span> (posn = 0; posn &lt; 8; ++posn) {</div>
 <div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        ((uint8_t *)output)[posn] = ((<span class="keyword">const</span> uint8_t *)input1)[posn] ^</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                                    ((<span class="keyword">const</span> uint8_t *)input2)[size];</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                                    ((<span class="keyword">const</span> uint8_t *)input2)[posn];</div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    }</div>
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="preprocessor"></span>}</div>
@@ -262,122 +262,75 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    }</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;}</div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">/* Note: For Skinny-64 and Mantis the four cells in a 16-bit row are stored</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="comment">   as 0x3210 in memory where the least significant nibble is cell 0.  However,</span></div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="comment">   the nibbles in the serialized representation are stored reversed as</span></div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment">   0x01 0x23.  We correct for this when reading and writing. */</span></div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;STATIC_INLINE uint8_t skinny_swap_byte(uint8_t value)</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;{</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <span class="keywordflow">return</span> (value &gt;&gt; 4) | (value &lt;&lt; 4);</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;}</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;STATIC_INLINE uint16_t skinny_swap_word16(uint16_t value)</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;{</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    <span class="keywordflow">return</span> ((value &gt;&gt; 4) &amp; 0x0F0FU) | ((value &lt;&lt; 4) &amp; 0xF0F0U);</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;}</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;STATIC_INLINE uint32_t skinny_swap_word32(uint32_t value)</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;{</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordflow">return</span> ((value &gt;&gt; 4) &amp; 0x0F0F0F0FU) | ((value &lt;&lt; 4) &amp; 0xF0F0F0F0U);</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;}</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;STATIC_INLINE uint64_t skinny_swap_word64(uint64_t value)</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;{</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    <span class="keywordflow">return</span> ((value &gt;&gt; 4) &amp; 0x0F0F0F0F0F0F0F0FULL) |</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;           ((value &lt;&lt; 4) &amp; 0xF0F0F0F0F0F0F0F0ULL);</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;}</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="preprocessor">#define READ_BYTE(ptr,offset) \</span></div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="preprocessor">    ((uint32_t)(((const uint8_t *)(ptr))[(offset)]))</span></div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;<span class="preprocessor">#define READ_WORD16(ptr,offset) \</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="preprocessor">    (((uint16_t)(((const uint8_t *)(ptr))[(offset)])) | \</span></div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="preprocessor">    (((uint16_t)(((const uint8_t *)(ptr))[(offset) + 1])) &lt;&lt; 8))</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="preprocessor">#define READ_BYTE(ptr,offset) \</span></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="preprocessor">    ((uint32_t)(((const uint8_t *)(ptr))[(offset)]))</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="preprocessor">#define READ_WORD16(ptr,offset) \</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="preprocessor">    (((uint16_t)(((const uint8_t *)(ptr))[(offset)])) | \</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="preprocessor">    (((uint16_t)(((const uint8_t *)(ptr))[(offset) + 1])) &lt;&lt; 8))</span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="preprocessor">#define READ_WORD32(ptr,offset) \</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset)])) | \</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 1])) &lt;&lt; 8) | \</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 2])) &lt;&lt; 16) | \</span></div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 3])) &lt;&lt; 24))</span></div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="preprocessor">#define READ_WORD64(ptr,offset) \</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset)])) | \</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 1])) &lt;&lt; 8) | \</span></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 2])) &lt;&lt; 16) | \</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 3])) &lt;&lt; 24) | \</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 4])) &lt;&lt; 32) | \</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 5])) &lt;&lt; 40) | \</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 6])) &lt;&lt; 48) | \</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 7])) &lt;&lt; 56))</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="preprocessor">#define WRITE_WORD16(ptr,offset,value) \</span></div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="preprocessor">    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) &gt;&gt; 8)))</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="preprocessor">#define WRITE_WORD32(ptr,offset,value) \</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;<span class="preprocessor">    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \</span></div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) &gt;&gt; 8)), \</span></div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 2] = (uint8_t)((value) &gt;&gt; 16)), \</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 3] = (uint8_t)((value) &gt;&gt; 24)))</span></div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="preprocessor">#define READ_WORD32(ptr,offset) \</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset)])) | \</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 1])) &lt;&lt; 8) | \</span></div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 2])) &lt;&lt; 16) | \</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="preprocessor">    (((uint32_t)(((const uint8_t *)(ptr))[(offset) + 3])) &lt;&lt; 24))</span></div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;<span class="preprocessor">#define READ_WORD64(ptr,offset) \</span></div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset)])) | \</span></div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 1])) &lt;&lt; 8) | \</span></div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 2])) &lt;&lt; 16) | \</span></div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 3])) &lt;&lt; 24) | \</span></div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 4])) &lt;&lt; 32) | \</span></div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 5])) &lt;&lt; 40) | \</span></div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 6])) &lt;&lt; 48) | \</span></div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="preprocessor">    (((uint64_t)(((const uint8_t *)(ptr))[(offset) + 7])) &lt;&lt; 56))</span></div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;<span class="preprocessor">#define WRITE_WORD16(ptr,offset,value) \</span></div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;<span class="preprocessor">    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \</span></div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) &gt;&gt; 8)))</span></div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="preprocessor">#define WRITE_WORD32(ptr,offset,value) \</span></div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;<span class="preprocessor">    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \</span></div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) &gt;&gt; 8)), \</span></div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 2] = (uint8_t)((value) &gt;&gt; 16)), \</span></div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 3] = (uint8_t)((value) &gt;&gt; 24)))</span></div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;<span class="preprocessor">#define WRITE_WORD64(ptr,offset,value) \</span></div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;<span class="preprocessor">    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \</span></div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) &gt;&gt; 8)), \</span></div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 2] = (uint8_t)((value) &gt;&gt; 16)), \</span></div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 3] = (uint8_t)((value) &gt;&gt; 24)), \</span></div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 4] = (uint8_t)((value) &gt;&gt; 32)), \</span></div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 5] = (uint8_t)((value) &gt;&gt; 40)), \</span></div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 6] = (uint8_t)((value) &gt;&gt; 48)), \</span></div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 7] = (uint8_t)((value) &gt;&gt; 56)))</span></div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;<span class="preprocessor">#define READ_BYTE_SWAPPED(ptr,offset) \</span></div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;<span class="preprocessor">    (skinny_swap_byte(READ_BYTE((ptr), (offset))))</span></div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;<span class="preprocessor">#define READ_WORD16_SWAPPED(ptr,offset) \</span></div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;<span class="preprocessor">    (skinny_swap_word16(READ_WORD16((ptr), (offset))))</span></div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;<span class="preprocessor">#define READ_WORD32_SWAPPED(ptr,offset) \</span></div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;<span class="preprocessor">    (skinny_swap_word32(READ_WORD32((ptr), (offset))))</span></div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="preprocessor">#define READ_WORD64_SWAPPED(ptr,offset) \</span></div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="preprocessor">    (skinny_swap_word64(READ_WORD64((ptr), (offset))))</span></div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="preprocessor">#define WRITE_WORD16_SWAPPED(ptr,offset,value) \</span></div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;<span class="preprocessor">    (WRITE_WORD16((ptr), (offset), skinny_swap_word16((value))))</span></div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;<span class="preprocessor">#define WRITE_WORD32_SWAPPED(ptr,offset,value) \</span></div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;<span class="preprocessor">    (WRITE_WORD32((ptr), (offset), skinny_swap_word32((value))))</span></div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="preprocessor">#define WRITE_WORD64_SWAPPED(ptr,offset,value) \</span></div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;<span class="preprocessor">    (WRITE_WORD64((ptr), (offset), skinny_swap_word64((value))))</span></div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;STATIC_INLINE <span class="keywordtype">void</span> skinny_cleanse(<span class="keywordtype">void</span> *ptr, <span class="keywordtype">size_t</span> size)</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;{</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="preprocessor">#if defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 201112L</span></div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="preprocessor"></span>    <span class="comment">/* C11 added memset_s() explicitly for the memory cleanse use case */</span></div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    memset_s(ptr, 0, size);</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;<span class="preprocessor"></span>    <span class="comment">/* We don&#39;t have memset_s(), so do the best we can to cleanse memory */</span></div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;    uint8_t <span class="keyword">volatile</span> *p = (uint8_t <span class="keyword">volatile</span> *)ptr;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    <span class="keywordflow">while</span> (size &gt; 0) {</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        *p++ = 0;</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        --size;</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    }</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;<span class="preprocessor"></span>}</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;<span class="comment">/* Determine if this platform supports 128-bit SIMD vector operations */</span></div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="keywordtype">int</span> _skinny_has_vec128(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;<span class="comment">/* Determine if this platform supports 256-bit SIMD vector operations */</span></div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;<span class="keywordtype">int</span> _skinny_has_vec256(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_INTERNAL_H */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="preprocessor">#define WRITE_WORD64(ptr,offset,value) \</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="preprocessor">    ((((uint8_t *)(ptr))[(offset)] = (uint8_t)(value)), \</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 1] = (uint8_t)((value) &gt;&gt; 8)), \</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 2] = (uint8_t)((value) &gt;&gt; 16)), \</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 3] = (uint8_t)((value) &gt;&gt; 24)), \</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 4] = (uint8_t)((value) &gt;&gt; 32)), \</span></div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 5] = (uint8_t)((value) &gt;&gt; 40)), \</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 6] = (uint8_t)((value) &gt;&gt; 48)), \</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="preprocessor">     (((uint8_t *)(ptr))[(offset) + 7] = (uint8_t)((value) &gt;&gt; 56)))</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;STATIC_INLINE <span class="keywordtype">void</span> skinny_cleanse(<span class="keywordtype">void</span> *ptr, <span class="keywordtype">size_t</span> size)</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;{</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="preprocessor">#if defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 201112L</span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="preprocessor"></span>    <span class="comment">/* C11 added memset_s() explicitly for the memory cleanse use case */</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    memset_s(ptr, 0, size);</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;<span class="preprocessor"></span>    <span class="comment">/* We don&#39;t have memset_s(), so do the best we can to cleanse memory */</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    uint8_t <span class="keyword">volatile</span> *p = (uint8_t <span class="keyword">volatile</span> *)ptr;</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    <span class="keywordflow">while</span> (size &gt; 0) {</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;        *p++ = 0;</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        --size;</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    }</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;<span class="preprocessor"></span>}</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;<span class="comment">/* Determine if this platform supports 128-bit SIMD vector operations */</span></div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;<span class="keywordtype">int</span> _skinny_has_vec128(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;<span class="comment">/* Determine if this platform supports 256-bit SIMD vector operations */</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;<span class="keywordtype">int</span> _skinny_has_vec256(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_INTERNAL_H */</span><span class="preprocessor"></span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Nov 14 2017 18:25:30 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Nov 20 2017 19:03:49 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

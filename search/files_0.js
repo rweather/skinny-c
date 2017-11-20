@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mainpage_2edox',['mainpage.dox',['../mainpage_8dox.html',1,'']]]
+  ['arduino_2edox',['arduino.dox',['../arduino_8dox.html',1,'']]]
 ];

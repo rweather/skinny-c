@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['ecounter',['ecounter',['../structMantisCTRCtx__t.html#a2403a2d8c9c38150742b3ac7477b722f',1,'MantisCTRCtx_t::ecounter()'],['../structSkinny128CTRCtx__t.html#adb88fff1b094232fa3bfbada4a79737c',1,'Skinny128CTRCtx_t::ecounter()'],['../structSkinny64CTRCtx__t.html#a773ffa537d3387b076e35de142a7bb80',1,'Skinny64CTRCtx_t::ecounter()']]]
+  ['blockcipher',['BlockCipher',['../classBlockCipher.html',1,'BlockCipher'],['../classBlockCipher.html#adc3d7cba116cbea9ad017f4cded6fe2f',1,'BlockCipher::BlockCipher()']]],
+  ['blocksize',['blockSize',['../classBlockCipher.html#a7059a310487c128db034b0ce0ad425a0',1,'BlockCipher::blockSize()'],['../classMantis8.html#af424c21a3c1327ff181f61fdc98eb66a',1,'Mantis8::blockSize()'],['../classSkinny128.html#a6d862fa4ad7f6e9110f8ce37cbfaa729',1,'Skinny128::blockSize()'],['../classSkinny64.html#a3ee0b46cb0ac7c0a20dcc0a6b071cec9',1,'Skinny64::blockSize()']]]
 ];

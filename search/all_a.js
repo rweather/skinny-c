@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['vtable',['vtable',['../structMantisCTR__t.html#ad538320d406ac5b88aee2374c87411f3',1,'MantisCTR_t::vtable()'],['../structSkinny128CTR__t.html#a9c89b1f92496392e22562dac8545b562',1,'Skinny128CTR_t::vtable()'],['../structSkinny64CTR__t.html#a5e819ab6b6741054dd220304053b2097',1,'Skinny64CTR_t::vtable()']]]
+  ['resettweak',['resetTweak',['../classSkinny128__Tweaked.html#a96d6c22edf5fd9fb5b28c51811a9d06a',1,'Skinny128_Tweaked::resetTweak()'],['../classSkinny64__Tweaked.html#acc6d202bd942c32acde5ce897230004a',1,'Skinny64_Tweaked::resetTweak()']]],
+  ['rounds',['rounds',['../structMantisKey__t.html#a3c78972dac254635c537588a9635ba65',1,'MantisKey_t::rounds()'],['../structSkinny128Key__t.html#a8ee9f0d085bf1cb33eb5f740b36855de',1,'Skinny128Key_t::rounds()'],['../structSkinny64Key__t.html#a19a99880e115f759b45fbc0426dbd099',1,'Skinny64Key_t::rounds()']]],
+  ['row',['row',['../unionMantisCells__t.html#adbb824650629d532c7a524ed0a08db10',1,'MantisCells_t::row()'],['../unionSkinny128Cells__t.html#a506def89005e2a9712aed2a69714a150',1,'Skinny128Cells_t::row()'],['../unionSkinny128HalfCells__t.html#a8d652082605ec428f1757d9c18cd7657',1,'Skinny128HalfCells_t::row()'],['../unionSkinny64Cells__t.html#aaece33266902f2d5b094935ee2632f12',1,'Skinny64Cells_t::row()'],['../unionSkinny64HalfCells__t.html#ad413932230a0d13d3a8b56cc24aa7912',1,'Skinny64HalfCells_t::row()']]]
 ];

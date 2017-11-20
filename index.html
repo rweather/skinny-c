@@ -81,7 +81,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="textblock"><p>The SKINNY family of tweakable block ciphers is intended for lightweight implementation in hardware and software, <a href="https://eprint.iacr.org/2016/660.pdf">paper</a>.</p>
 <p>The algorithm authors' <a href="https://sites.google.com/site/skinnycipher">web site</a> provides a <a href="https://sites.google.com/site/skinnycipher/downloads/skinny_reference.c">refererence implementation</a> in C, but it isn't terribly efficient - it is intended to be <em>correct</em> to make the algorithm easier to analyse. And that's OK.</p>
-<p>The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a> provides an alternative implementation in ISO C99 that is designed for efficient operation on 32-bit and 64-bit platforms. Alternative backends for CTR mode are also provided that can make use of <a href="https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html">GCC Vector Extensions</a> or equivalent on systems that support 128-bit SIMD and 256-bit SIMD operations.</p>
+<p>The Skinny-C <a href="https://github.com/rweather/skinny-c">repository</a> provides an alternative implementation in ISO C99 that is designed for efficient operation on 32-bit and 64-bit platforms. Alternative backends for <a class="el" href="classCTR.html" title="Implementation of the Counter (CTR) mode for 128-bit block ciphers. ">CTR</a> mode are also provided that can make use of <a href="https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html">GCC Vector Extensions</a> or equivalent on systems that support 128-bit SIMD and 256-bit SIMD operations.</p>
 <p>Other assembly language and SIMD speed-ups are definitely possible, such as <a href="https://github.com/kste/skinny_avx">this</a> blindingly fast AVX2 implementation, and may be added later.</p>
 <p>This implementation is designed to have constant-time and constant-cache behaviour. In particular, there are no lookup tables for the S-boxes.</p>
 <p>Skinny-C is distributed under the terms of the MIT license.</p>
@@ -96,7 +96,7 @@ Using Skinny-C</h1>
 <h1><a class="anchor" id="main_examples"></a>
 Examples</h1>
 <p>There are two example programs, "skinny-ctr" and "skinny-tweak", in the "examples" directory of the repository. See the README.md file in that directory for information on using the examples.</p>
-<p>The "skinny-ctr" program is a simple example of encrypting and decrypting files using SKINNY in CTR mode. Incrementing counter values are encrypted for each block and XOR'ed with the plaintext to create the ciphertext.</p>
+<p>The "skinny-ctr" program is a simple example of encrypting and decrypting files using SKINNY in <a class="el" href="classCTR.html" title="Implementation of the Counter (CTR) mode for 128-bit block ciphers. ">CTR</a> mode. Incrementing counter values are encrypted for each block and XOR'ed with the plaintext to create the ciphertext.</p>
 <p>The "skinny-tweak" program is similar to "skinny-ctr" except that it increments the tweak each block and encrypts the plaintext directly using the key and tweak. This is intended as an example of using SKINNY as a true tweakable block cipher, rather than a recommended method to use SKINNY in a realistic application.</p>
 <h1><a class="anchor" id="main_apiref"></a>
 API Reference</h1>
@@ -105,13 +105,16 @@ API Reference</h1>
 <li><a class="el" href="group__skinny64.html">Skinny-64 API</a> </li>
 <li><a class="el" href="group__mantis.html">Mantis API</a></li>
 </ul>
+<h1><a class="anchor" id="main_arduino"></a>
+Arduino Version</h1>
+<p>The Skinny-C repository contains a cut-down implementation of Skinny-64, Skinny-128, and Mantis-8 for Arduino devices. More information is on <a class="el" href="skinny_arduino.html">this page</a>.</p>
 <h1><a class="anchor" id="main_contact"></a>
 Contact</h1>
 <p>For more information on this code, to report bugs, or to suggest improvements, please contact the author Rhys Weatherley via <a href="#" onclick="location.href='mai'+'lto:'+'rhy'+'s.'+'wea'+'th'+'erl'+'ey'+'@gm'+'ai'+'l.c'+'om'; return false;">email</a>. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Nov 14 2017 18:25:30 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Nov 20 2017 19:03:49 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
