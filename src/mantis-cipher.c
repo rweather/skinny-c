@@ -30,22 +30,14 @@
 
 /* Swap the bits in an RC constant to convert into host-endian */
 #define RC(x) \
-    (((((uint64_t)((x) >> 60)) & 0x0F)) | \
-     ((((uint64_t)((x) >> 56)) & 0x0F) << 4) | \
-     ((((uint64_t)((x) >> 52)) & 0x0F) << 8) | \
-     ((((uint64_t)((x) >> 48)) & 0x0F) << 12) | \
-     ((((uint64_t)((x) >> 44)) & 0x0F) << 16) | \
-     ((((uint64_t)((x) >> 40)) & 0x0F) << 20) | \
-     ((((uint64_t)((x) >> 36)) & 0x0F) << 24) | \
-     ((((uint64_t)((x) >> 32)) & 0x0F) << 28) | \
-     ((((uint64_t)((x) >> 28)) & 0x0F) << 32) | \
-     ((((uint64_t)((x) >> 24)) & 0x0F) << 36) | \
-     ((((uint64_t)((x) >> 20)) & 0x0F) << 40) | \
-     ((((uint64_t)((x) >> 16)) & 0x0F) << 44) | \
-     ((((uint64_t)((x) >> 12)) & 0x0F) << 48) | \
-     ((((uint64_t)((x) >>  8)) & 0x0F) << 52) | \
-     ((((uint64_t)((x) >>  4)) & 0x0F) << 56) | \
-     ((((uint64_t)((x)      )) & 0x0F) << 60))
+    (((((uint64_t)((x) >> 56)) & 0xFF)) | \
+     ((((uint64_t)((x) >> 48)) & 0xFF) <<  8) | \
+     ((((uint64_t)((x) >> 40)) & 0xFF) << 16) | \
+     ((((uint64_t)((x) >> 32)) & 0xFF) << 24) | \
+     ((((uint64_t)((x) >> 24)) & 0xFF) << 32) | \
+     ((((uint64_t)((x) >> 16)) & 0xFF) << 40) | \
+     ((((uint64_t)((x) >>  8)) & 0xFF) << 48) | \
+     ((((uint64_t)((x)      )) & 0xFF) << 56))
 
 /* Alpha constant for adjusting k1 for the inverse rounds */
 #define ALPHA      (RC(0x243F6A8885A308D3ULL))
@@ -69,14 +61,10 @@ static uint64_t const rc[MANTIS_MAX_ROUNDS] = {
 
 /* Extract the 32 bits for a row from a 64-bit round constant */
 #define RC_EXTRACT_ROW(x,shift) \
-    (((((uint32_t)((x) >> ((shift) + 28))) & 0x0F)) | \
-     ((((uint32_t)((x) >> ((shift) + 24))) & 0x0F) << 4) | \
-     ((((uint32_t)((x) >> ((shift) + 20))) & 0x0F) << 8) | \
-     ((((uint32_t)((x) >> ((shift) + 16))) & 0x0F) << 12) | \
-     ((((uint32_t)((x) >> ((shift) + 12))) & 0x0F) << 16) | \
-     ((((uint32_t)((x) >> ((shift) +  8))) & 0x0F) << 20) | \
-     ((((uint32_t)((x) >> ((shift) +  4))) & 0x0F) << 24) | \
-     ((((uint32_t)((x) >> ((shift))))      & 0x0F) << 28))
+    (((((uint32_t)((x) >> ((shift) + 24))) & 0xFF)) | \
+     ((((uint32_t)((x) >> ((shift) + 16))) & 0xFF) <<  8) | \
+     ((((uint32_t)((x) >> ((shift) +  8))) & 0xFF) << 16) | \
+     ((((uint32_t)((x) >> ((shift))))      & 0xFF) << 24))
 
 /* Extract the rows from a 64-bit round constant */
 #define RC(x)    \
@@ -106,10 +94,8 @@ static uint32_t const rc[MANTIS_MAX_ROUNDS][2] = {
 
 /* Extract the 16 bits for a row from a 64-bit round constant */
 #define RC_EXTRACT_ROW(x,shift) \
-    (((((uint16_t)((x) >> ((shift) + 12))) & 0x0F)) | \
-     ((((uint16_t)((x) >> ((shift) +  8))) & 0x0F) << 4) | \
-     ((((uint16_t)((x) >> ((shift) +  4))) & 0x0F) << 8) | \
-     ((((uint16_t)((x) >> ((shift))))      & 0x0F) << 12))
+    (((((uint16_t)((x) >> ((shift) + 8))) & 0xFF)) | \
+     ((((uint16_t)((x) >> ((shift))))     & 0xFF) << 8))
 
 /* Extract the rows from a 64-bit round constant */
 #define RC(x)    \
@@ -141,13 +127,13 @@ STATIC_INLINE void mantis_unpack_block
     (MantisCells_t *block, const uint8_t *buf, unsigned offset)
 {
 #if SKINNY_LITTLE_ENDIAN
-    block->lrow[0] = READ_WORD32_SWAPPED(buf, offset);
-    block->lrow[1] = READ_WORD32_SWAPPED(buf, offset + 4);
+    block->lrow[0] = READ_WORD32(buf, offset);
+    block->lrow[1] = READ_WORD32(buf, offset + 4);
 #else
-    block->row[0] = READ_WORD16_SWAPPED(buf, offset);
-    block->row[1] = READ_WORD16_SWAPPED(buf, offset + 2);
-    block->row[2] = READ_WORD16_SWAPPED(buf, offset + 4);
-    block->row[3] = READ_WORD16_SWAPPED(buf, offset + 6);
+    block->row[0] = READ_WORD16(buf, offset);
+    block->row[1] = READ_WORD16(buf, offset + 2);
+    block->row[2] = READ_WORD16(buf, offset + 4);
+    block->row[3] = READ_WORD16(buf, offset + 6);
 #endif
 }
 
@@ -318,12 +304,13 @@ STATIC_INLINE void mantis_update_tweak(MantisCells_t *tweak)
     uint16_t row3 = tweak->row[3];
     tweak->row[1] = tweak->row[0];
     tweak->row[3] = tweak->row[2];
-    tweak->row[0] = ((row1 >>  8) & 0x000FU) |
-                     (row1        & 0x00F0U) |
+    tweak->row[0] = ((row1 >>  8) & 0x00F0U) |
+                     (row1        & 0x000FU) |
                      (row3        & 0xFF00U);
-    tweak->row[2] = ((row1 >> 12) & 0x000FU) |
-                    ((row1 << 12) & 0xF000U) |
-                    ((row3 <<  4) & 0x0FF0U);
+    tweak->row[2] = ((row1 <<  4) & 0x0F00U) |
+                    ((row1 >>  4) & 0x00F0U) |
+                    ((row3 >>  4) & 0x000FU) |
+                    ((row3 << 12) & 0xF000U);
 }
 
 STATIC_INLINE void mantis_update_tweak_inverse(MantisCells_t *tweak)
@@ -333,12 +320,13 @@ STATIC_INLINE void mantis_update_tweak_inverse(MantisCells_t *tweak)
     uint16_t row2 = tweak->row[2];
     tweak->row[0] = tweak->row[1];
     tweak->row[2] = tweak->row[3];
-    tweak->row[1] = ((row2 >> 12) & 0x000FU) |
-                    ((row2 << 12) & 0xF000U) |
-                     (row0        & 0x00F0U) |
-                    ((row0 <<  8) & 0x0F00U);
+    tweak->row[1] = ((row2 >>  4) & 0x00F0U) |
+                    ((row2 <<  4) & 0x0F00U) |
+                     (row0        & 0x000FU) |
+                    ((row0 <<  8) & 0xF000U);
     tweak->row[3] =  (row0        & 0xFF00U) |
-                    ((row2 >>  4) & 0x00FFU);
+                    ((row2 <<  4) & 0x00F0U) |
+                    ((row2 >> 12) & 0x000FU);
 }
 
 STATIC_INLINE void mantis_shift_rows(MantisCells_t *state)
@@ -348,22 +336,22 @@ STATIC_INLINE void mantis_shift_rows(MantisCells_t *state)
     uint16_t row1 = state->row[1];
     uint16_t row2 = state->row[2];
     uint16_t row3 = state->row[3];
-    state->row[0] =  (row0        & 0x000FU) |
-                     (row1        & 0x0F00U) |
-                    ((row2 >>  8) & 0x00F0U) |
-                    ((row3 <<  8) & 0xF000U);
-    state->row[1] =  (row0        & 0x00F0U) |
+    state->row[0] =  (row0        & 0x00F0U) |
                      (row1        & 0xF000U) |
                     ((row2 >>  8) & 0x000FU) |
                     ((row3 <<  8) & 0x0F00U);
-    state->row[2] = ((row0 >>  4) & 0x0F00U) |
-                    ((row1 >>  4) & 0x000FU) |
-                    ((row2 << 12) & 0xF000U) |
-                    ((row3 >>  4) & 0x00F0U);
-    state->row[3] = ((row0 <<  4) & 0xF000U) |
+    state->row[1] =  (row0        & 0x000FU) |
+                     (row1        & 0x0F00U) |
+                    ((row2 >>  8) & 0x00F0U) |
+                    ((row3 <<  8) & 0xF000U);
+    state->row[2] = ((row0 <<  4) & 0xF000U) |
                     ((row1 <<  4) & 0x00F0U) |
                     ((row2 <<  4) & 0x0F00U) |
                     ((row3 >> 12) & 0x000FU);
+    state->row[3] = ((row0 >>  4) & 0x0F00U) |
+                    ((row1 >>  4) & 0x000FU) |
+                    ((row2 << 12) & 0xF000U) |
+                    ((row3 >>  4) & 0x00F0U);
 }
 
 STATIC_INLINE void mantis_shift_rows_inverse(MantisCells_t *state)
@@ -373,22 +361,22 @@ STATIC_INLINE void mantis_shift_rows_inverse(MantisCells_t *state)
     uint16_t row1 = state->row[1];
     uint16_t row2 = state->row[2];
     uint16_t row3 = state->row[3];
-    state->row[0] =  (row0        & 0x000FU) |
-                     (row1        & 0x00F0U) |
-                    ((row2 <<  4) & 0xF000U) |
-                    ((row3 >>  4) & 0x0F00U);
-    state->row[1] =  (row0        & 0x0F00U) |
-                     (row1        & 0xF000U) |
-                    ((row2 <<  4) & 0x00F0U) |
-                    ((row3 >>  4) & 0x000FU);
-    state->row[2] = ((row0 <<  8) & 0xF000U) |
-                    ((row1 <<  8) & 0x0F00U) |
-                    ((row2 >> 12) & 0x000FU) |
-                    ((row3 >>  4) & 0x00F0U);
-    state->row[3] = ((row0 >>  8) & 0x00F0U) |
-                    ((row1 >>  8) & 0x000FU) |
-                    ((row2 <<  4) & 0x0F00U) |
-                    ((row3 << 12) & 0xF000U);
+    state->row[0] =  (row0        & 0x00F0U) |
+                     (row1        & 0x000FU) |
+                    ((row2 >>  4) & 0x0F00U) |
+                    ((row3 <<  4) & 0xF000U);
+    state->row[1] =  (row0        & 0xF000U) |
+                     (row1        & 0x0F00U) |
+                    ((row2 >>  4) & 0x000FU) |
+                    ((row3 <<  4) & 0x00F0U);
+    state->row[2] = ((row0 <<  8) & 0x0F00U) |
+                    ((row1 <<  8) & 0xF000U) |
+                    ((row2 >>  4) & 0x00F0U) |
+                    ((row3 >> 12) & 0x000FU);
+    state->row[3] = ((row0 >>  8) & 0x000FU) |
+                    ((row1 >>  8) & 0x00F0U) |
+                    ((row2 << 12) & 0xF000U) |
+                    ((row3 <<  4) & 0x0F00U);
 }
 
 STATIC_INLINE void mantis_mix_columns(MantisCells_t *state)
@@ -419,15 +407,15 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
 
     /* Read the input buffer and convert little-endian to host-endian */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-    state.llrow = READ_WORD64_SWAPPED(input, 0);
+    state.llrow = READ_WORD64(input, 0);
 #elif SKINNY_LITTLE_ENDIAN
-    state.lrow[0] = READ_WORD32_SWAPPED(input, 0);
-    state.lrow[1] = READ_WORD32_SWAPPED(input, 4);
+    state.lrow[0] = READ_WORD32(input, 0);
+    state.lrow[1] = READ_WORD32(input, 4);
 #else
-    state.row[0] = READ_WORD16_SWAPPED(input, 0);
-    state.row[1] = READ_WORD16_SWAPPED(input, 2);
-    state.row[2] = READ_WORD16_SWAPPED(input, 4);
-    state.row[3] = READ_WORD16_SWAPPED(input, 6);
+    state.row[0] = READ_WORD16(input, 0);
+    state.row[1] = READ_WORD16(input, 2);
+    state.row[2] = READ_WORD16(input, 4);
+    state.row[3] = READ_WORD16(input, 6);
 #endif
 
     /* XOR the initial whitening key k0 with the state,
@@ -564,14 +552,14 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
 
     /* Convert host-endian back into little-endian in the output buffer */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-    WRITE_WORD64_SWAPPED(output, 0, state.llrow);
+    WRITE_WORD64(output, 0, state.llrow);
 #elif SKINNY_LITTLE_ENDIAN
-    WRITE_WORD32_SWAPPED(output, 0, state.lrow[0]);
-    WRITE_WORD32_SWAPPED(output, 4, state.lrow[1]);
+    WRITE_WORD32(output, 0, state.lrow[0]);
+    WRITE_WORD32(output, 4, state.lrow[1]);
 #else
-    WRITE_WORD16_SWAPPED(output, 0, state.row[0]);
-    WRITE_WORD16_SWAPPED(output, 2, state.row[1]);
-    WRITE_WORD16_SWAPPED(output, 4, state.row[2]);
-    WRITE_WORD16_SWAPPED(output, 6, state.row[3]);
+    WRITE_WORD16(output, 0, state.row[0]);
+    WRITE_WORD16(output, 2, state.row[1]);
+    WRITE_WORD16(output, 4, state.row[2]);
+    WRITE_WORD16(output, 6, state.row[3]);
 #endif
 }

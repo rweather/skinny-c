@@ -150,11 +150,6 @@ typedef union
 
 } MantisVectorCells_t;
 
-STATIC_INLINE MantisVector_t mantis_swap_nibbles(MantisVector_t value)
-{
-    return ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-}
-
 STATIC_INLINE MantisVector_t mantis_sbox(MantisVector_t d)
 {
     /*
@@ -185,12 +180,13 @@ STATIC_INLINE void mantis_update_tweak(MantisCells_t *tweak)
     uint16_t row3 = tweak->row[3];
     tweak->row[1] = tweak->row[0];
     tweak->row[3] = tweak->row[2];
-    tweak->row[0] = ((row1 >>  8) & 0x000FU) |
-                     (row1        & 0x00F0U) |
+    tweak->row[0] = ((row1 >>  8) & 0x00F0U) |
+                     (row1        & 0x000FU) |
                      (row3        & 0xFF00U);
-    tweak->row[2] = ((row1 >> 12) & 0x000FU) |
-                    ((row1 << 12) & 0xF000U) |
-                    ((row3 <<  4) & 0x0FF0U);
+    tweak->row[2] = ((row1 <<  4) & 0x0F00U) |
+                    ((row1 >>  4) & 0x00F0U) |
+                    ((row3 >>  4) & 0x000FU) |
+                    ((row3 << 12) & 0xF000U);
 }
 
 STATIC_INLINE void mantis_update_tweak_inverse(MantisCells_t *tweak)
@@ -200,12 +196,13 @@ STATIC_INLINE void mantis_update_tweak_inverse(MantisCells_t *tweak)
     uint16_t row2 = tweak->row[2];
     tweak->row[0] = tweak->row[1];
     tweak->row[2] = tweak->row[3];
-    tweak->row[1] = ((row2 >> 12) & 0x000FU) |
-                    ((row2 << 12) & 0xF000U) |
-                     (row0        & 0x00F0U) |
-                    ((row0 <<  8) & 0x0F00U);
+    tweak->row[1] = ((row2 >>  4) & 0x00F0U) |
+                    ((row2 <<  4) & 0x0F00U) |
+                     (row0        & 0x000FU) |
+                    ((row0 <<  8) & 0xF000U);
     tweak->row[3] =  (row0        & 0xFF00U) |
-                    ((row2 >>  4) & 0x00FFU);
+                    ((row2 <<  4) & 0x00F0U) |
+                    ((row2 >> 12) & 0x000FU);
 }
 
 STATIC_INLINE void mantis_shift_rows(MantisVectorCells_t *state)
@@ -215,22 +212,22 @@ STATIC_INLINE void mantis_shift_rows(MantisVectorCells_t *state)
     MantisVector_t row1 = state->row[1];
     MantisVector_t row2 = state->row[2];
     MantisVector_t row3 = state->row[3];
-    state->row[0] =  (row0        & 0x000FU) |
-                     (row1        & 0x0F00U) |
-                    ((row2 >>  8) & 0x00F0U) |
-                    ((row3 <<  8) & 0xF000U);
-    state->row[1] =  (row0        & 0x00F0U) |
+    state->row[0] =  (row0        & 0x00F0U) |
                      (row1        & 0xF000U) |
                     ((row2 >>  8) & 0x000FU) |
                     ((row3 <<  8) & 0x0F00U);
-    state->row[2] = ((row0 >>  4) & 0x0F00U) |
-                    ((row1 >>  4) & 0x000FU) |
-                    ((row2 << 12) & 0xF000U) |
-                    ((row3 >>  4) & 0x00F0U);
-    state->row[3] = ((row0 <<  4) & 0xF000U) |
+    state->row[1] =  (row0        & 0x000FU) |
+                     (row1        & 0x0F00U) |
+                    ((row2 >>  8) & 0x00F0U) |
+                    ((row3 <<  8) & 0xF000U);
+    state->row[2] = ((row0 <<  4) & 0xF000U) |
                     ((row1 <<  4) & 0x00F0U) |
                     ((row2 <<  4) & 0x0F00U) |
                     ((row3 >> 12) & 0x000FU);
+    state->row[3] = ((row0 >>  4) & 0x0F00U) |
+                    ((row1 >>  4) & 0x000FU) |
+                    ((row2 << 12) & 0xF000U) |
+                    ((row3 >>  4) & 0x00F0U);
 }
 
 STATIC_INLINE void mantis_shift_rows_inverse(MantisVectorCells_t *state)
@@ -240,22 +237,22 @@ STATIC_INLINE void mantis_shift_rows_inverse(MantisVectorCells_t *state)
     MantisVector_t row1 = state->row[1];
     MantisVector_t row2 = state->row[2];
     MantisVector_t row3 = state->row[3];
-    state->row[0] =  (row0        & 0x000FU) |
-                     (row1        & 0x00F0U) |
-                    ((row2 <<  4) & 0xF000U) |
-                    ((row3 >>  4) & 0x0F00U);
-    state->row[1] =  (row0        & 0x0F00U) |
-                     (row1        & 0xF000U) |
-                    ((row2 <<  4) & 0x00F0U) |
-                    ((row3 >>  4) & 0x000FU);
-    state->row[2] = ((row0 <<  8) & 0xF000U) |
-                    ((row1 <<  8) & 0x0F00U) |
-                    ((row2 >> 12) & 0x000FU) |
-                    ((row3 >>  4) & 0x00F0U);
-    state->row[3] = ((row0 >>  8) & 0x00F0U) |
-                    ((row1 >>  8) & 0x000FU) |
-                    ((row2 <<  4) & 0x0F00U) |
-                    ((row3 << 12) & 0xF000U);
+    state->row[0] =  (row0        & 0x00F0U) |
+                     (row1        & 0x000FU) |
+                    ((row2 >>  4) & 0x0F00U) |
+                    ((row3 <<  4) & 0xF000U);
+    state->row[1] =  (row0        & 0xF000U) |
+                     (row1        & 0x0F00U) |
+                    ((row2 >>  4) & 0x000FU) |
+                    ((row3 <<  4) & 0x00F0U);
+    state->row[2] = ((row0 <<  8) & 0x0F00U) |
+                    ((row1 <<  8) & 0xF000U) |
+                    ((row2 >>  4) & 0x00F0U) |
+                    ((row3 >> 12) & 0x000FU);
+    state->row[3] = ((row0 >>  8) & 0x000FU) |
+                    ((row1 >>  8) & 0x00F0U) |
+                    ((row2 << 12) & 0xF000U) |
+                    ((row3 <<  4) & 0x0F00U);
 }
 
 STATIC_INLINE void mantis_mix_columns(MantisVectorCells_t *state)
@@ -272,10 +269,8 @@ STATIC_INLINE void mantis_mix_columns(MantisVectorCells_t *state)
 
 /* Extract the 16 bits for a row from a 64-bit round constant */
 #define RC_EXTRACT_ROW(x,shift) \
-    (((((uint16_t)((x) >> ((shift) + 12))) & 0x0F)) | \
-     ((((uint16_t)((x) >> ((shift) +  8))) & 0x0F) << 4) | \
-     ((((uint16_t)((x) >> ((shift) +  4))) & 0x0F) << 8) | \
-     ((((uint16_t)((x) >> ((shift))))      & 0x0F) << 12))
+    (((((uint16_t)((x) >> ((shift) + 8))) & 0xFF)) | \
+     ((((uint16_t)((x) >> ((shift))))     & 0xFF) << 8))
 
 /* Extract the rows from a 64-bit round constant */
 #define RC(x)    \
@@ -347,12 +342,6 @@ static void mantis_ecb_encrypt_eight
          READ_WORD16(input, 46),
          READ_WORD16(input, 54),
          READ_WORD16(input, 62)};
-
-    /* Swap the nibbles in all rows */
-    state.row[0] = mantis_swap_nibbles(state.row[0]);
-    state.row[1] = mantis_swap_nibbles(state.row[1]);
-    state.row[2] = mantis_swap_nibbles(state.row[2]);
-    state.row[3] = mantis_swap_nibbles(state.row[3]);
 
     /* XOR the initial whitening key k0 with the state,
        together with k1 and the initial tweak value */
@@ -446,12 +435,6 @@ static void mantis_ecb_encrypt_eight
     state.row[1] ^= ks->k0prime.row[1] ^ k1.row[1] ^ tweak.row[1];
     state.row[2] ^= ks->k0prime.row[2] ^ k1.row[2] ^ tweak.row[2];
     state.row[3] ^= ks->k0prime.row[3] ^ k1.row[3] ^ tweak.row[3];
-
-    /* Swap the nibbles in all rows */
-    state.row[0] = mantis_swap_nibbles(state.row[0]);
-    state.row[1] = mantis_swap_nibbles(state.row[1]);
-    state.row[2] = mantis_swap_nibbles(state.row[2]);
-    state.row[3] = mantis_swap_nibbles(state.row[3]);
 
     /* Write the rows of all eight blocks back to memory */
     WRITE_WORD16(output,  0, state.row[0][0]);

@@ -161,18 +161,10 @@ static int skinny64_ctr_vec128_set_counter
     return 1;
 }
 
-STATIC_INLINE Skinny64Vector_t skinny64_swap_nibbles(Skinny64Vector_t value)
-{
-    return ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-}
-
 STATIC_INLINE Skinny64Vector_t skinny64_rotate_right
     (Skinny64Vector_t x, unsigned count)
 {
-    /* Note: we are rotating the cells right, which actually moves
-       the values up closer to the MSB.  That is, we do a left shift
-       on the word to rotate the cells in the word right */
-    return (x << count) | (x >> (16 - count));
+    return (x >> count) | (x << (16 - count));
 }
 
 #define SBOX_MIX(x)  \
@@ -242,12 +234,6 @@ static void skinny64_ecb_encrypt_eight
          READ_WORD16(input, 54),
          READ_WORD16(input, 62)};
 
-    /* Swap the nibbles in all rows */
-    row0 = skinny64_swap_nibbles(row0);
-    row1 = skinny64_swap_nibbles(row1);
-    row2 = skinny64_swap_nibbles(row2);
-    row3 = skinny64_swap_nibbles(row3);
-
     /* Perform all encryption rounds */
     schedule = ks->schedule;
     for (index = ks->rounds; index > 0; --index, ++schedule) {
@@ -260,7 +246,7 @@ static void skinny64_ecb_encrypt_eight
         /* Apply the subkey for this round */
         row0 ^= schedule->row[0];
         row1 ^= schedule->row[1];
-        row2 ^= 0x02;
+        row2 ^= 0x20;
 
         /* Shift the rows */
         row1 = skinny64_rotate_right(row1, 4);
@@ -276,12 +262,6 @@ static void skinny64_ecb_encrypt_eight
         row1 = row0;
         row0 = temp;
     }
-
-    /* Swap the nibbles in all rows */
-    row0 = skinny64_swap_nibbles(row0);
-    row1 = skinny64_swap_nibbles(row1);
-    row2 = skinny64_swap_nibbles(row2);
-    row3 = skinny64_swap_nibbles(row3);
 
     /* Write the rows of all eight blocks back to memory */
     WRITE_WORD16(output,  0, row0[0]);

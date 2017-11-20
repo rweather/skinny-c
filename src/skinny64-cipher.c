@@ -42,14 +42,14 @@ STATIC_INLINE void skinny64_permute_tk(Skinny64Cells_t *tk)
     uint16_t row3 = tk->row[3];
     tk->row[2] = tk->row[0];
     tk->row[3] = tk->row[1];
-    tk->row[0] = ((row2 >> 4) & 0x000FU) |
-                 ((row2 << 8) & 0x0F00U) |
-                 ((row3 >> 8) & 0x00F0U) |
-                 ((row3 << 8) & 0xF000U);
-    tk->row[1] = ((row2 >> 8) & 0x000FU) |
-                  (row2       & 0xF000U) |
-                 ((row3 >> 4) & 0x00F0U) |
-                 ((row3 << 8) & 0x0F00U);
+    tk->row[0] = ((row2 <<  4) & 0x00F0U) |
+                 ((row2 <<  8) & 0xF000U) |
+                 ((row3 >>  8) & 0x000FU) |
+                 ((row3 <<  8) & 0x0F00U);
+    tk->row[1] = ((row2 >>  8) & 0x00F0U) |
+                  (row2        & 0x0F00U) |
+                 ((row3 >> 12) & 0x000FU) |
+                 ((row3 <<  8) & 0xF000U);
 }
 
 static void skinny64_set_key_inner
@@ -79,9 +79,9 @@ static void skinny64_set_key_inner
         memset(tk, 0, sizeof(tk));
         for (index = 0; index < key_size; index += 2) {
             if ((index + 2) <= key_size) {
-                word = READ_WORD16_SWAPPED(key, index);
+                word = READ_WORD16(key, index);
             } else {
-                word = READ_BYTE_SWAPPED(key, index);
+                word = READ_BYTE(key, index);
             }
             tk[index / SKINNY64_BLOCK_SIZE].row[(index / 2) & 0x03] = word;
         }
@@ -91,9 +91,9 @@ static void skinny64_set_key_inner
         memset(&(tk[1]), 0, sizeof(Skinny64Cells_t) * 2);
         for (index = 0; index < key_size; index += 2) {
             if ((index + 2) <= key_size) {
-                word = READ_WORD16_SWAPPED(key, index);
+                word = READ_WORD16(key, index);
             } else {
-                word = READ_BYTE_SWAPPED(key, index);
+                word = READ_BYTE(key, index);
             }
             tk[(index / SKINNY64_BLOCK_SIZE) + 1].row[(index / 2) & 0x03] = word;
         }
@@ -118,14 +118,14 @@ static void skinny64_set_key_inner
            fixed and will be applied during encrypt/decrypt */
         rc = (rc << 1) ^ ((rc >> 5) & 0x01) ^ ((rc >> 4) & 0x01) ^ 0x01;
         rc &= 0x3F;
-        ks->schedule[index].row[0] ^= (rc & 0x0F);
-        ks->schedule[index].row[1] ^= (rc >> 4);
+        ks->schedule[index].row[0] ^= ((rc & 0x0F) << 4);
+        ks->schedule[index].row[1] ^= (rc & 0x30);
 
         /* If we have a tweak, then we need to XOR a 1 bit into the
            second bit of the top cell of the third column as recommended
            by the SKINNY specification */
         if (tweak)
-            ks->schedule[index].row[0] ^= 0x0200;
+            ks->schedule[index].row[0] ^= 0x2000;
 
         /* If this is the last round, then there is no point permuting
            the TKi values to create another key schedule entry */
@@ -171,9 +171,9 @@ static void skinny64_read_tweak
     if (tweak) {
         for (index = 0; index < tweak_size; index += 2) {
             if ((index + 2) <= tweak_size) {
-                word = READ_WORD16_SWAPPED(tweak, index);
+                word = READ_WORD16(tweak, index);
             } else {
-                word = READ_BYTE_SWAPPED(tweak, index);
+                word = READ_BYTE(tweak, index);
             }
             tk->row[(index / 2) & 0x03] = word;
         }
@@ -237,10 +237,7 @@ int skinny64_set_tweak
 
 STATIC_INLINE uint16_t skinny64_rotate_right(uint16_t x, unsigned count)
 {
-    /* Note: we are rotating the cells right, which actually moves
-       the values up closer to the MSB.  That is, we do a left shift
-       on the word to rotate the cells in the word right */
-    return (x << count) | (x >> (16 - count));
+    return (x >> count) | (x << (16 - count));
 }
 
 #if SKINNY_64BIT
@@ -319,15 +316,15 @@ void skinny64_ecb_encrypt
 
     /* Read the input buffer and convert little-endian to host-endian */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-    state.llrow = READ_WORD64_SWAPPED(input, 0);
+    state.llrow = READ_WORD64(input, 0);
 #elif SKINNY_LITTLE_ENDIAN
-    state.lrow[0] = READ_WORD32_SWAPPED(input, 0);
-    state.lrow[1] = READ_WORD32_SWAPPED(input, 4);
+    state.lrow[0] = READ_WORD32(input, 0);
+    state.lrow[1] = READ_WORD32(input, 4);
 #else
-    state.row[0] = READ_WORD16_SWAPPED(input, 0);
-    state.row[1] = READ_WORD16_SWAPPED(input, 2);
-    state.row[2] = READ_WORD16_SWAPPED(input, 4);
-    state.row[3] = READ_WORD16_SWAPPED(input, 6);
+    state.row[0] = READ_WORD16(input, 0);
+    state.row[1] = READ_WORD16(input, 2);
+    state.row[2] = READ_WORD16(input, 4);
+    state.row[3] = READ_WORD16(input, 6);
 #endif
 
     /* Perform all encryption rounds */
@@ -343,10 +340,10 @@ void skinny64_ecb_encrypt
 
         /* Apply the subkey for this round */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-        state.llrow ^= schedule->lrow | 0x0200000000ULL;
+        state.llrow ^= schedule->lrow | 0x2000000000ULL;
 #else
         state.lrow[0] ^= schedule->lrow;
-        state.row[2] ^= 0x02;
+        state.row[2] ^= 0x20;
 #endif
 
         /* Shift the rows */
@@ -366,15 +363,15 @@ void skinny64_ecb_encrypt
 
     /* Convert host-endian back into little-endian in the output buffer */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-    WRITE_WORD64_SWAPPED(output, 0, state.llrow);
+    WRITE_WORD64(output, 0, state.llrow);
 #elif SKINNY_LITTLE_ENDIAN
-    WRITE_WORD32_SWAPPED(output, 0, state.lrow[0]);
-    WRITE_WORD32_SWAPPED(output, 4, state.lrow[1]);
+    WRITE_WORD32(output, 0, state.lrow[0]);
+    WRITE_WORD32(output, 4, state.lrow[1]);
 #else
-    WRITE_WORD16_SWAPPED(output, 0, state.row[0]);
-    WRITE_WORD16_SWAPPED(output, 2, state.row[1]);
-    WRITE_WORD16_SWAPPED(output, 4, state.row[2]);
-    WRITE_WORD16_SWAPPED(output, 6, state.row[3]);
+    WRITE_WORD16(output, 0, state.row[0]);
+    WRITE_WORD16(output, 2, state.row[1]);
+    WRITE_WORD16(output, 4, state.row[2]);
+    WRITE_WORD16(output, 6, state.row[3]);
 #endif
 }
 
@@ -388,15 +385,15 @@ void skinny64_ecb_decrypt
 
     /* Read the input buffer and convert little-endian to host-endian */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-    state.llrow = READ_WORD64_SWAPPED(input, 0);
+    state.llrow = READ_WORD64(input, 0);
 #elif SKINNY_LITTLE_ENDIAN
-    state.lrow[0] = READ_WORD32_SWAPPED(input, 0);
-    state.lrow[1] = READ_WORD32_SWAPPED(input, 4);
+    state.lrow[0] = READ_WORD32(input, 0);
+    state.lrow[1] = READ_WORD32(input, 4);
 #else
-    state.row[0] = READ_WORD16_SWAPPED(input, 0);
-    state.row[1] = READ_WORD16_SWAPPED(input, 2);
-    state.row[2] = READ_WORD16_SWAPPED(input, 4);
-    state.row[3] = READ_WORD16_SWAPPED(input, 6);
+    state.row[0] = READ_WORD16(input, 0);
+    state.row[1] = READ_WORD16(input, 2);
+    state.row[2] = READ_WORD16(input, 4);
+    state.row[3] = READ_WORD16(input, 6);
 #endif
 
     /* Perform all decryption rounds */
@@ -418,10 +415,10 @@ void skinny64_ecb_decrypt
 
         /* Apply the subkey for this round */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-        state.llrow ^= schedule->lrow | 0x0200000000ULL;
+        state.llrow ^= schedule->lrow | 0x2000000000ULL;
 #else
         state.lrow[0] ^= schedule->lrow;
-        state.row[2] ^= 0x02;
+        state.row[2] ^= 0x20;
 #endif
 
         /* Apply the inverse of the S-box to all bytes in the state */
@@ -435,14 +432,14 @@ void skinny64_ecb_decrypt
 
     /* Convert host-endian back into little-endian in the output buffer */
 #if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
-    WRITE_WORD64_SWAPPED(output, 0, state.llrow);
+    WRITE_WORD64(output, 0, state.llrow);
 #elif SKINNY_LITTLE_ENDIAN
-    WRITE_WORD32_SWAPPED(output, 0, state.lrow[0]);
-    WRITE_WORD32_SWAPPED(output, 4, state.lrow[1]);
+    WRITE_WORD32(output, 0, state.lrow[0]);
+    WRITE_WORD32(output, 4, state.lrow[1]);
 #else
-    WRITE_WORD16_SWAPPED(output, 0, state.row[0]);
-    WRITE_WORD16_SWAPPED(output, 2, state.row[1]);
-    WRITE_WORD16_SWAPPED(output, 4, state.row[2]);
-    WRITE_WORD16_SWAPPED(output, 6, state.row[3]);
+    WRITE_WORD16(output, 0, state.row[0]);
+    WRITE_WORD16(output, 2, state.row[1]);
+    WRITE_WORD16(output, 4, state.row[2]);
+    WRITE_WORD16(output, 6, state.row[3]);
 #endif
 }

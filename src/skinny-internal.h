@@ -172,32 +172,6 @@ STATIC_INLINE void skinny64_inc_counter(uint8_t *counter, uint16_t inc)
     }
 }
 
-/* Note: For Skinny-64 and Mantis the four cells in a 16-bit row are stored
-   as 0x3210 in memory where the least significant nibble is cell 0.  However,
-   the nibbles in the serialized representation are stored reversed as
-   0x01 0x23.  We correct for this when reading and writing. */
-
-STATIC_INLINE uint8_t skinny_swap_byte(uint8_t value)
-{
-    return (value >> 4) | (value << 4);
-}
-
-STATIC_INLINE uint16_t skinny_swap_word16(uint16_t value)
-{
-    return ((value >> 4) & 0x0F0FU) | ((value << 4) & 0xF0F0U);
-}
-
-STATIC_INLINE uint32_t skinny_swap_word32(uint32_t value)
-{
-    return ((value >> 4) & 0x0F0F0F0FU) | ((value << 4) & 0xF0F0F0F0U);
-}
-
-STATIC_INLINE uint64_t skinny_swap_word64(uint64_t value)
-{
-    return ((value >> 4) & 0x0F0F0F0F0F0F0F0FULL) |
-           ((value << 4) & 0xF0F0F0F0F0F0F0F0ULL);
-}
-
 #define READ_BYTE(ptr,offset) \
     ((uint32_t)(((const uint8_t *)(ptr))[(offset)]))
 
@@ -240,27 +214,6 @@ STATIC_INLINE uint64_t skinny_swap_word64(uint64_t value)
      (((uint8_t *)(ptr))[(offset) + 5] = (uint8_t)((value) >> 40)), \
      (((uint8_t *)(ptr))[(offset) + 6] = (uint8_t)((value) >> 48)), \
      (((uint8_t *)(ptr))[(offset) + 7] = (uint8_t)((value) >> 56)))
-
-#define READ_BYTE_SWAPPED(ptr,offset) \
-    (skinny_swap_byte(READ_BYTE((ptr), (offset))))
-
-#define READ_WORD16_SWAPPED(ptr,offset) \
-    (skinny_swap_word16(READ_WORD16((ptr), (offset))))
-
-#define READ_WORD32_SWAPPED(ptr,offset) \
-    (skinny_swap_word32(READ_WORD32((ptr), (offset))))
-
-#define READ_WORD64_SWAPPED(ptr,offset) \
-    (skinny_swap_word64(READ_WORD64((ptr), (offset))))
-
-#define WRITE_WORD16_SWAPPED(ptr,offset,value) \
-    (WRITE_WORD16((ptr), (offset), skinny_swap_word16((value))))
-
-#define WRITE_WORD32_SWAPPED(ptr,offset,value) \
-    (WRITE_WORD32((ptr), (offset), skinny_swap_word32((value))))
-
-#define WRITE_WORD64_SWAPPED(ptr,offset,value) \
-    (WRITE_WORD64((ptr), (offset), skinny_swap_word64((value))))
 
 STATIC_INLINE void skinny_cleanse(void *ptr, size_t size)
 {

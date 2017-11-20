@@ -306,39 +306,31 @@ inline uint32_t skinny64_inv_sbox(uint32_t x)
     return SBOX_MIX(x);
 }
 
-inline uint16_t leftRotate_16bit(uint16_t x, uint8_t shift)
+inline uint16_t rightRotate_16bit(uint16_t x, uint8_t shift)
 {
-    return (x << shift) | (x >> (16 - shift));
-}
-
-inline uint32_t skinny64_swap_nibbles(uint32_t x)
-{
-    return ((x << 4) & 0xF0F0F0F0U) | ((x >> 4) & 0x0F0F0F0FU);
+    return (x >> shift) | (x << (16 - shift));
 }
 
 inline void skinny64_unpack(Skinny64Cells_t *cells, const uint8_t *input)
 {
-    uint32_t x;
-    x = ((uint32_t)(input[0])) |
-       (((uint32_t)(input[1])) << 8) |
-       (((uint32_t)(input[2])) << 16) |
-       (((uint32_t)(input[3])) << 24);
-    cells->lrow[0] = skinny64_swap_nibbles(x);
-    x = ((uint32_t)(input[4])) |
-       (((uint32_t)(input[5])) << 8) |
-       (((uint32_t)(input[6])) << 16) |
-       (((uint32_t)(input[7])) << 24);
-    cells->lrow[1] = skinny64_swap_nibbles(x);
+    cells->lrow[0] = ((uint32_t)(input[0])) |
+                    (((uint32_t)(input[1])) << 8) |
+                    (((uint32_t)(input[2])) << 16) |
+                    (((uint32_t)(input[3])) << 24);
+    cells->lrow[1] = ((uint32_t)(input[4])) |
+                    (((uint32_t)(input[5])) << 8) |
+                    (((uint32_t)(input[6])) << 16) |
+                    (((uint32_t)(input[7])) << 24);
 }
 
 inline void skinny64_pack(uint8_t *output, const Skinny64Cells_t *cells)
 {
-    uint32_t x = skinny64_swap_nibbles(cells->lrow[0]);
+    uint32_t x = cells->lrow[0];
     output[0] = (uint8_t)x;
     output[1] = (uint8_t)(x >> 8);
     output[2] = (uint8_t)(x >> 16);
     output[3] = (uint8_t)(x >> 24);
-    x = skinny64_swap_nibbles(cells->lrow[1]);
+    x = cells->lrow[1];
     output[4] = (uint8_t)x;
     output[5] = (uint8_t)(x >> 8);
     output[6] = (uint8_t)(x >> 16);
@@ -466,14 +458,12 @@ void Skinny64::encryptBlock(uint8_t *output, const uint8_t *input)
 
         // Apply the subkey for this round.
         state.lrow[0] ^= schedule[0];
-        state.row[2] ^= 0x02;
+        state.row[2] ^= 0x20;
 
-        // Shift the cells in the rows right, which moves the cell
-        // values up closer to the MSB.  That is, we do a left rotate
-        // on the word to rotate the cells in the word right.
-        state.row[1] = leftRotate_16bit(state.row[1], 4);
-        state.row[2] = leftRotate_16bit(state.row[2], 8);
-        state.row[3] = leftRotate_16bit(state.row[3], 12);
+        // Shift the cells in the rows right.
+        state.row[1] = rightRotate_16bit(state.row[1], 4);
+        state.row[2] = rightRotate_16bit(state.row[2], 8);
+        state.row[3] = rightRotate_16bit(state.row[3], 12);
 
         // Mix the columns.
         state.row[1] ^= state.row[2];
@@ -613,13 +603,13 @@ void Skinny64::decryptBlock(uint8_t *output, const uint8_t *input)
         state.row[1] ^= state.row[2];
 
         // Inverse shift of the rows.
-        state.row[1] = leftRotate_16bit(state.row[1], 12);
-        state.row[2] = leftRotate_16bit(state.row[2], 8);
-        state.row[3] = leftRotate_16bit(state.row[3], 4);
+        state.row[1] = rightRotate_16bit(state.row[1], 12);
+        state.row[2] = rightRotate_16bit(state.row[2], 8);
+        state.row[3] = rightRotate_16bit(state.row[3], 4);
 
         // Apply the subkey for this round.
         state.lrow[0] ^= schedule[0];
-        state.row[2] ^= 0x02;
+        state.row[2] ^= 0x20;
 
         // Apply the inverse of the S-box to all bytes in the state.
         state.lrow[0] = skinny64_inv_sbox(state.lrow[0]);
@@ -678,14 +668,14 @@ void Skinny64::clear()
         uint16_t row3 = tk.row[3]; \
         tk.row[2] = tk.row[0]; \
         tk.row[3] = tk.row[1]; \
-        tk.row[0] = ((row2 >> 4) & 0x000FU) | \
-                    ((row2 << 8) & 0x0F00U) | \
-                    ((row3 >> 8) & 0x00F0U) | \
-                    ((row3 << 8) & 0xF000U); \
-        tk.row[1] = ((row2 >> 8) & 0x000FU) | \
-                     (row2       & 0xF000U) | \
-                    ((row3 >> 4) & 0x00F0U) | \
-                    ((row3 << 8) & 0x0F00U); \
+        tk.row[0] = ((row2 <<  4) & 0x00F0U) | \
+                    ((row2 <<  8) & 0xF000U) | \
+                    ((row3 >>  8) & 0x000FU) | \
+                    ((row3 <<  8) & 0x0F00U); \
+        tk.row[1] = ((row2 >>  8) & 0x00F0U) | \
+                     (row2        & 0x0F00U) | \
+                    ((row3 >> 12) & 0x000FU) | \
+                    ((row3 <<  8) & 0xF000U); \
     } while (0)
 
 #endif // !USE_AVR_INLINE_ASM
@@ -765,14 +755,14 @@ void Skinny64::setTK1(const uint8_t *key, bool tweaked)
         // fixed and will be applied during encrypt/decrypt.
         rc = (rc << 1) ^ ((rc >> 5) & 0x01) ^ ((rc >> 4) & 0x01) ^ 0x01;
         rc &= 0x3F;
-        schedule[0] = TK1.lrow[0] ^ (rc & 0x0F) ^
-                      ((((uint32_t)rc) << 12) & 0x30000U);
+        schedule[0] = TK1.lrow[0] ^ ((rc << 4) & 0xF0) ^
+                      ((((uint32_t)rc) << 16) & 0x300000U);
 
         // If we have a tweak, then we need to XOR a 1 bit into the
         // second bit of the top cell of the third column as recommended
         // by the SKINNY specification.
         if (tweaked)
-            schedule[0] ^= 0x0200;
+            schedule[0] ^= 0x2000;
 
         // Permute TK1 for the next round.
         skinny64_permute_tk(TK1);
