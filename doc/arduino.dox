@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2017 Southern Storm Software, Pty Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+\file arduino.dox
+\page skinny_arduino Skinny-C on Arduino
+
+The Skinny-C repository contains a cut-down implementation of Skinny-64,
+Skinny-128, and Mantis-8 for Arduino devices.  The source code is under the
+<a href="https://github.com/rweather/skinny-c/arduino/libraries/Skinny">arduino/libraries/Skinny</a>
+directory, and uses the framework of Rhys Weatherley's
+<a href="http://rweather.github.com/arduinolibs/crypto.html">cryptography
+library</a> for Arduino.
+
+The Arduino version of Skinny-C uses C code for 32-bit ARM platforms and
+inline assembly for AVR platforms.  The plain C version was too slow on AVR
+to be of practical use.
+
+To install the library, copy the contents of the "arduino/libraries/Skinny"
+directory to "sketchbook/libraries/Skinny" on your system.  You should
+then be able to load and compile the examples from within the Arudino IDE.
+
+\section arduino_perf Performance
+
+The following figures are for the AVR-based Arduino Uno running at 16 MHz,
+compared against the ChaCha20 and Speck implementations from the basic
+framework:
+
+<table>
+<tr><td>Encryption Algorithm</td><td align="right">Encryption (per byte)</td><td align="right">Decryption (per byte)</td><td align="right">Key Setup</td><td>State Size (bytes)</td></tr>
+<tr><td>Skinny-128 (128-bit key, ECB mode)</td><td align="right">33.15us</td><td align="right">22.14us</td><td align="right">150.32us</td><td align="right">325</td></tr>
+<tr><td>Skinny-128 (256-bit key, ECB mode)</td><td align="right">39.62us</td><td align="right">39.61us</td><td align="right">493.83us</td><td align="right">389</td></tr>
+<tr><td>Skinny-128 (384-bit key, ECB mode)</td><td align="right">46.10us</td><td align="right">46.09us</td><td align="right">965.37us</td><td align="right">453</td></tr>
+<tr><td>Skinny-64 (64-bit key, ECB mode)</td><td align="right">15.75us</td><td align="right">15.74us</td><td align="right">122.15us</td><td align="right">133</td></tr>
+<tr><td>Skinny-64 (128-bit key, ECB mode)</td><td align="right">17.65us</td><td align="right">17.64us</td><td align="right">345.69us</td><td align="right">149</td></tr>
+<tr><td>Skinny-64 (192-bit key, ECB mode)</td><td align="right">19.55us</td><td align="right">19.55us</td><td align="right">591.61us</td><td align="right">165</td></tr>
+<tr><td>Mantis-8 (128-bit key, 64-bit tweak, ECB mode)</td><td align="right">17.05us</td><td align="right">17.05us</td><td align="right">10.77us</td><td align="right">34</td></tr>
+<tr><td colspan="5"> </td></tr>
+<tr><td>ChaCha (20 rounds)</td><td align="right">14.87us</td><td align="right">14.88us</td><td align="right">43.74us</td><td align="right">132</td></tr>
+<tr><td>Speck (128-bit key, ECB mode)</td><td align="right">9.74us</td><td align="right">10.12us</td><td align="right">253.94us</td><td align="right">275</td></tr>
+<tr><td>Speck (256-bit key, ECB mode)</td><td align="right">10.31us</td><td align="right">10.71us</td><td align="right">275.26us</td><td align="right">275</td></tr>
+<tr><td>SpeckTiny (128-bit key, ECB mode)</td><td align="right">33.93us</td><td align="right"> </td><td align="right">10.22us</td><td align="right">35</td></tr>
+<tr><td>SpeckTiny (256-bit key, ECB mode)</td><td align="right">36.46us</td><td align="right"> </td><td align="right">16.89us</td><td align="right">35</td></tr>
+</table>
+
+The following figures are for the ARM-based Arduino Due running at 84 MHz:
+
+<table>
+<tr><td>Encryption Algorithm</td><td align="right">Encryption (per byte)</td><td align="right">Decryption (per byte)</td><td align="right">Key Setup</td><td>State Size (bytes)</td></tr>
+<tr><td>Skinny-128 (128-bit key, ECB mode)</td><td align="right">10.19us</td><td align="right">10.58us</td><td align="right">38.37us</td><td align="right">332</td></tr>
+<tr><td>Skinny-128 (256-bit key, ECB mode)</td><td align="right">12.20us</td><td align="right">12.67us</td><td align="right">109.15us</td><td align="right">396</td></tr>
+<tr><td>Skinny-128 (384-bit key, ECB mode)</td><td align="right">14.22us</td><td align="right">14.76us</td><td align="right">205.71</td><td align="right">460</td></tr>
+<tr><td>Skinny-64 (64-bit key, ECB mode)</td><td align="right">3.73us</td><td align="right">3.81us</td><td align="right">35.60us</td><td align="right">140</td></tr>
+<tr><td>Skinny-64 (128-bit key, ECB mode)</td><td align="right">4.17us</td><td align="right">4.26us</td><td align="right">76.32us</td><td align="right">156</td></tr>
+<tr><td>Skinny-64 (192-bit key, ECB mode)</td><td align="right">4.61us</td><td align="right">4.71us</td><td align="right">121.55us</td><td align="right">172</td></tr>
+<tr><td>Mantis-8 (128-bit key, 64-bit tweak, ECB mode)</td><td align="right">4.04us</td><td align="right">4.04us</td><td align="right">5.54us</td><td align="right">36</td></tr>
+<tr><td colspan="5"> </td></tr>
+<tr><td>ChaCha (20 rounds)</td><td align="right">0.87us</td><td align="right">0.88us</td><td align="right">4.96us</td><td align="right">136</td></tr>
+<tr><td>Speck (128-bit key, ECB mode)</td><td align="right">0.97us</td><td align="right">0.96us</td><td align="right">36.80us</td><td align="right">288</td></tr>
+<tr><td>Speck (256-bit key, ECB mode)</td><td align="right">1.03us</td><td align="right">1.01us</td><td align="right">39.31us</td><td align="right">288</td></tr>
+<tr><td>SpeckTiny (128-bit key, ECB mode)</td><td align="right">2.72us</td><td align="right"> </td><td align="right">1.47us</td><td align="right">48</td></tr>
+<tr><td>SpeckTiny (256-bit key, ECB mode)</td><td align="right">2.90us</td><td align="right"> </td><td align="right">1.83us</td><td align="right">48</td></tr>
+</table>
+
+*/

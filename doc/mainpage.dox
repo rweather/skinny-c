@@ -89,6 +89,12 @@ method to use SKINNY in a realistic application.
 \li \ref skinny64 "Skinny-64 API"
 \li \ref mantis "Mantis API"
 
+\section main_arduino Arduino Version
+
+The Skinny-C repository contains a cut-down implementation of Skinny-64,
+Skinny-128, and Mantis-8 for Arduino devices.  More information is on
+\ref skinny_arduino "this page".
+
 \section main_contact Contact
 
 For more information on this code, to report bugs, or to suggest
