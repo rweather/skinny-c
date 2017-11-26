@@ -148,7 +148,7 @@ void skinny64_perf(const char *name, unsigned key_size)
 
     RUN_OP(set_key, skinny64_set_key(&ks, key_data, key_size));
     RUN_MB(enc, skinny64_ecb_encrypt(block, block, &ks), 8, 8);
-    RUN_MB(dec, skinny64_ecb_encrypt(block, block, &ks), 8, 8);
+    RUN_MB(dec, skinny64_ecb_decrypt(block, block, &ks), 8, 8);
 
     skinny64_ctr_init(&c);
     skinny64_ctr_set_key(&c, key_data, key_size);
@@ -170,7 +170,7 @@ void skinny128_perf(const char *name, unsigned key_size)
 
     RUN_OP(set_key, skinny128_set_key(&ks, key_data, key_size));
     RUN_MB(enc, skinny128_ecb_encrypt(block, block, &ks), 16, 16);
-    RUN_MB(dec, skinny128_ecb_encrypt(block, block, &ks), 16, 16);
+    RUN_MB(dec, skinny128_ecb_decrypt(block, block, &ks), 16, 16);
 
     skinny128_ctr_init(&c);
     skinny128_ctr_set_key(&c, key_data, key_size);
