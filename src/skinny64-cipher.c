@@ -242,66 +242,84 @@ STATIC_INLINE uint16_t skinny64_rotate_right(uint16_t x, unsigned count)
 
 #if SKINNY_64BIT
 
-#define SBOX_MIX(x)  \
-    (((~((((x) >> 1) | (x)) >> 2)) & 0x1111111111111111ULL) ^ (x))
-#define SBOX_SHIFT(x)  \
-    ((((x) << 1) & 0xEEEEEEEEEEEEEEEEULL) | \
-     (((x) >> 3) & 0x1111111111111111ULL))
-#define SBOX_SHIFT_INV(x)  \
-    ((((x) >> 1) & 0x7777777777777777ULL) | \
-     (((x) << 3) & 0x8888888888888888ULL))
-
 STATIC_INLINE uint64_t skinny64_sbox(uint64_t x)
 {
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    return SBOX_MIX(x);
+    /* See 32-bit version below for a description of what is happening here */
+    x = ((~((x >> 3) | (x >> 2))) & 0x1111111111111111ULL) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x8888888888888888ULL) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x4444444444444444ULL) ^ x;
+    x = ((~((x >> 2) | (x << 1))) & 0x2222222222222222ULL) ^ x;
+    return ((x >> 1) & 0x7777777777777777ULL) |
+           ((x << 3) & 0x8888888888888888ULL);
 }
 
 STATIC_INLINE uint64_t skinny64_inv_sbox(uint64_t x)
 {
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT_INV(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT_INV(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT_INV(x);
-    return SBOX_MIX(x);
+    /* See 32-bit version below for a description of what is happening here */
+    x = ((~((x >> 3) | (x >> 2))) & 0x1111111111111111ULL) ^ x;
+    x = ((~((x << 1) | (x >> 2))) & 0x2222222222222222ULL) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x4444444444444444ULL) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x8888888888888888ULL) ^ x;
+    return ((x << 1) & 0xEEEEEEEEEEEEEEEEULL) |
+           ((x >> 3) & 0x1111111111111111ULL);
 }
 
 #else
 
-#define SBOX_MIX(x)  \
-    (((~((((x) >> 1) | (x)) >> 2)) & 0x11111111U) ^ (x))
-#define SBOX_SHIFT(x)  \
-    ((((x) << 1) & 0xEEEEEEEEU) | (((x) >> 3) & 0x11111111U))
-#define SBOX_SHIFT_INV(x)  \
-    ((((x) >> 1) & 0x77777777U) | (((x) << 3) & 0x88888888U))
-
 STATIC_INLINE uint32_t skinny64_sbox(uint32_t x)
 {
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    return SBOX_MIX(x);
+    /* Original version from the specification is equivalent to:
+     *
+     * #define SBOX_MIX(x)
+     *     (((~((((x) >> 1) | (x)) >> 2)) & 0x11111111U) ^ (x))
+     * #define SBOX_SHIFT(x)
+     *     ((((x) << 1) & 0xEEEEEEEEU) | (((x) >> 3) & 0x11111111U))
+     *
+     * x = SBOX_MIX(x);
+     * x = SBOX_SHIFT(x);
+     * x = SBOX_MIX(x);
+     * x = SBOX_SHIFT(x);
+     * x = SBOX_MIX(x);
+     * x = SBOX_SHIFT(x);
+     * return SBOX_MIX(x);
+     *
+     * However, we can mix the bits in their original positions and then
+     * delay the SBOX_SHIFT steps to be performed with one final rotation.
+     * This reduces the number of required shift operations from 14 to 10.
+     */
+    x = ((~((x >> 3) | (x >> 2))) & 0x11111111U) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x88888888U) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x44444444U) ^ x;
+    x = ((~((x >> 2) | (x << 1))) & 0x22222222U) ^ x;
+    return ((x >> 1) & 0x77777777U) | ((x << 3) & 0x88888888U);
 }
 
 STATIC_INLINE uint32_t skinny64_inv_sbox(uint32_t x)
 {
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT_INV(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT_INV(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT_INV(x);
-    return SBOX_MIX(x);
+    /* Original version from the specification is equivalent to:
+     *
+     * #define SBOX_MIX(x)
+     *     (((~((((x) >> 1) | (x)) >> 2)) & 0x11111111U) ^ (x))
+     * #define SBOX_SHIFT_INV(x)
+     *     ((((x) >> 1) & 0x77777777U) | (((x) << 3) & 0x88888888U))
+     *
+     * x = SBOX_MIX(x);
+     * x = SBOX_SHIFT_INV(x);
+     * x = SBOX_MIX(x);
+     * x = SBOX_SHIFT_INV(x);
+     * x = SBOX_MIX(x);
+     * x = SBOX_SHIFT_INV(x);
+     * return SBOX_MIX(x);
+     *
+     * However, we can mix the bits in their original positions and then
+     * delay the SBOX_SHIFT_INV steps to be performed with one final rotation.
+     * This reduces the number of required shift operations from 14 to 10.
+     */
+    x = ((~((x >> 3) | (x >> 2))) & 0x11111111U) ^ x;
+    x = ((~((x << 1) | (x >> 2))) & 0x22222222U) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x44444444U) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x88888888U) ^ x;
+    return ((x << 1) & 0xEEEEEEEEU) | ((x >> 3) & 0x11111111U);
 }
 
 #endif

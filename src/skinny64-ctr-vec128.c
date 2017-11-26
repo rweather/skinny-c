@@ -167,22 +167,13 @@ STATIC_INLINE Skinny64Vector_t skinny64_rotate_right
     return (x >> count) | (x << (16 - count));
 }
 
-#define SBOX_MIX(x)  \
-    (((~((((x) >> 1) | (x)) >> 2)) & 0x1111U) ^ (x))
-#define SBOX_SHIFT(x)  \
-    ((((x) << 1) & 0xEEEEU) | (((x) >> 3) & 0x1111U))
-#define SBOX_SHIFT_INV(x)  \
-    ((((x) >> 1) & 0x7777U) | (((x) << 3) & 0x8888U))
-
 STATIC_INLINE Skinny64Vector_t skinny64_sbox(Skinny64Vector_t x)
 {
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    x = SBOX_MIX(x);
-    x = SBOX_SHIFT(x);
-    return SBOX_MIX(x);
+    x = ((~((x >> 3) | (x >> 2))) & 0x1111U) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x8888U) ^ x;
+    x = ((~((x << 1) | (x << 2))) & 0x4444U) ^ x;
+    x = ((~((x >> 2) | (x << 1))) & 0x2222U) ^ x;
+    return ((x >> 1) & 0x7777U) | ((x << 3) & 0x8888U);
 }
 
 static void skinny64_ecb_encrypt_eight
