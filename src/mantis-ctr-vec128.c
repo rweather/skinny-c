@@ -29,6 +29,9 @@
 
 /* Mantis state represented as a vector of eight 16-bit words */
 typedef uint16_t MantisVector_t SKINNY_VECTOR_ATTR(8, 16);
+#if SKINNY_UNALIGNED
+typedef uint16_t MantisVectorU_t SKINNY_VECTORU_ATTR(8, 16);
+#endif
 
 /* This implementation encrypts eight blocks at a time */
 #define MANTIS_CTR_BLOCK_SIZE (MANTIS_BLOCK_SIZE * 8)
@@ -39,8 +42,8 @@ typedef struct
     /** Key schedule for Mantis */
     MantisKey_t ks;
 
-    /** Counter value for the next block */
-    unsigned char counter[MANTIS_CTR_BLOCK_SIZE];
+    /** Counter values for the next block, pre-formatted into row vectors */
+    MantisVector_t counter[4];
 
     /** Encrypted counter value for encrypting the current block */
     unsigned char ecounter[MANTIS_CTR_BLOCK_SIZE];
@@ -109,11 +112,38 @@ static int mantis_ctr_vec128_set_tweak
     return 1;
 }
 
+/* Convert a scalar value into a vector */
+STATIC_INLINE MantisVector_t mantis_to_vector(uint16_t x)
+{
+    return (MantisVector_t){x, x, x, x, x, x, x, x};
+}
+
+/* Increment a specific column in an array of row vectors */
+STATIC_INLINE void mantis_ctr_increment
+    (MantisVector_t *counter, unsigned column, unsigned inc)
+{
+    uint8_t *ctr = ((uint8_t *)counter) + column * 2;
+    uint8_t *ptr;
+    unsigned index;
+    for (index = 8; index > 0; ) {
+        --index;
+        ptr = ctr + (index & 0x06) * 8;
+#if SKINNY_LITTLE_ENDIAN
+        ptr += index & 0x01;
+#else
+        ptr += 1 - (index & 0x01);
+#endif
+        inc += ptr[0];
+        ptr[0] = (uint8_t)inc;
+        inc >>= 8;
+    }
+}
+
 static int mantis_ctr_vec128_set_counter
     (MantisCTR_t *ctr, const void *counter, unsigned size)
 {
     MantisCTRVec128Ctx_t *ctx;
-    unsigned index;
+    unsigned char block[MANTIS_BLOCK_SIZE];
 
     /* Validate the parameters */
     if (size > MANTIS_BLOCK_SIZE)
@@ -124,20 +154,30 @@ static int mantis_ctr_vec128_set_counter
 
     /* Set the counter and reset the keystream to a block boundary */
     if (counter) {
-        memset(ctx->counter, 0, MANTIS_BLOCK_SIZE - size);
-        memcpy(ctx->counter + MANTIS_BLOCK_SIZE - size, counter, size);
+        memset(block, 0, MANTIS_BLOCK_SIZE - size);
+        memcpy(block + MANTIS_BLOCK_SIZE - size, counter, size);
     } else {
-        memset(ctx->counter, 0, MANTIS_BLOCK_SIZE);
+        memset(block, 0, MANTIS_BLOCK_SIZE);
     }
     ctx->offset = MANTIS_CTR_BLOCK_SIZE;
 
-    /* Expand the counter to eight blocks because we are going
-       to be encrypting the counter eight blocks at a time */
-    for (index = 1; index < 8; ++index) {
-        memcpy(ctx->counter + MANTIS_BLOCK_SIZE * index,
-               ctx->counter, MANTIS_BLOCK_SIZE);
-        skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * index, index);
-    }
+    /* Load the counter block and convert into row vectors */
+    ctx->counter[0] = mantis_to_vector(READ_WORD16(block, 0));
+    ctx->counter[1] = mantis_to_vector(READ_WORD16(block, 2));
+    ctx->counter[2] = mantis_to_vector(READ_WORD16(block, 4));
+    ctx->counter[3] = mantis_to_vector(READ_WORD16(block, 6));
+
+    /* Increment the second through seventh columns of each row vector */
+    mantis_ctr_increment(ctx->counter, 1, 1);
+    mantis_ctr_increment(ctx->counter, 2, 2);
+    mantis_ctr_increment(ctx->counter, 3, 3);
+    mantis_ctr_increment(ctx->counter, 4, 4);
+    mantis_ctr_increment(ctx->counter, 5, 5);
+    mantis_ctr_increment(ctx->counter, 6, 6);
+    mantis_ctr_increment(ctx->counter, 7, 7);
+
+    /* Clean up and exit */
+    skinny_cleanse(block, sizeof(block));
     return 1;
 }
 
@@ -297,7 +337,7 @@ static uint16_t const rc[MANTIS_MAX_ROUNDS][4] = {
 };
 
 static void mantis_ecb_encrypt_eight
-    (void *output, const void *input, const MantisKey_t *ks)
+    (void *output, const MantisVector_t *input, const MantisKey_t *ks)
 {
     const uint16_t *r = rc[0];
     MantisCells_t tweak = ks->tweak;
@@ -305,43 +345,11 @@ static void mantis_ecb_encrypt_eight
     MantisVectorCells_t state;
     unsigned index;
 
-    /* Read the rows of all eight blocks into memory */
-    state.row[0] = (MantisVector_t)
-        {READ_WORD16(input,  0),
-         READ_WORD16(input,  8),
-         READ_WORD16(input, 16),
-         READ_WORD16(input, 24),
-         READ_WORD16(input, 32),
-         READ_WORD16(input, 40),
-         READ_WORD16(input, 48),
-         READ_WORD16(input, 56)};
-    state.row[1] = (MantisVector_t)
-        {READ_WORD16(input,  2),
-         READ_WORD16(input, 10),
-         READ_WORD16(input, 18),
-         READ_WORD16(input, 26),
-         READ_WORD16(input, 34),
-         READ_WORD16(input, 42),
-         READ_WORD16(input, 50),
-         READ_WORD16(input, 58)};
-    state.row[2] = (MantisVector_t)
-        {READ_WORD16(input,  4),
-         READ_WORD16(input, 12),
-         READ_WORD16(input, 20),
-         READ_WORD16(input, 28),
-         READ_WORD16(input, 36),
-         READ_WORD16(input, 44),
-         READ_WORD16(input, 52),
-         READ_WORD16(input, 60)};
-    state.row[3] = (MantisVector_t)
-        {READ_WORD16(input,  6),
-         READ_WORD16(input, 14),
-         READ_WORD16(input, 22),
-         READ_WORD16(input, 30),
-         READ_WORD16(input, 38),
-         READ_WORD16(input, 46),
-         READ_WORD16(input, 54),
-         READ_WORD16(input, 62)};
+    /* Read the rows of all eight counter blocks into memory */
+    state.row[0] = input[0];
+    state.row[1] = input[1];
+    state.row[2] = input[2];
+    state.row[3] = input[3];
 
     /* XOR the initial whitening key k0 with the state,
        together with k1 and the initial tweak value */
@@ -436,7 +444,32 @@ static void mantis_ecb_encrypt_eight
     state.row[2] ^= ks->k0prime.row[2] ^ k1.row[2] ^ tweak.row[2];
     state.row[3] ^= ks->k0prime.row[3] ^ k1.row[3] ^ tweak.row[3];
 
-    /* Write the rows of all eight blocks back to memory */
+    /* Write the rows of all eight blocks back to memory.
+       Note: In this case, direct WRITE_WORD16() calls seem to give
+       better performance than rearranging the vectors and performing
+       an unaligned vector write */
+#if 0 /* SKINNY_LITTLE_ENDIAN && SKINNY_UNALIGNED */
+    *((MantisVectorU_t *)output) =
+        (MantisVector_t){state.row[0][0], state.row[1][0],
+                         state.row[2][0], state.row[3][0],
+                         state.row[0][1], state.row[1][1],
+                         state.row[2][1], state.row[3][1]};
+    *((MantisVectorU_t *)(output + 16)) =
+        (MantisVector_t){state.row[0][2], state.row[1][2],
+                         state.row[2][2], state.row[3][2],
+                         state.row[0][3], state.row[1][3],
+                         state.row[2][3], state.row[3][3]};
+    *((MantisVectorU_t *)(output + 32)) =
+        (MantisVector_t){state.row[0][4], state.row[1][4],
+                         state.row[2][4], state.row[3][4],
+                         state.row[0][5], state.row[1][5],
+                         state.row[2][5], state.row[3][5]};
+    *((MantisVectorU_t *)(output + 48)) =
+        (MantisVector_t){state.row[0][6], state.row[1][6],
+                         state.row[2][6], state.row[3][6],
+                         state.row[0][7], state.row[1][7],
+                         state.row[2][7], state.row[3][7]};
+#else
     WRITE_WORD16(output,  0, state.row[0][0]);
     WRITE_WORD16(output,  2, state.row[1][0]);
     WRITE_WORD16(output,  4, state.row[2][0]);
@@ -469,6 +502,7 @@ static void mantis_ecb_encrypt_eight
     WRITE_WORD16(output, 58, state.row[1][7]);
     WRITE_WORD16(output, 60, state.row[2][7]);
     WRITE_WORD16(output, 62, state.row[3][7]);
+#endif
 }
 
 static int mantis_ctr_vec128_encrypt
@@ -490,14 +524,14 @@ static int mantis_ctr_vec128_encrypt
         if (ctx->offset >= MANTIS_CTR_BLOCK_SIZE) {
             /* We need a new keystream block */
             mantis_ecb_encrypt_eight(ctx->ecounter, ctx->counter, &(ctx->ks));
-            skinny64_inc_counter(ctx->counter, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * 2, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * 3, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * 4, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * 5, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * 6, 8);
-            skinny64_inc_counter(ctx->counter + MANTIS_BLOCK_SIZE * 7, 8);
+            mantis_ctr_increment(ctx->counter, 0, 8);
+            mantis_ctr_increment(ctx->counter, 1, 8);
+            mantis_ctr_increment(ctx->counter, 2, 8);
+            mantis_ctr_increment(ctx->counter, 3, 8);
+            mantis_ctr_increment(ctx->counter, 4, 8);
+            mantis_ctr_increment(ctx->counter, 5, 8);
+            mantis_ctr_increment(ctx->counter, 6, 8);
+            mantis_ctr_increment(ctx->counter, 7, 8);
 
             /* XOR an entire keystream block in one go if possible */
             if (size >= MANTIS_CTR_BLOCK_SIZE) {

@@ -32,7 +32,6 @@ clean:
 check: all
 
 # Plain C core source files.
-skinny-internal.o: skinny-internal.h
 skinny128-cipher.o: ../include/skinny128-cipher.h skinny-internal.h
 skinny128-ctr.o: ../include/skinny128-cipher.h skinny-internal.h \
                     skinny128-ctr-internal.h
@@ -55,6 +54,9 @@ skinny64-ctr-vec128.o: skinny64-ctr-vec128.c ../include/skinny64-cipher.h \
 mantis-ctr-vec128.o: mantis-ctr-vec128.c ../include/mantis-cipher.h \
                     skinny-internal.h mantis-ctr-internal.h
 	$(CC) $(VEC128_CFLAGS) $(CFLAGS) -c -o $@ $<
+
+skinny-internal.o: skinny-internal.c skinny-internal.h
+	$(CC) $(VEC128_CFLAGS) $(VEC256_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 # Source files that use 256-bit SIMD vector instructions.
 skinny128-ctr-vec256.o: skinny128-ctr-vec256.c ../include/skinny128-cipher.h \

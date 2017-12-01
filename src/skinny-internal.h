@@ -85,8 +85,10 @@
 /* Attribute for declaring a vector type with this compiler */
 #if defined(__clang__)
 #define SKINNY_VECTOR_ATTR(words, bytes) __attribute__((ext_vector_type(words)))
+#define SKINNY_VECTORU_ATTR(words, bytes) __attribute__((ext_vector_type(words), aligned(1)))
 #else
 #define SKINNY_VECTOR_ATTR(words, bytes) __attribute__((vector_size(bytes)))
+#define SKINNY_VECTORU_ATTR(words, bytes) __attribute__((vector_size(bytes), aligned(1)))
 #endif
 
 /* XOR two blocks together of arbitrary size and alignment */

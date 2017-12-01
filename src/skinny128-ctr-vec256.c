@@ -29,6 +29,9 @@
 
 /* Skinny-128 state represented as a vector of eight 32-bit words */
 typedef uint32_t Skinny128Vector_t SKINNY_VECTOR_ATTR(8, 32);
+#if SKINNY_UNALIGNED
+typedef uint32_t Skinny128VectorU_t SKINNY_VECTORU_ATTR(8, 32);
+#endif
 
 /* This implementation encrypts eight blocks at a time */
 #define SKINNY128_CTR_BLOCK_SIZE (SKINNY128_BLOCK_SIZE * 8)
@@ -39,8 +42,8 @@ typedef struct
     /** Key schedule for Skinny-128, with an optional tweak */
     Skinny128TweakedKey_t kt;
 
-    /** Counter value for the next block */
-    unsigned char counter[SKINNY128_CTR_BLOCK_SIZE];
+    /** Counter values for the next block, pre-formatted into row vectors */
+    Skinny128Vector_t counter[4];
 
     /** Encrypted counter value for encrypting the current block */
     unsigned char ecounter[SKINNY128_CTR_BLOCK_SIZE];
@@ -130,11 +133,38 @@ static int skinny128_ctr_vec256_set_tweak
     return 1;
 }
 
+/* Convert a scalar value into a vector */
+STATIC_INLINE Skinny128Vector_t skinny128_to_vector(uint32_t x)
+{
+    return (Skinny128Vector_t){x, x, x, x, x, x, x, x};
+}
+
+/* Increment a specific column in an array of row vectors */
+STATIC_INLINE void skinny128_ctr_increment
+    (Skinny128Vector_t *counter, unsigned column, unsigned inc)
+{
+    uint8_t *ctr = ((uint8_t *)counter) + column * 4;
+    uint8_t *ptr;
+    unsigned index;
+    for (index = 16; index > 0; ) {
+        --index;
+        ptr = ctr + (index & 0x0C) * 8;
+#if SKINNY_LITTLE_ENDIAN
+        ptr += index & 0x03;
+#else
+        ptr += 3 - (index & 0x03);
+#endif
+        inc += ptr[0];
+        ptr[0] = (uint8_t)inc;
+        inc >>= 8;
+    }
+}
+
 static int skinny128_ctr_vec256_set_counter
     (Skinny128CTR_t *ctr, const void *counter, unsigned size)
 {
     Skinny128CTRVec256Ctx_t *ctx;
-    unsigned index;
+    unsigned char block[SKINNY128_BLOCK_SIZE];
 
     /* Validate the parameters */
     if (size > SKINNY128_BLOCK_SIZE)
@@ -145,21 +175,30 @@ static int skinny128_ctr_vec256_set_counter
 
     /* Set the counter and reset the keystream to a block boundary */
     if (counter) {
-        memset(ctx->counter, 0, SKINNY128_BLOCK_SIZE - size);
-        memcpy(ctx->counter + SKINNY128_BLOCK_SIZE - size, counter, size);
+        memset(block, 0, SKINNY128_BLOCK_SIZE - size);
+        memcpy(block + SKINNY128_BLOCK_SIZE - size, counter, size);
     } else {
-        memset(ctx->counter, 0, SKINNY128_BLOCK_SIZE);
+        memset(block, 0, SKINNY128_BLOCK_SIZE);
     }
     ctx->offset = SKINNY128_CTR_BLOCK_SIZE;
 
-    /* Expand the counter to eight blocks because we are going
-       to be encrypting the counter eight blocks at a time */
-    for (index = 1; index < 8; ++index) {
-        memcpy(ctx->counter + SKINNY128_BLOCK_SIZE * index,
-               ctx->counter, SKINNY128_BLOCK_SIZE);
-        skinny128_inc_counter
-            (ctx->counter + SKINNY128_BLOCK_SIZE * index, index);
-    }
+    /* Load the counter block and convert into row vectors */
+    ctx->counter[0] = skinny128_to_vector(READ_WORD32(block,  0));
+    ctx->counter[1] = skinny128_to_vector(READ_WORD32(block,  4));
+    ctx->counter[2] = skinny128_to_vector(READ_WORD32(block,  8));
+    ctx->counter[3] = skinny128_to_vector(READ_WORD32(block, 12));
+
+    /* Increment the second through seventh columns of each row vector */
+    skinny128_ctr_increment(ctx->counter, 1, 1);
+    skinny128_ctr_increment(ctx->counter, 2, 2);
+    skinny128_ctr_increment(ctx->counter, 3, 3);
+    skinny128_ctr_increment(ctx->counter, 4, 4);
+    skinny128_ctr_increment(ctx->counter, 5, 5);
+    skinny128_ctr_increment(ctx->counter, 6, 6);
+    skinny128_ctr_increment(ctx->counter, 7, 7);
+
+    /* Clean up and exit */
+    skinny_cleanse(block, sizeof(block));
     return 1;
 }
 
@@ -254,7 +293,7 @@ STATIC_INLINE void skinny128_sbox_four
 }
 
 static void skinny128_ecb_encrypt_eight
-    (void *output, const void *input, const Skinny128Key_t *ks)
+    (void *output, const Skinny128Vector_t *input, const Skinny128Key_t *ks)
 {
     Skinny128Vector_t row0;
     Skinny128Vector_t row1;
@@ -264,27 +303,11 @@ static void skinny128_ecb_encrypt_eight
     unsigned index;
     Skinny128Vector_t temp;
 
-    /* Read the rows of all eight blocks into memory */
-    row0 = (Skinny128Vector_t)
-        {READ_WORD32(input,   0), READ_WORD32(input,  16),
-         READ_WORD32(input,  32), READ_WORD32(input,  48),
-         READ_WORD32(input,  64), READ_WORD32(input,  80),
-         READ_WORD32(input,  96), READ_WORD32(input, 112)};
-    row1 = (Skinny128Vector_t)
-        {READ_WORD32(input,   4), READ_WORD32(input,  20),
-         READ_WORD32(input,  36), READ_WORD32(input,  52),
-         READ_WORD32(input,  68), READ_WORD32(input,  84),
-         READ_WORD32(input, 100), READ_WORD32(input, 116)};
-    row2 = (Skinny128Vector_t)
-        {READ_WORD32(input,   8), READ_WORD32(input,  24),
-         READ_WORD32(input,  40), READ_WORD32(input,  56),
-         READ_WORD32(input,  72), READ_WORD32(input,  88),
-         READ_WORD32(input, 104), READ_WORD32(input, 120)};
-    row3 = (Skinny128Vector_t)
-        {READ_WORD32(input,  12), READ_WORD32(input,  28),
-         READ_WORD32(input,  44), READ_WORD32(input,  60),
-         READ_WORD32(input,  76), READ_WORD32(input,  92),
-         READ_WORD32(input, 108), READ_WORD32(input, 124)};
+    /* Read the rows of all eight counter blocks into memory */
+    row0 = input[0];
+    row1 = input[1];
+    row2 = input[2];
+    row3 = input[3];
 
     /* Perform all encryption rounds on the eight blocks in parallel */
     schedule = ks->schedule;
@@ -313,6 +336,20 @@ static void skinny128_ecb_encrypt_eight
     }
 
     /* Write the rows of all eight blocks back to memory */
+#if SKINNY_LITTLE_ENDIAN && SKINNY_UNALIGNED
+    *((Skinny128VectorU_t *)output) =
+        (Skinny128Vector_t){row0[0], row1[0], row2[0], row3[0],
+                            row0[1], row1[1], row2[1], row3[1]};
+    *((Skinny128VectorU_t *)(output + 32)) =
+        (Skinny128Vector_t){row0[2], row1[2], row2[2], row3[2],
+                            row0[3], row1[3], row2[3], row3[3]};
+    *((Skinny128VectorU_t *)(output + 64)) =
+        (Skinny128Vector_t){row0[4], row1[4], row2[4], row3[4],
+                            row0[5], row1[5], row2[5], row3[5]};
+    *((Skinny128VectorU_t *)(output + 96)) =
+        (Skinny128Vector_t){row0[6], row1[6], row2[6], row3[6],
+                            row0[7], row1[7], row2[7], row3[7]};
+#else
     WRITE_WORD32(output,   0, row0[0]);
     WRITE_WORD32(output,   4, row1[0]);
     WRITE_WORD32(output,   8, row2[0]);
@@ -345,6 +382,7 @@ static void skinny128_ecb_encrypt_eight
     WRITE_WORD32(output, 116, row1[7]);
     WRITE_WORD32(output, 120, row2[7]);
     WRITE_WORD32(output, 124, row3[7]);
+#endif
 }
 
 static int skinny128_ctr_vec256_encrypt
@@ -367,14 +405,14 @@ static int skinny128_ctr_vec256_encrypt
             /* We need a new keystream block */
             skinny128_ecb_encrypt_eight
                 (ctx->ecounter, ctx->counter, &(ctx->kt.ks));
-            skinny128_inc_counter(ctx->counter, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE * 2, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE * 3, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE * 4, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE * 5, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE * 6, 8);
-            skinny128_inc_counter(ctx->counter + SKINNY128_BLOCK_SIZE * 7, 8);
+            skinny128_ctr_increment(ctx->counter, 0, 8);
+            skinny128_ctr_increment(ctx->counter, 1, 8);
+            skinny128_ctr_increment(ctx->counter, 2, 8);
+            skinny128_ctr_increment(ctx->counter, 3, 8);
+            skinny128_ctr_increment(ctx->counter, 4, 8);
+            skinny128_ctr_increment(ctx->counter, 5, 8);
+            skinny128_ctr_increment(ctx->counter, 6, 8);
+            skinny128_ctr_increment(ctx->counter, 7, 8);
 
             /* XOR an entire keystream block in one go if possible */
             if (size >= SKINNY128_CTR_BLOCK_SIZE) {
