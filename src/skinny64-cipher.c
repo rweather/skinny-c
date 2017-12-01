@@ -244,24 +244,38 @@ STATIC_INLINE uint16_t skinny64_rotate_right(uint16_t x, unsigned count)
 
 STATIC_INLINE uint64_t skinny64_sbox(uint64_t x)
 {
-    /* See 32-bit version below for a description of what is happening here */
-    x = ((~((x >> 3) | (x >> 2))) & 0x1111111111111111ULL) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x8888888888888888ULL) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x4444444444444444ULL) ^ x;
-    x = ((~((x >> 2) | (x << 1))) & 0x2222222222222222ULL) ^ x;
-    return ((x >> 1) & 0x7777777777777777ULL) |
-           ((x << 3) & 0x8888888888888888ULL);
+    /* Splitting the bits out individually gives better performance on
+       64-bit platforms because we have more spare registers to work with.
+       This doesn't work as well on 32-bit platforms or with SIMD because
+       register spills start to impact performance.  See below. */
+    uint64_t bit0 = x;
+    uint64_t bit1 = x >> 1;
+    uint64_t bit2 = x >> 2;
+    uint64_t bit3 = x >> 3;
+    bit0 ^= ~(bit3 | bit2);
+    bit3 ^= ~(bit1 | bit2);
+    bit2 ^= ~(bit1 | bit0);
+    bit1 ^= ~(bit0 | bit3);
+    return ((bit0 << 3) & 0x8888888888888888ULL) |
+           ( bit1       & 0x1111111111111111ULL) |
+           ((bit2 << 1) & 0x2222222222222222ULL) |
+           ((bit3 << 2) & 0x4444444444444444ULL);
 }
 
 STATIC_INLINE uint64_t skinny64_inv_sbox(uint64_t x)
 {
-    /* See 32-bit version below for a description of what is happening here */
-    x = ((~((x >> 3) | (x >> 2))) & 0x1111111111111111ULL) ^ x;
-    x = ((~((x << 1) | (x >> 2))) & 0x2222222222222222ULL) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x4444444444444444ULL) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x8888888888888888ULL) ^ x;
-    return ((x << 1) & 0xEEEEEEEEEEEEEEEEULL) |
-           ((x >> 3) & 0x1111111111111111ULL);
+    uint64_t bit0 = x;
+    uint64_t bit1 = x >> 1;
+    uint64_t bit2 = x >> 2;
+    uint64_t bit3 = x >> 3;
+    bit0 ^= ~(bit3 | bit2);
+    bit1 ^= ~(bit3 | bit0);
+    bit2 ^= ~(bit1 | bit0);
+    bit3 ^= ~(bit1 | bit2);
+    return ((bit0 << 1) & 0x2222222222222222ULL) |
+           ((bit1 << 2) & 0x4444444444444444ULL) |
+           ((bit2 << 3) & 0x8888888888888888ULL) |
+           ( bit3       & 0x1111111111111111ULL);
 }
 
 #else
@@ -286,6 +300,12 @@ STATIC_INLINE uint32_t skinny64_sbox(uint32_t x)
      * However, we can mix the bits in their original positions and then
      * delay the SBOX_SHIFT steps to be performed with one final rotation.
      * This reduces the number of required shift operations from 14 to 10.
+     *
+     * It is possible to reduce the number of shifts and AND's even further
+     * as shown in the 64-bit version of skinny64_sbox() above.  However on
+     * 32-bit platforms this causes extra register spills which slows down
+     * the implementation more than the improvement gained by reducing the
+     * number of bit operations.
      */
     x = ((~((x >> 3) | (x >> 2))) & 0x11111111U) ^ x;
     x = ((~((x << 1) | (x << 2))) & 0x88888888U) ^ x;
