@@ -27,12 +27,6 @@
 
 #if SKINNY_VEC128_MATH
 
-/* Mantis state represented as a vector of eight 16-bit words */
-typedef uint16_t MantisVector_t SKINNY_VECTOR_ATTR(8, 16);
-#if SKINNY_UNALIGNED
-typedef uint16_t MantisVectorU_t SKINNY_VECTORU_ATTR(8, 16);
-#endif
-
 /* This implementation encrypts eight blocks at a time */
 #define MANTIS_CTR_BLOCK_SIZE (MANTIS_BLOCK_SIZE * 8)
 
@@ -43,7 +37,7 @@ typedef struct
     MantisKey_t ks;
 
     /** Counter values for the next block, pre-formatted into row vectors */
-    MantisVector_t counter[4];
+    SkinnyVector8x16_t counter[4];
 
     /** Encrypted counter value for encrypting the current block */
     unsigned char ecounter[MANTIS_CTR_BLOCK_SIZE];
@@ -112,15 +106,9 @@ static int mantis_ctr_vec128_set_tweak
     return 1;
 }
 
-/* Convert a scalar value into a vector */
-STATIC_INLINE MantisVector_t mantis_to_vector(uint16_t x)
-{
-    return (MantisVector_t){x, x, x, x, x, x, x, x};
-}
-
 /* Increment a specific column in an array of row vectors */
 STATIC_INLINE void mantis_ctr_increment
-    (MantisVector_t *counter, unsigned column, unsigned inc)
+    (SkinnyVector8x16_t *counter, unsigned column, unsigned inc)
 {
     uint8_t *ctr = ((uint8_t *)counter) + column * 2;
     uint8_t *ptr;
@@ -162,10 +150,10 @@ static int mantis_ctr_vec128_set_counter
     ctx->offset = MANTIS_CTR_BLOCK_SIZE;
 
     /* Load the counter block and convert into row vectors */
-    ctx->counter[0] = mantis_to_vector(READ_WORD16(block, 0));
-    ctx->counter[1] = mantis_to_vector(READ_WORD16(block, 2));
-    ctx->counter[2] = mantis_to_vector(READ_WORD16(block, 4));
-    ctx->counter[3] = mantis_to_vector(READ_WORD16(block, 6));
+    ctx->counter[0] = skinny_to_vec8x16(READ_WORD16(block, 0));
+    ctx->counter[1] = skinny_to_vec8x16(READ_WORD16(block, 2));
+    ctx->counter[2] = skinny_to_vec8x16(READ_WORD16(block, 4));
+    ctx->counter[3] = skinny_to_vec8x16(READ_WORD16(block, 6));
 
     /* Increment the second through seventh columns of each row vector */
     mantis_ctr_increment(ctx->counter, 1, 1);
@@ -186,11 +174,11 @@ static int mantis_ctr_vec128_set_counter
  */
 typedef union
 {
-    MantisVector_t row[4];
+    SkinnyVector8x16_t row[4];
 
 } MantisVectorCells_t;
 
-STATIC_INLINE MantisVector_t mantis_sbox(MantisVector_t d)
+STATIC_INLINE SkinnyVector8x16_t mantis_sbox(SkinnyVector8x16_t d)
 {
     /*
      * MIDORI Sb0 from section 4.2 of https://eprint.iacr.org/2015/1142.pdf
@@ -202,13 +190,13 @@ STATIC_INLINE MantisVector_t mantis_sbox(MantisVector_t d)
      * cout = NAND(NAND(b, d), (NOR(b, d) | a))
      * dout = NOR(NOR(a, (b | c)), NAND(NAND(a, b), (c | d)))
      */
-    MantisVector_t a = (d >> 3);
-    MantisVector_t b = (d >> 2);
-    MantisVector_t c = (d >> 1);
-    MantisVector_t aout = ~((c | (a & b)) & (a | d));
-    MantisVector_t bout = (~(a | d)) | (b & c) | (a & c & d);
-    MantisVector_t cout = (b & d) | ((b | d) & ~a);
-    MantisVector_t dout = (a | b | c) & (~(a & b)) & (c | d);
+    SkinnyVector8x16_t a = (d >> 3);
+    SkinnyVector8x16_t b = (d >> 2);
+    SkinnyVector8x16_t c = (d >> 1);
+    SkinnyVector8x16_t aout = ~((c | (a & b)) & (a | d));
+    SkinnyVector8x16_t bout = (~(a | d)) | (b & c) | (a & c & d);
+    SkinnyVector8x16_t cout = (b & d) | ((b | d) & ~a);
+    SkinnyVector8x16_t dout = (a | b | c) & (~(a & b)) & (c | d);
     return ((aout & 0x1111U) << 3) | ((bout & 0x1111U) << 2) |
            ((cout & 0x1111U) << 1) |  (dout & 0x1111U);
 }
@@ -248,10 +236,10 @@ STATIC_INLINE void mantis_update_tweak_inverse(MantisCells_t *tweak)
 STATIC_INLINE void mantis_shift_rows(MantisVectorCells_t *state)
 {
     /* P = [0, 11, 6, 13, 10, 1, 12, 7, 5, 14, 3, 8, 15, 4, 9, 2] */
-    MantisVector_t row0 = state->row[0];
-    MantisVector_t row1 = state->row[1];
-    MantisVector_t row2 = state->row[2];
-    MantisVector_t row3 = state->row[3];
+    SkinnyVector8x16_t row0 = state->row[0];
+    SkinnyVector8x16_t row1 = state->row[1];
+    SkinnyVector8x16_t row2 = state->row[2];
+    SkinnyVector8x16_t row3 = state->row[3];
     state->row[0] =  (row0        & 0x00F0U) |
                      (row1        & 0xF000U) |
                     ((row2 >>  8) & 0x000FU) |
@@ -273,10 +261,10 @@ STATIC_INLINE void mantis_shift_rows(MantisVectorCells_t *state)
 STATIC_INLINE void mantis_shift_rows_inverse(MantisVectorCells_t *state)
 {
     /* P' = [0, 5, 15, 10, 13, 8, 2, 7, 11, 14, 4, 1, 6, 3, 9, 12] */
-    MantisVector_t row0 = state->row[0];
-    MantisVector_t row1 = state->row[1];
-    MantisVector_t row2 = state->row[2];
-    MantisVector_t row3 = state->row[3];
+    SkinnyVector8x16_t row0 = state->row[0];
+    SkinnyVector8x16_t row1 = state->row[1];
+    SkinnyVector8x16_t row2 = state->row[2];
+    SkinnyVector8x16_t row3 = state->row[3];
     state->row[0] =  (row0        & 0x00F0U) |
                      (row1        & 0x000FU) |
                     ((row2 >>  4) & 0x0F00U) |
@@ -297,10 +285,10 @@ STATIC_INLINE void mantis_shift_rows_inverse(MantisVectorCells_t *state)
 
 STATIC_INLINE void mantis_mix_columns(MantisVectorCells_t *state)
 {
-    MantisVector_t t0 = state->row[0];
-    MantisVector_t t1 = state->row[1];
-    MantisVector_t t2 = state->row[2];
-    MantisVector_t t3 = state->row[3];
+    SkinnyVector8x16_t t0 = state->row[0];
+    SkinnyVector8x16_t t1 = state->row[1];
+    SkinnyVector8x16_t t2 = state->row[2];
+    SkinnyVector8x16_t t3 = state->row[3];
     state->row[0] = t1 ^ t2 ^ t3;
     state->row[1] = t0 ^ t2 ^ t3;
     state->row[2] = t0 ^ t1 ^ t3;
@@ -337,7 +325,7 @@ static uint16_t const rc[MANTIS_MAX_ROUNDS][4] = {
 };
 
 static void mantis_ecb_encrypt_eight
-    (void *output, const MantisVector_t *input, const MantisKey_t *ks)
+    (void *output, const SkinnyVector8x16_t *input, const MantisKey_t *ks)
 {
     const uint16_t *r = rc[0];
     MantisCells_t tweak = ks->tweak;
@@ -449,26 +437,26 @@ static void mantis_ecb_encrypt_eight
        better performance than rearranging the vectors and performing
        an unaligned vector write */
 #if 0 /* SKINNY_LITTLE_ENDIAN && SKINNY_UNALIGNED */
-    *((MantisVectorU_t *)output) =
-        (MantisVector_t){state.row[0][0], state.row[1][0],
-                         state.row[2][0], state.row[3][0],
-                         state.row[0][1], state.row[1][1],
-                         state.row[2][1], state.row[3][1]};
-    *((MantisVectorU_t *)(output + 16)) =
-        (MantisVector_t){state.row[0][2], state.row[1][2],
-                         state.row[2][2], state.row[3][2],
-                         state.row[0][3], state.row[1][3],
-                         state.row[2][3], state.row[3][3]};
-    *((MantisVectorU_t *)(output + 32)) =
-        (MantisVector_t){state.row[0][4], state.row[1][4],
-                         state.row[2][4], state.row[3][4],
-                         state.row[0][5], state.row[1][5],
-                         state.row[2][5], state.row[3][5]};
-    *((MantisVectorU_t *)(output + 48)) =
-        (MantisVector_t){state.row[0][6], state.row[1][6],
-                         state.row[2][6], state.row[3][6],
-                         state.row[0][7], state.row[1][7],
-                         state.row[2][7], state.row[3][7]};
+    *((SkinnyVector8x16U_t *)output) =
+        (SkinnyVector8x16_t){state.row[0][0], state.row[1][0],
+                             state.row[2][0], state.row[3][0],
+                             state.row[0][1], state.row[1][1],
+                             state.row[2][1], state.row[3][1]};
+    *((SkinnyVector8x16U_t *)(output + 16)) =
+        (SkinnyVector8x16_t){state.row[0][2], state.row[1][2],
+                             state.row[2][2], state.row[3][2],
+                             state.row[0][3], state.row[1][3],
+                             state.row[2][3], state.row[3][3]};
+    *((SkinnyVector8x16U_t *)(output + 32)) =
+        (SkinnyVector8x16_t){state.row[0][4], state.row[1][4],
+                             state.row[2][4], state.row[3][4],
+                             state.row[0][5], state.row[1][5],
+                             state.row[2][5], state.row[3][5]};
+    *((SkinnyVector8x16U_t *)(output + 48)) =
+        (SkinnyVector8x16_t){state.row[0][6], state.row[1][6],
+                             state.row[2][6], state.row[3][6],
+                             state.row[0][7], state.row[1][7],
+                             state.row[2][7], state.row[3][7]};
 #else
     WRITE_WORD16(output,  0, state.row[0][0]);
     WRITE_WORD16(output,  2, state.row[1][0]);

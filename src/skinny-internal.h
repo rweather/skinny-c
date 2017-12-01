@@ -232,6 +232,46 @@ STATIC_INLINE void skinny_cleanse(void *ptr, size_t size)
 #endif
 }
 
+#if SKINNY_VEC128_MATH
+
+/* Define types that fit within a 128-bit SIMD vector */
+typedef uint32_t SkinnyVector4x32_t SKINNY_VECTOR_ATTR(4, 16);
+typedef uint16_t SkinnyVector8x16_t SKINNY_VECTOR_ATTR(8, 16);
+#if SKINNY_UNALIGNED
+typedef uint32_t SkinnyVector4x32U_t SKINNY_VECTORU_ATTR(4, 16);
+typedef uint16_t SkinnyVector8x16U_t SKINNY_VECTORU_ATTR(8, 16);
+#endif
+
+/* Convert a scalar value into a 4x32 SIMD vector */
+STATIC_INLINE SkinnyVector4x32_t skinny_to_vec4x32(uint32_t x)
+{
+    return (SkinnyVector4x32_t){x, x, x, x};
+}
+
+/* Convert a scalar value into a 8x16 SIMD vector */
+STATIC_INLINE SkinnyVector8x16_t skinny_to_vec8x16(uint32_t x)
+{
+    return (SkinnyVector8x16_t){x, x, x, x, x, x, x, x};
+}
+
+#endif /* SKINNY_VEC128_MATH */
+
+#if SKINNY_VEC256_MATH
+
+/* Define types that fit within a 256-bit SIMD vector */
+typedef uint32_t SkinnyVector8x32_t SKINNY_VECTOR_ATTR(8, 32);
+#if SKINNY_UNALIGNED
+typedef uint32_t SkinnyVector8x32U_t SKINNY_VECTORU_ATTR(8, 32);
+#endif
+
+/* Convert a scalar value into a 8x32 SIMD vector */
+STATIC_INLINE SkinnyVector8x32_t skinny_to_vec8x32(uint32_t x)
+{
+    return (SkinnyVector8x32_t){x, x, x, x, x, x, x, x};
+}
+
+#endif /* SKINNY_VEC256_MATH */
+
 /* Determine if this platform supports 128-bit SIMD vector operations */
 int _skinny_has_vec128(void);
 

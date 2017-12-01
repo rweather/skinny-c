@@ -27,12 +27,6 @@
 
 #if SKINNY_VEC128_MATH
 
-/* Skinny-128 state represented as a vector of four 32-bit words */
-typedef uint32_t Skinny128Vector_t SKINNY_VECTOR_ATTR(4, 16);
-#if SKINNY_UNALIGNED
-typedef uint32_t Skinny128VectorU_t SKINNY_VECTORU_ATTR(4, 16);
-#endif
-
 /* This implementation encrypts four blocks at a time */
 #define SKINNY128_CTR_BLOCK_SIZE (SKINNY128_BLOCK_SIZE * 4)
 
@@ -43,7 +37,7 @@ typedef struct
     Skinny128TweakedKey_t kt;
 
     /** Counter values for the next block, pre-formatted into row vectors */
-    Skinny128Vector_t counter[4];
+    SkinnyVector4x32_t counter[4];
 
     /** Encrypted counter values for encrypting the current block */
     unsigned char ecounter[SKINNY128_CTR_BLOCK_SIZE];
@@ -133,15 +127,9 @@ static int skinny128_ctr_vec128_set_tweak
     return 1;
 }
 
-/* Convert a scalar value into a vector */
-STATIC_INLINE Skinny128Vector_t skinny128_to_vector(uint32_t x)
-{
-    return (Skinny128Vector_t){x, x, x, x};
-}
-
 /* Increment a specific column in an array of row vectors */
 STATIC_INLINE void skinny128_ctr_increment
-    (Skinny128Vector_t *counter, unsigned column, unsigned inc)
+    (SkinnyVector4x32_t *counter, unsigned column, unsigned inc)
 {
     uint8_t *ctr = ((uint8_t *)counter) + column * 4;
     uint8_t *ptr;
@@ -183,10 +171,10 @@ static int skinny128_ctr_vec128_set_counter
     ctx->offset = SKINNY128_CTR_BLOCK_SIZE;
 
     /* Load the counter block and convert into row vectors */
-    ctx->counter[0] = skinny128_to_vector(READ_WORD32(block,  0));
-    ctx->counter[1] = skinny128_to_vector(READ_WORD32(block,  4));
-    ctx->counter[2] = skinny128_to_vector(READ_WORD32(block,  8));
-    ctx->counter[3] = skinny128_to_vector(READ_WORD32(block, 12));
+    ctx->counter[0] = skinny_to_vec4x32(READ_WORD32(block,  0));
+    ctx->counter[1] = skinny_to_vec4x32(READ_WORD32(block,  4));
+    ctx->counter[2] = skinny_to_vec4x32(READ_WORD32(block,  8));
+    ctx->counter[3] = skinny_to_vec4x32(READ_WORD32(block, 12));
 
     /* Increment the second, third, and fourth columns of each row vector */
     skinny128_ctr_increment(ctx->counter, 1, 1);
@@ -198,8 +186,8 @@ static int skinny128_ctr_vec128_set_counter
     return 1;
 }
 
-STATIC_INLINE Skinny128Vector_t skinny128_rotate_right
-    (Skinny128Vector_t x, unsigned count)
+STATIC_INLINE SkinnyVector4x32_t skinny128_rotate_right
+    (SkinnyVector4x32_t x, unsigned count)
 {
     /* Note: we are rotating the cells right, which actually moves
        the values up closer to the MSB.  That is, we do a left shift
@@ -214,17 +202,17 @@ STATIC_INLINE Skinny128Vector_t skinny128_rotate_right
    registers on x86-64 CPU's that have SSE2 support or better as the CPU
    can schedule unrelated operations to operate in parallel. */
 STATIC_INLINE void skinny128_sbox_four
-    (Skinny128Vector_t *u, Skinny128Vector_t *v,
-     Skinny128Vector_t *s, Skinny128Vector_t *t)
+    (SkinnyVector4x32_t *u, SkinnyVector4x32_t *v,
+     SkinnyVector4x32_t *s, SkinnyVector4x32_t *t)
 {
-    Skinny128Vector_t x1 = *u;
-    Skinny128Vector_t y1;
-    Skinny128Vector_t x2 = *v;
-    Skinny128Vector_t y2;
-    Skinny128Vector_t x3 = *s;
-    Skinny128Vector_t y3;
-    Skinny128Vector_t x4 = *t;
-    Skinny128Vector_t y4;
+    SkinnyVector4x32_t x1 = *u;
+    SkinnyVector4x32_t y1;
+    SkinnyVector4x32_t x2 = *v;
+    SkinnyVector4x32_t y2;
+    SkinnyVector4x32_t x3 = *s;
+    SkinnyVector4x32_t y3;
+    SkinnyVector4x32_t x4 = *t;
+    SkinnyVector4x32_t y4;
 
     x1 ^= ((~((x1 >> 2) | (x1 >> 3))) & 0x11111111U);
     x2 ^= ((~((x2 >> 2) | (x2 >> 3))) & 0x11111111U);
@@ -297,12 +285,12 @@ STATIC_INLINE void skinny128_sbox_four
    temporary values below, we perform the operations two at a time
    instead of four at a time.  This alleviates register pressure. */
 STATIC_INLINE void skinny128_sbox_two
-    (Skinny128Vector_t *u, Skinny128Vector_t *v)
+    (SkinnyVector4x32_t *u, SkinnyVector4x32_t *v)
 {
-    Skinny128Vector_t x1 = *u;
-    Skinny128Vector_t y1;
-    Skinny128Vector_t x2 = *v;
-    Skinny128Vector_t y2;
+    SkinnyVector4x32_t x1 = *u;
+    SkinnyVector4x32_t y1;
+    SkinnyVector4x32_t x2 = *v;
+    SkinnyVector4x32_t y2;
 
     x1 ^= ((~((x1 >> 2) | (x1 >> 3))) & 0x11111111U);
     x2 ^= ((~((x2 >> 2) | (x2 >> 3))) & 0x11111111U);
@@ -343,15 +331,15 @@ STATIC_INLINE void skinny128_sbox_two
 #endif
 
 static void skinny128_ecb_encrypt_four
-    (void *output, const Skinny128Vector_t *input, const Skinny128Key_t *ks)
+    (void *output, const SkinnyVector4x32_t *input, const Skinny128Key_t *ks)
 {
-    Skinny128Vector_t row0;
-    Skinny128Vector_t row1;
-    Skinny128Vector_t row2;
-    Skinny128Vector_t row3;
+    SkinnyVector4x32_t row0;
+    SkinnyVector4x32_t row1;
+    SkinnyVector4x32_t row2;
+    SkinnyVector4x32_t row3;
     const Skinny128HalfCells_t *schedule;
     unsigned index;
-    Skinny128Vector_t temp;
+    SkinnyVector4x32_t temp;
 
     /* Read the rows of all four counter blocks into memory */
     row0 = input[0];
@@ -392,14 +380,14 @@ static void skinny128_ecb_encrypt_four
 
     /* Write the rows of all four blocks back to memory */
 #if SKINNY_LITTLE_ENDIAN && SKINNY_UNALIGNED
-    *((Skinny128VectorU_t *)output) =
-        (Skinny128Vector_t){row0[0], row1[0], row2[0], row3[0]};
-    *((Skinny128VectorU_t *)(output + 16)) =
-        (Skinny128Vector_t){row0[1], row1[1], row2[1], row3[1]};
-    *((Skinny128VectorU_t *)(output + 32)) =
-        (Skinny128Vector_t){row0[2], row1[2], row2[2], row3[2]};
-    *((Skinny128VectorU_t *)(output + 48)) =
-        (Skinny128Vector_t){row0[3], row1[3], row2[3], row3[3]};
+    *((SkinnyVector4x32U_t *)output) =
+        (SkinnyVector4x32_t){row0[0], row1[0], row2[0], row3[0]};
+    *((SkinnyVector4x32U_t *)(output + 16)) =
+        (SkinnyVector4x32_t){row0[1], row1[1], row2[1], row3[1]};
+    *((SkinnyVector4x32U_t *)(output + 32)) =
+        (SkinnyVector4x32_t){row0[2], row1[2], row2[2], row3[2]};
+    *((SkinnyVector4x32U_t *)(output + 48)) =
+        (SkinnyVector4x32_t){row0[3], row1[3], row2[3], row3[3]};
 #else
     WRITE_WORD32(output,  0, row0[0]);
     WRITE_WORD32(output,  4, row1[0]);

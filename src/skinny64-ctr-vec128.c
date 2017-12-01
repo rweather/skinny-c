@@ -27,12 +27,6 @@
 
 #if SKINNY_VEC128_MATH
 
-/* Skinny-64 state represented as a vector of eight 16-bit words */
-typedef uint16_t Skinny64Vector_t SKINNY_VECTOR_ATTR(8, 16);
-#if SKINNY_UNALIGNED
-typedef uint16_t Skinny64VectorU_t SKINNY_VECTORU_ATTR(8, 16);
-#endif
-
 /* This implementation encrypts eight blocks at a time */
 #define SKINNY64_CTR_BLOCK_SIZE (SKINNY64_BLOCK_SIZE * 8)
 
@@ -43,7 +37,7 @@ typedef struct
     Skinny64TweakedKey_t kt;
 
     /** Counter values for the next block, pre-formatted into row vectors */
-    Skinny64Vector_t counter[4];
+    SkinnyVector8x16_t counter[4];
 
     /** Encrypted counter value for encrypting the current block */
     unsigned char ecounter[SKINNY64_CTR_BLOCK_SIZE];
@@ -132,15 +126,9 @@ static int skinny64_ctr_vec128_set_tweak
     return 1;
 }
 
-/* Convert a scalar value into a vector */
-STATIC_INLINE Skinny64Vector_t skinny64_to_vector(uint16_t x)
-{
-    return (Skinny64Vector_t){x, x, x, x, x, x, x, x};
-}
-
 /* Increment a specific column in an array of row vectors */
 STATIC_INLINE void skinny64_ctr_increment
-    (Skinny64Vector_t *counter, unsigned column, unsigned inc)
+    (SkinnyVector8x16_t *counter, unsigned column, unsigned inc)
 {
     uint8_t *ctr = ((uint8_t *)counter) + column * 2;
     uint8_t *ptr;
@@ -182,10 +170,10 @@ static int skinny64_ctr_vec128_set_counter
     ctx->offset = SKINNY64_CTR_BLOCK_SIZE;
 
     /* Load the counter block and convert into row vectors */
-    ctx->counter[0] = skinny64_to_vector(READ_WORD16(block, 0));
-    ctx->counter[1] = skinny64_to_vector(READ_WORD16(block, 2));
-    ctx->counter[2] = skinny64_to_vector(READ_WORD16(block, 4));
-    ctx->counter[3] = skinny64_to_vector(READ_WORD16(block, 6));
+    ctx->counter[0] = skinny_to_vec8x16(READ_WORD16(block, 0));
+    ctx->counter[1] = skinny_to_vec8x16(READ_WORD16(block, 2));
+    ctx->counter[2] = skinny_to_vec8x16(READ_WORD16(block, 4));
+    ctx->counter[3] = skinny_to_vec8x16(READ_WORD16(block, 6));
 
     /* Increment the second through seventh columns of each row vector */
     skinny64_ctr_increment(ctx->counter, 1, 1);
@@ -201,13 +189,13 @@ static int skinny64_ctr_vec128_set_counter
     return 1;
 }
 
-STATIC_INLINE Skinny64Vector_t skinny64_rotate_right
-    (Skinny64Vector_t x, unsigned count)
+STATIC_INLINE SkinnyVector8x16_t skinny64_rotate_right
+    (SkinnyVector8x16_t x, unsigned count)
 {
     return (x >> count) | (x << (16 - count));
 }
 
-STATIC_INLINE Skinny64Vector_t skinny64_sbox(Skinny64Vector_t x)
+STATIC_INLINE SkinnyVector8x16_t skinny64_sbox(SkinnyVector8x16_t x)
 {
     x = ((~((x >> 3) | (x >> 2))) & 0x1111U) ^ x;
     x = ((~((x << 1) | (x << 2))) & 0x8888U) ^ x;
@@ -217,15 +205,15 @@ STATIC_INLINE Skinny64Vector_t skinny64_sbox(Skinny64Vector_t x)
 }
 
 static void skinny64_ecb_encrypt_eight
-    (void *output, const Skinny64Vector_t *input, const Skinny64Key_t *ks)
+    (void *output, const SkinnyVector8x16_t *input, const Skinny64Key_t *ks)
 {
-    Skinny64Vector_t row0;
-    Skinny64Vector_t row1;
-    Skinny64Vector_t row2;
-    Skinny64Vector_t row3;
+    SkinnyVector8x16_t row0;
+    SkinnyVector8x16_t row1;
+    SkinnyVector8x16_t row2;
+    SkinnyVector8x16_t row3;
     const Skinny64HalfCells_t *schedule;
     unsigned index;
-    Skinny64Vector_t temp;
+    SkinnyVector8x16_t temp;
 
     /* Read the rows of all eight counter blocks into memory */
     row0 = input[0];
@@ -267,18 +255,18 @@ static void skinny64_ecb_encrypt_eight
        better performance than rearranging the vectors and performing
        an unaligned vector write */
 #if 0 /* SKINNY_LITTLE_ENDIAN && SKINNY_UNALIGNED */
-    *((Skinny64VectorU_t *)output) =
-        (Skinny64Vector_t){row0[0], row1[0], row2[0], row3[0],
-                           row0[1], row1[1], row2[1], row3[1]};
-    *((Skinny64VectorU_t *)(output + 16)) =
-        (Skinny64Vector_t){row0[2], row1[2], row2[2], row3[2],
-                           row0[3], row1[3], row2[3], row3[3]};
-    *((Skinny64VectorU_t *)(output + 32)) =
-        (Skinny64Vector_t){row0[4], row1[4], row2[4], row3[4],
-                           row0[5], row1[5], row2[5], row3[5]};
-    *((Skinny64VectorU_t *)(output + 48)) =
-        (Skinny64Vector_t){row0[6], row1[6], row2[6], row3[6],
-                           row0[7], row1[7], row2[7], row3[7]};
+    *((SkinnyVector8x16U_t *)output) =
+        (SkinnyVector8x16_t){row0[0], row1[0], row2[0], row3[0],
+                             row0[1], row1[1], row2[1], row3[1]};
+    *((SkinnyVector8x16U_t *)(output + 16)) =
+        (SkinnyVector8x16_t){row0[2], row1[2], row2[2], row3[2],
+                             row0[3], row1[3], row2[3], row3[3]};
+    *((SkinnyVector8x16U_t *)(output + 32)) =
+        (SkinnyVector8x16_t){row0[4], row1[4], row2[4], row3[4],
+                             row0[5], row1[5], row2[5], row3[5]};
+    *((SkinnyVector8x16U_t *)(output + 48)) =
+        (SkinnyVector8x16_t){row0[6], row1[6], row2[6], row3[6],
+                             row0[7], row1[7], row2[7], row3[7]};
 #else
     WRITE_WORD16(output,  0, row0[0]);
     WRITE_WORD16(output,  2, row1[0]);

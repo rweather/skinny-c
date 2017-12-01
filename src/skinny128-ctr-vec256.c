@@ -27,12 +27,6 @@
 
 #if SKINNY_VEC256_MATH
 
-/* Skinny-128 state represented as a vector of eight 32-bit words */
-typedef uint32_t Skinny128Vector_t SKINNY_VECTOR_ATTR(8, 32);
-#if SKINNY_UNALIGNED
-typedef uint32_t Skinny128VectorU_t SKINNY_VECTORU_ATTR(8, 32);
-#endif
-
 /* This implementation encrypts eight blocks at a time */
 #define SKINNY128_CTR_BLOCK_SIZE (SKINNY128_BLOCK_SIZE * 8)
 
@@ -43,7 +37,7 @@ typedef struct
     Skinny128TweakedKey_t kt;
 
     /** Counter values for the next block, pre-formatted into row vectors */
-    Skinny128Vector_t counter[4];
+    SkinnyVector8x32_t counter[4];
 
     /** Encrypted counter value for encrypting the current block */
     unsigned char ecounter[SKINNY128_CTR_BLOCK_SIZE];
@@ -133,15 +127,9 @@ static int skinny128_ctr_vec256_set_tweak
     return 1;
 }
 
-/* Convert a scalar value into a vector */
-STATIC_INLINE Skinny128Vector_t skinny128_to_vector(uint32_t x)
-{
-    return (Skinny128Vector_t){x, x, x, x, x, x, x, x};
-}
-
 /* Increment a specific column in an array of row vectors */
 STATIC_INLINE void skinny128_ctr_increment
-    (Skinny128Vector_t *counter, unsigned column, unsigned inc)
+    (SkinnyVector8x32_t *counter, unsigned column, unsigned inc)
 {
     uint8_t *ctr = ((uint8_t *)counter) + column * 4;
     uint8_t *ptr;
@@ -183,10 +171,10 @@ static int skinny128_ctr_vec256_set_counter
     ctx->offset = SKINNY128_CTR_BLOCK_SIZE;
 
     /* Load the counter block and convert into row vectors */
-    ctx->counter[0] = skinny128_to_vector(READ_WORD32(block,  0));
-    ctx->counter[1] = skinny128_to_vector(READ_WORD32(block,  4));
-    ctx->counter[2] = skinny128_to_vector(READ_WORD32(block,  8));
-    ctx->counter[3] = skinny128_to_vector(READ_WORD32(block, 12));
+    ctx->counter[0] = skinny_to_vec8x32(READ_WORD32(block,  0));
+    ctx->counter[1] = skinny_to_vec8x32(READ_WORD32(block,  4));
+    ctx->counter[2] = skinny_to_vec8x32(READ_WORD32(block,  8));
+    ctx->counter[3] = skinny_to_vec8x32(READ_WORD32(block, 12));
 
     /* Increment the second through seventh columns of each row vector */
     skinny128_ctr_increment(ctx->counter, 1, 1);
@@ -202,8 +190,8 @@ static int skinny128_ctr_vec256_set_counter
     return 1;
 }
 
-STATIC_INLINE Skinny128Vector_t skinny128_rotate_right
-    (Skinny128Vector_t x, unsigned count)
+STATIC_INLINE SkinnyVector8x32_t skinny128_rotate_right
+    (SkinnyVector8x32_t x, unsigned count)
 {
     /* Note: we are rotating the cells right, which actually moves
        the values up closer to the MSB.  That is, we do a left shift
@@ -216,17 +204,17 @@ STATIC_INLINE Skinny128Vector_t skinny128_rotate_right
    registers on x86-64 CPU's that have AVX2 support or better as the CPU
    can schedule unrelated operations to operate in parallel. */
 STATIC_INLINE void skinny128_sbox_four
-    (Skinny128Vector_t *u, Skinny128Vector_t *v,
-     Skinny128Vector_t *s, Skinny128Vector_t *t)
+    (SkinnyVector8x32_t *u, SkinnyVector8x32_t *v,
+     SkinnyVector8x32_t *s, SkinnyVector8x32_t *t)
 {
-    Skinny128Vector_t x1 = *u;
-    Skinny128Vector_t y1;
-    Skinny128Vector_t x2 = *v;
-    Skinny128Vector_t y2;
-    Skinny128Vector_t x3 = *s;
-    Skinny128Vector_t y3;
-    Skinny128Vector_t x4 = *t;
-    Skinny128Vector_t y4;
+    SkinnyVector8x32_t x1 = *u;
+    SkinnyVector8x32_t y1;
+    SkinnyVector8x32_t x2 = *v;
+    SkinnyVector8x32_t y2;
+    SkinnyVector8x32_t x3 = *s;
+    SkinnyVector8x32_t y3;
+    SkinnyVector8x32_t x4 = *t;
+    SkinnyVector8x32_t y4;
 
     x1 ^= ((~((x1 >> 2) | (x1 >> 3))) & 0x11111111U);
     x2 ^= ((~((x2 >> 2) | (x2 >> 3))) & 0x11111111U);
@@ -293,15 +281,15 @@ STATIC_INLINE void skinny128_sbox_four
 }
 
 static void skinny128_ecb_encrypt_eight
-    (void *output, const Skinny128Vector_t *input, const Skinny128Key_t *ks)
+    (void *output, const SkinnyVector8x32_t *input, const Skinny128Key_t *ks)
 {
-    Skinny128Vector_t row0;
-    Skinny128Vector_t row1;
-    Skinny128Vector_t row2;
-    Skinny128Vector_t row3;
+    SkinnyVector8x32_t row0;
+    SkinnyVector8x32_t row1;
+    SkinnyVector8x32_t row2;
+    SkinnyVector8x32_t row3;
     const Skinny128HalfCells_t *schedule;
     unsigned index;
-    Skinny128Vector_t temp;
+    SkinnyVector8x32_t temp;
 
     /* Read the rows of all eight counter blocks into memory */
     row0 = input[0];
@@ -337,18 +325,18 @@ static void skinny128_ecb_encrypt_eight
 
     /* Write the rows of all eight blocks back to memory */
 #if SKINNY_LITTLE_ENDIAN && SKINNY_UNALIGNED
-    *((Skinny128VectorU_t *)output) =
-        (Skinny128Vector_t){row0[0], row1[0], row2[0], row3[0],
-                            row0[1], row1[1], row2[1], row3[1]};
-    *((Skinny128VectorU_t *)(output + 32)) =
-        (Skinny128Vector_t){row0[2], row1[2], row2[2], row3[2],
-                            row0[3], row1[3], row2[3], row3[3]};
-    *((Skinny128VectorU_t *)(output + 64)) =
-        (Skinny128Vector_t){row0[4], row1[4], row2[4], row3[4],
-                            row0[5], row1[5], row2[5], row3[5]};
-    *((Skinny128VectorU_t *)(output + 96)) =
-        (Skinny128Vector_t){row0[6], row1[6], row2[6], row3[6],
-                            row0[7], row1[7], row2[7], row3[7]};
+    *((SkinnyVector8x32U_t *)output) =
+        (SkinnyVector8x32_t){row0[0], row1[0], row2[0], row3[0],
+                             row0[1], row1[1], row2[1], row3[1]};
+    *((SkinnyVector8x32U_t *)(output + 32)) =
+        (SkinnyVector8x32_t){row0[2], row1[2], row2[2], row3[2],
+                             row0[3], row1[3], row2[3], row3[3]};
+    *((SkinnyVector8x32U_t *)(output + 64)) =
+        (SkinnyVector8x32_t){row0[4], row1[4], row2[4], row3[4],
+                             row0[5], row1[5], row2[5], row3[5]};
+    *((SkinnyVector8x32U_t *)(output + 96)) =
+        (SkinnyVector8x32_t){row0[6], row1[6], row2[6], row3[6],
+                             row0[7], row1[7], row2[7], row3[7]};
 #else
     WRITE_WORD32(output,   0, row0[0]);
     WRITE_WORD32(output,   4, row1[0]);
