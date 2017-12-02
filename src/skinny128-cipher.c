@@ -72,47 +72,22 @@ STATIC_INLINE void skinny128_permute_tk(Skinny128Cells_t *tk)
                  ((row3 << 16) & 0x00FF0000U);
 }
 
-static void skinny128_set_key_inner
-    (Skinny128Key_t *ks, const void *key, unsigned key_size,
-     const Skinny128Cells_t *tweak)
+/* Initializes the key schedule with TK1 */
+static void skinny128_set_tk1
+    (Skinny128Key_t *ks, const void *key, unsigned key_size, int tweaked)
 {
-    Skinny128Cells_t tk[3];
-    unsigned count, index;
-    uint32_t word;
+    Skinny128Cells_t tk;
+    unsigned index;
+    uint16_t word;
     uint8_t rc = 0;
 
-    /* How many tk items do we need and what is the round count? */
-    if (key_size == SKINNY128_BLOCK_SIZE) {
-        count = 1;
-        ks->rounds = 40;
-    } else if (key_size <= (2 * SKINNY128_BLOCK_SIZE)) {
-        count = 2;
-        ks->rounds = 48;
-    } else {
-        count = 3;
-        ks->rounds = 56;
-    }
-
     /* Unpack the key and convert from little-endian to host-endian */
-    if (!tweak) {
-        /* Key only, no tweak */
-        memset(tk, 0, sizeof(tk));
-        for (index = 0; index < key_size; index += 4) {
-            if ((index + 4) <= key_size) {
-                word = READ_WORD32(key, index);
-            } else {
-                word = READ_BYTE(key, index);
-                if ((index + 1) < key_size)
-                    word |= (READ_BYTE(key, index + 1) << 8);
-                if ((index + 2) < key_size)
-                    word |= (READ_BYTE(key, index + 2) << 16);
-            }
-            tk[index / SKINNY128_BLOCK_SIZE].row[(index / 4) & 0x03] = word;
-        }
+    if (key_size >= SKINNY128_BLOCK_SIZE) {
+        tk.row[0] = READ_WORD32(key, 0);
+        tk.row[1] = READ_WORD32(key, 4);
+        tk.row[2] = READ_WORD32(key, 8);
+        tk.row[3] = READ_WORD32(key, 12);
     } else {
-        /* TK1 is set to the tweak, with the key in the remaining cells */
-        tk[0] = *tweak;
-        memset(&(tk[1]), 0, sizeof(Skinny128Cells_t) * 2);
         for (index = 0; index < key_size; index += 4) {
             if ((index + 4) <= key_size) {
                 word = READ_WORD32(key, index);
@@ -123,39 +98,18 @@ static void skinny128_set_key_inner
                 if ((index + 2) < key_size)
                     word |= (READ_BYTE(key, index + 2) << 16);
             }
-            tk[(index / SKINNY128_BLOCK_SIZE) + 1].row[(index / 4) & 0x03] = word;
+            tk.row[index / 4] = word;
         }
     }
 
-    /* Compute the key schedule words for each round */
+    /* Generate the key schedule words for all rounds */
     for (index = 0; index < ks->rounds; ++index) {
-        /* Determine the subkey to use at this point in the key schedule
-           by XOR'ing together the first two rows of each TKi element */
+        /* Determine the subkey to use at this point in the key schedule */
 #if SKINNY_64BIT
-        if (count == 1) {
-            ks->schedule[index].lrow = tk[0].lrow[0];
-        } else if (count == 2) {
-            ks->schedule[index].lrow =
-                tk[0].lrow[0] ^ tk[1].lrow[0];
-        } else {
-            ks->schedule[index].lrow =
-                tk[0].lrow[0] ^ tk[1].lrow[0] ^ tk[2].lrow[0];
-        }
+        ks->schedule[index].lrow = tk.lrow[0];
 #else
-        if (count == 1) {
-            ks->schedule[index].row[0] = tk[0].row[0];
-            ks->schedule[index].row[1] = tk[0].row[1];
-        } else if (count == 2) {
-            ks->schedule[index].row[0] =
-                tk[0].row[0] ^ tk[1].row[0];
-            ks->schedule[index].row[1] =
-                tk[0].row[1] ^ tk[1].row[1];
-        } else {
-            ks->schedule[index].row[0] =
-                tk[0].row[0] ^ tk[1].row[0] ^ tk[2].row[0];
-            ks->schedule[index].row[1] =
-                tk[0].row[1] ^ tk[1].row[1] ^ tk[2].row[1];
-        }
+        ks->schedule[index].row[0] = tk.row[0];
+        ks->schedule[index].row[1] = tk.row[1];
 #endif
 
         /* XOR in the round constants for the first two rows.
@@ -169,37 +123,179 @@ static void skinny128_set_key_inner
         /* If we have a tweak, then we need to XOR a 1 bit into the
            second bit of the top cell of the third column as recommended
            by the SKINNY specification */
-        if (tweak)
+        if (tweaked)
             ks->schedule[index].row[0] ^= 0x00020000;
 
-        /* If this is the last round, then there is no point permuting
-           the TKi values to create another key schedule entry */
-        if (index == (ks->rounds - 1))
-            break;
+        /* Permute TK1 for the next round */
+        skinny128_permute_tk(&tk);
+    }
+}
 
-        /* Permute the TKi states */
-        skinny128_permute_tk(&(tk[0]));
-        if (count == 1)
-            continue;
-        skinny128_permute_tk(&(tk[1]));
-        if (count == 3) {
-            skinny128_permute_tk(&(tk[2]));
-        }
+/* XOR the key schedule with TK1 */
+static void skinny128_xor_tk1(Skinny128Key_t *ks, const void *key)
+{
+    Skinny128Cells_t tk;
+    unsigned index;
 
-        /* Update the TK2 and TK3 states with the LFSR's */
+    /* Unpack the key and convert from little-endian to host-endian */
+    tk.row[0] = READ_WORD32(key, 0);
+    tk.row[1] = READ_WORD32(key, 4);
+    tk.row[2] = READ_WORD32(key, 8);
+    tk.row[3] = READ_WORD32(key, 12);
+
+    /* Generate the key schedule words for all rounds */
+    for (index = 0; index < ks->rounds; ++index) {
+        /* Determine the subkey to use at this point in the key schedule */
 #if SKINNY_64BIT
-        tk[1].lrow[0] = skinny128_LFSR2(tk[1].lrow[0]);
-        if (count == 3) {
-            tk[2].lrow[0] = skinny128_LFSR3(tk[2].lrow[0]);
-        }
+        ks->schedule[index].lrow ^= tk.lrow[0];
 #else
-        tk[1].row[0] = skinny128_LFSR2(tk[1].row[0]);
-        tk[1].row[1] = skinny128_LFSR2(tk[1].row[1]);
-        if (count == 3) {
-            tk[2].row[0] = skinny128_LFSR3(tk[2].row[0]);
-            tk[2].row[1] = skinny128_LFSR3(tk[2].row[1]);
-        }
+        ks->schedule[index].row[0] ^= tk.row[0];
+        ks->schedule[index].row[1] ^= tk.row[1];
 #endif
+
+        /* Permute TK1 for the next round */
+        skinny128_permute_tk(&tk);
+    }
+}
+
+/* XOR the key schedule with TK2 */
+static void skinny128_set_tk2
+    (Skinny128Key_t *ks, const void *key, unsigned key_size)
+{
+    Skinny128Cells_t tk;
+    unsigned index;
+    uint16_t word;
+
+    /* Unpack the key and convert from little-endian to host-endian */
+    if (key_size >= SKINNY128_BLOCK_SIZE) {
+        tk.row[0] = READ_WORD32(key, 0);
+        tk.row[1] = READ_WORD32(key, 4);
+        tk.row[2] = READ_WORD32(key, 8);
+        tk.row[3] = READ_WORD32(key, 12);
+    } else {
+        for (index = 0; index < key_size; index += 4) {
+            if ((index + 4) <= key_size) {
+                word = READ_WORD32(key, index);
+            } else {
+                word = READ_BYTE(key, index);
+                if ((index + 1) < key_size)
+                    word |= (READ_BYTE(key, index + 1) << 8);
+                if ((index + 2) < key_size)
+                    word |= (READ_BYTE(key, index + 2) << 16);
+            }
+            tk.row[index / 4] = word;
+        }
+    }
+
+    /* Generate the key schedule words for all rounds */
+    for (index = 0; index < ks->rounds; ++index) {
+        /* Determine the subkey to use at this point in the key schedule */
+#if SKINNY_64BIT
+        ks->schedule[index].lrow ^= tk.lrow[0];
+#else
+        ks->schedule[index].row[0] ^= tk.row[0];
+        ks->schedule[index].row[1] ^= tk.row[1];
+#endif
+
+        /* Permute TK2 for the next round */
+        skinny128_permute_tk(&tk);
+
+        /* Apply LFSR2 to the first two rows of TK2 */
+#if SKINNY_64BIT
+        tk.lrow[0] = skinny128_LFSR2(tk.lrow[0]);
+#else
+        tk.row[0] = skinny128_LFSR2(tk.row[0]);
+        tk.row[1] = skinny128_LFSR2(tk.row[1]);
+#endif
+    }
+}
+
+/* XOR the key schedule with TK3 */
+static void skinny128_set_tk3
+    (Skinny128Key_t *ks, const void *key, unsigned key_size)
+{
+    Skinny128Cells_t tk;
+    unsigned index;
+    uint16_t word;
+
+    /* Unpack the key and convert from little-endian to host-endian */
+    if (key_size >= SKINNY128_BLOCK_SIZE) {
+        tk.row[0] = READ_WORD32(key, 0);
+        tk.row[1] = READ_WORD32(key, 4);
+        tk.row[2] = READ_WORD32(key, 8);
+        tk.row[3] = READ_WORD32(key, 12);
+    } else {
+        for (index = 0; index < key_size; index += 4) {
+            if ((index + 4) <= key_size) {
+                word = READ_WORD32(key, index);
+            } else {
+                word = READ_BYTE(key, index);
+                if ((index + 1) < key_size)
+                    word |= (READ_BYTE(key, index + 1) << 8);
+                if ((index + 2) < key_size)
+                    word |= (READ_BYTE(key, index + 2) << 16);
+            }
+            tk.row[index / 4] = word;
+        }
+    }
+
+    /* Generate the key schedule words for all rounds */
+    for (index = 0; index < ks->rounds; ++index) {
+        /* Determine the subkey to use at this point in the key schedule */
+#if SKINNY_64BIT
+        ks->schedule[index].lrow ^= tk.lrow[0];
+#else
+        ks->schedule[index].row[0] ^= tk.row[0];
+        ks->schedule[index].row[1] ^= tk.row[1];
+#endif
+
+        /* Permute TK3 for the next round */
+        skinny128_permute_tk(&tk);
+
+        /* Apply LFSR3 to the first two rows of TK2 */
+#if SKINNY_64BIT
+        tk.lrow[0] = skinny128_LFSR3(tk.lrow[0]);
+#else
+        tk.row[0] = skinny128_LFSR3(tk.row[0]);
+        tk.row[1] = skinny128_LFSR3(tk.row[1]);
+#endif
+    }
+}
+
+static void skinny128_set_key_inner
+    (Skinny128Key_t *ks, const void *key, unsigned key_size, const void *tweak)
+{
+    if (!tweak) {
+        /* Key only, no tweak */
+        if (key_size == SKINNY128_BLOCK_SIZE) {
+            ks->rounds = 40;
+            skinny128_set_tk1(ks, key, key_size, 0);
+        } else if (key_size <= (2 * SKINNY128_BLOCK_SIZE)) {
+            ks->rounds = 48;
+            skinny128_set_tk1(ks, key, SKINNY128_BLOCK_SIZE, 0);
+            skinny128_set_tk2(ks, key + SKINNY128_BLOCK_SIZE,
+                              key_size - SKINNY128_BLOCK_SIZE);
+        } else {
+            ks->rounds = 56;
+            skinny128_set_tk1(ks, key, SKINNY128_BLOCK_SIZE, 0);
+            skinny128_set_tk2(ks, key + SKINNY128_BLOCK_SIZE,
+                              SKINNY128_BLOCK_SIZE);
+            skinny128_set_tk3(ks, key + SKINNY128_BLOCK_SIZE * 2,
+                              key_size - SKINNY128_BLOCK_SIZE * 2);
+        }
+    } else {
+        /* Key and tweak */
+        if (key_size == SKINNY128_BLOCK_SIZE) {
+            ks->rounds = 48;
+            skinny128_set_tk1(ks, tweak, SKINNY128_BLOCK_SIZE, 1);
+            skinny128_set_tk2(ks, key, key_size);
+        } else {
+            ks->rounds = 56;
+            skinny128_set_tk1(ks, tweak, SKINNY128_BLOCK_SIZE, 1);
+            skinny128_set_tk2(ks, key, SKINNY128_BLOCK_SIZE);
+            skinny128_set_tk3(ks, key + SKINNY128_BLOCK_SIZE,
+                              key_size - SKINNY128_BLOCK_SIZE);
+        }
     }
 }
 
@@ -216,28 +312,6 @@ int skinny128_set_key(Skinny128Key_t *ks, const void *key, unsigned size)
     return 1;
 }
 
-static void skinny128_read_tweak
-    (Skinny128Cells_t *tk, const void *tweak, unsigned tweak_size)
-{
-    unsigned index;
-    uint32_t word;
-    memset(tk, 0, sizeof(Skinny128Cells_t));
-    if (tweak) {
-        for (index = 0; index < tweak_size; index += 4) {
-            if ((index + 4) <= tweak_size) {
-                word = READ_WORD32(tweak, index);
-            } else {
-                word = READ_BYTE(tweak, index);
-                if ((index + 1) < tweak_size)
-                    word |= (READ_BYTE(tweak, index + 1) << 8);
-                if ((index + 2) < tweak_size)
-                    word |= (READ_BYTE(tweak, index + 2) << 16);
-            }
-            tk->row[(index / 4) & 0x03] = word;
-        }
-    }
-}
-
 int skinny128_set_tweaked_key
     (Skinny128TweakedKey_t *ks, const void *key, unsigned key_size)
 {
@@ -248,58 +322,33 @@ int skinny128_set_tweaked_key
     }
 
     /* Set the initial tweak to all-zeroes */
-    memset(&(ks->tweak), 0, sizeof(ks->tweak));
+    memset(ks->tweak, 0, sizeof(ks->tweak));
 
     /* Set the initial key and tweak value */
-    skinny128_set_key_inner(&(ks->ks), key, key_size, &(ks->tweak));
+    skinny128_set_key_inner(&(ks->ks), key, key_size, ks->tweak);
     return 1;
 }
 
 int skinny128_set_tweak
     (Skinny128TweakedKey_t *ks, const void *tweak, unsigned tweak_size)
 {
-    Skinny128Cells_t tk_prev;
-    Skinny128Cells_t tk_next;
-    unsigned index;
+    uint8_t tk_prev[SKINNY128_BLOCK_SIZE];
 
     /* Validate the parameters */
     if (!ks || tweak_size < 1 || tweak_size > SKINNY128_BLOCK_SIZE) {
         return 0;
     }
 
-    /* Read the tweak value and convert little-endian to host-endian */
-    skinny128_read_tweak(&tk_next, tweak, tweak_size);
+    /* Read the new tweak value and swap with the original */
+    memcpy(tk_prev, ks->tweak, sizeof(tk_prev));
+    memcpy(ks->tweak, tweak, tweak_size);
+    memset(ks->tweak + tweak_size, 0, sizeof(ks->tweak) - tweak_size);
 
-    /* We iterate through every round and XOR the previous and new tweaks
-       with the key schedule entries.  This will have the effect of removing
-       the previous tweak and then applying the new tweak */
-    tk_prev = ks->tweak;
-    ks->tweak = tk_next;
-    for (index = 0; index < ks->ks.rounds; ++index) {
-        /* Remove the previous tweak from the key schedule entry */
-#if SKINNY_64BIT
-        ks->ks.schedule[index].lrow ^= tk_prev.lrow[0];
-#else
-        ks->ks.schedule[index].row[0] ^= tk_prev.row[0];
-        ks->ks.schedule[index].row[1] ^= tk_prev.row[1];
-#endif
+    /* XOR the original tweak out of the key schedule */
+    skinny128_xor_tk1(&(ks->ks), tk_prev);
 
-        /* Apply the new tweak to the key schedule entry */
-#if SKINNY_64BIT
-        ks->ks.schedule[index].lrow ^= tk_next.lrow[0];
-#else
-        ks->ks.schedule[index].row[0] ^= tk_next.row[0];
-        ks->ks.schedule[index].row[1] ^= tk_next.row[1];
-#endif
-
-        /* Permute the TK1 states for all rounds except the last */
-        if (index < (ks->ks.rounds - 1)) {
-            skinny128_permute_tk(&tk_prev);
-            skinny128_permute_tk(&tk_next);
-        }
-    }
-
-    /* Ready to go */
+    /* XOR the new tweak into the key schedule */
+    skinny128_xor_tk1(&(ks->ks), ks->tweak);
     return 1;
 }
 

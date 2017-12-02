@@ -94,7 +94,7 @@ typedef struct
     Skinny64Key_t ks;
 
     /** Current tweak value, to assist with changing it */
-    Skinny64Cells_t tweak;
+    uint8_t tweak[SKINNY64_BLOCK_SIZE];
 
 } Skinny64TweakedKey_t;
 
