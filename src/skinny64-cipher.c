@@ -42,14 +42,14 @@ STATIC_INLINE void skinny64_permute_tk(Skinny64Cells_t *tk)
     uint16_t row3 = tk->row[3];
     tk->row[2] = tk->row[0];
     tk->row[3] = tk->row[1];
-    tk->row[0] = ((row2 <<  4) & 0x00F0U) |
-                 ((row2 <<  8) & 0xF000U) |
-                 ((row3 >>  8) & 0x000FU) |
-                 ((row3 <<  8) & 0x0F00U);
-    tk->row[1] = ((row2 >>  8) & 0x00F0U) |
-                  (row2        & 0x0F00U) |
-                 ((row3 >> 12) & 0x000FU) |
-                 ((row3 <<  8) & 0xF000U);
+    row3 = (row3 << 8) | (row3 >> 8);
+    tk->row[0] = ((row2 << 4) & 0x00F0U) |
+                 ((row2 << 8) & 0xF000U) |
+                  (row3       & 0x0F0FU);
+    tk->row[1] = ((row2 >> 8) & 0x00F0U) |
+                  (row2       & 0x0F00U) |
+                 ((row3 >> 4) & 0x000FU) |
+                 ( row3       & 0xF000U);
 }
 
 /* Initializes the key schedule with TK1 */

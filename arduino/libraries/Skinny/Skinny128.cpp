@@ -764,14 +764,14 @@ void Skinny128::clear()
         uint32_t row3 = tk[3]; \
         tk[2] = tk[0]; \
         tk[3] = tk[1]; \
+        row3 = (row3 << 16) | (row3 >> 16); \
         tk[0] = ((row2 >>  8) & 0x000000FFU) | \
                 ((row2 << 16) & 0x00FF0000U) | \
-                ((row3 >> 16) & 0x0000FF00U) | \
-                ((row3 << 16) & 0xFF000000U);  \
+                ( row3        & 0xFF00FF00U); \
         tk[1] = ((row2 >> 16) & 0x000000FFU) | \
                  (row2        & 0xFF000000U) | \
-                ((row3 >>  8) & 0x0000FF00U) | \
-                ((row3 << 16) & 0x00FF0000U);  \
+                ((row3 <<  8) & 0x0000FF00U) | \
+                ( row3        & 0x00FF0000U); \
     } while (0)
 
 #endif // !USE_AVR_INLINE_ASM

@@ -66,9 +66,9 @@ The following figures are for the ARM-based Arduino Due running at 84 MHz:
 
 <table>
 <tr><td>Encryption Algorithm</td><td align="right">Encryption (per byte)</td><td align="right">Decryption (per byte)</td><td align="right">Key Setup</td><td>State Size (bytes)</td></tr>
-<tr><td>Skinny-128 (128-bit key, ECB mode)</td><td align="right">10.55us</td><td align="right">11.14us</td><td align="right">41.10us</td><td align="right">332</td></tr>
-<tr><td>Skinny-128 (256-bit key, ECB mode)</td><td align="right">12.63us</td><td align="right">13.34us</td><td align="right">119.55us</td><td align="right">396</td></tr>
-<tr><td>Skinny-128 (384-bit key, ECB mode)</td><td align="right">14.72us</td><td align="right">15.55us</td><td align="right">215.35</td><td align="right">460</td></tr>
+<tr><td>Skinny-128 (128-bit key, ECB mode)</td><td align="right">10.55us</td><td align="right">11.14us</td><td align="right">39.20us</td><td align="right">332</td></tr>
+<tr><td>Skinny-128 (256-bit key, ECB mode)</td><td align="right">12.63us</td><td align="right">13.34us</td><td align="right">112.13us</td><td align="right">396</td></tr>
+<tr><td>Skinny-128 (384-bit key, ECB mode)</td><td align="right">14.72us</td><td align="right">15.55us</td><td align="right">200.53</td><td align="right">460</td></tr>
 <tr><td>Skinny-64 (64-bit key, ECB mode)</td><td align="right">3.38us</td><td align="right">3.52us</td><td align="right">28.64us</td><td align="right">140</td></tr>
 <tr><td>Skinny-64 (128-bit key, ECB mode)</td><td align="right">3.79us</td><td align="right">3.95us</td><td align="right">63.88us</td><td align="right">156</td></tr>
 <tr><td>Skinny-64 (192-bit key, ECB mode)</td><td align="right">4.20us</td><td align="right">4.38us</td><td align="right">102.61us</td><td align="right">172</td></tr>
