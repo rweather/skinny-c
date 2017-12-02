@@ -775,14 +775,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00764"></a><span class="lineno">  764</span>&#160;<span class="preprocessor">        uint32_t row3 = tk[3]; \</span></div>
 <div class="line"><a name="l00765"></a><span class="lineno">  765</span>&#160;<span class="preprocessor">        tk[2] = tk[0]; \</span></div>
 <div class="line"><a name="l00766"></a><span class="lineno">  766</span>&#160;<span class="preprocessor">        tk[3] = tk[1]; \</span></div>
-<div class="line"><a name="l00767"></a><span class="lineno">  767</span>&#160;<span class="preprocessor">        tk[0] = ((row2 &gt;&gt;  8) &amp; 0x000000FFU) | \</span></div>
-<div class="line"><a name="l00768"></a><span class="lineno">  768</span>&#160;<span class="preprocessor">                ((row2 &lt;&lt; 16) &amp; 0x00FF0000U) | \</span></div>
-<div class="line"><a name="l00769"></a><span class="lineno">  769</span>&#160;<span class="preprocessor">                ((row3 &gt;&gt; 16) &amp; 0x0000FF00U) | \</span></div>
-<div class="line"><a name="l00770"></a><span class="lineno">  770</span>&#160;<span class="preprocessor">                ((row3 &lt;&lt; 16) &amp; 0xFF000000U);  \</span></div>
+<div class="line"><a name="l00767"></a><span class="lineno">  767</span>&#160;<span class="preprocessor">        row3 = (row3 &lt;&lt; 16) | (row3 &gt;&gt; 16); \</span></div>
+<div class="line"><a name="l00768"></a><span class="lineno">  768</span>&#160;<span class="preprocessor">        tk[0] = ((row2 &gt;&gt;  8) &amp; 0x000000FFU) | \</span></div>
+<div class="line"><a name="l00769"></a><span class="lineno">  769</span>&#160;<span class="preprocessor">                ((row2 &lt;&lt; 16) &amp; 0x00FF0000U) | \</span></div>
+<div class="line"><a name="l00770"></a><span class="lineno">  770</span>&#160;<span class="preprocessor">                ( row3        &amp; 0xFF00FF00U); \</span></div>
 <div class="line"><a name="l00771"></a><span class="lineno">  771</span>&#160;<span class="preprocessor">        tk[1] = ((row2 &gt;&gt; 16) &amp; 0x000000FFU) | \</span></div>
 <div class="line"><a name="l00772"></a><span class="lineno">  772</span>&#160;<span class="preprocessor">                 (row2        &amp; 0xFF000000U) | \</span></div>
-<div class="line"><a name="l00773"></a><span class="lineno">  773</span>&#160;<span class="preprocessor">                ((row3 &gt;&gt;  8) &amp; 0x0000FF00U) | \</span></div>
-<div class="line"><a name="l00774"></a><span class="lineno">  774</span>&#160;<span class="preprocessor">                ((row3 &lt;&lt; 16) &amp; 0x00FF0000U);  \</span></div>
+<div class="line"><a name="l00773"></a><span class="lineno">  773</span>&#160;<span class="preprocessor">                ((row3 &lt;&lt;  8) &amp; 0x0000FF00U) | \</span></div>
+<div class="line"><a name="l00774"></a><span class="lineno">  774</span>&#160;<span class="preprocessor">                ( row3        &amp; 0x00FF0000U); \</span></div>
 <div class="line"><a name="l00775"></a><span class="lineno">  775</span>&#160;<span class="preprocessor">    } while (0)</span></div>
 <div class="line"><a name="l00776"></a><span class="lineno">  776</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00777"></a><span class="lineno">  777</span>&#160;<span class="preprocessor">#endif // !USE_AVR_INLINE_ASM</span></div>
@@ -1419,7 +1419,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 26 2017 19:42:42 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 2 2017 13:28:58 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
