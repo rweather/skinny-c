@@ -28,29 +28,25 @@
 STATIC_INLINE uint64_t skinny128_LFSR2(uint64_t x)
 {
     return ((x << 1) & 0xFEFEFEFEFEFEFEFEULL) ^
-           ((x >> 7) & 0x0101010101010101ULL) ^
-           ((x >> 5) & 0x0101010101010101ULL);
+           (((x >> 7) ^ (x >> 5)) & 0x0101010101010101ULL);
 }
 
 STATIC_INLINE uint64_t skinny128_LFSR3(uint64_t x)
 {
     return ((x >> 1) & 0x7F7F7F7F7F7F7F7FULL) ^
-           ((x << 7) & 0x8080808080808080ULL) ^
-           ((x << 1) & 0x8080808080808080ULL);
+           (((x << 7) ^ (x << 1)) & 0x8080808080808080ULL);
 }
 
 #else
 
 STATIC_INLINE uint32_t skinny128_LFSR2(uint32_t x)
 {
-    return ((x << 1) & 0xFEFEFEFEU) ^ ((x >> 7) & 0x01010101U) ^
-           ((x >> 5) & 0x01010101U);
+    return ((x << 1) & 0xFEFEFEFEU) ^ (((x >> 7) ^ (x >> 5)) & 0x01010101U);
 }
 
 STATIC_INLINE uint32_t skinny128_LFSR3(uint32_t x)
 {
-    return ((x >> 1) & 0x7F7F7F7FU) ^ ((x << 7) & 0x80808080U) ^
-           ((x << 1) & 0x80808080U);
+    return ((x >> 1) & 0x7F7F7F7FU) ^ (((x << 7) ^ (x << 1)) & 0x80808080U);
 }
 
 #endif

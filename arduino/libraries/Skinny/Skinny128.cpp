@@ -1008,14 +1008,12 @@ void Skinny128::xorTK1(const uint8_t *key)
 
 inline uint32_t skinny128_LFSR2(uint32_t x)
 {
-    return ((x << 1) & 0xFEFEFEFEU) ^ ((x >> 7) & 0x01010101U) ^
-           ((x >> 5) & 0x01010101U);
+    return ((x << 1) & 0xFEFEFEFEU) ^ (((x >> 7) ^ (x >> 5)) & 0x01010101U);
 }
 
 inline uint32_t skinny128_LFSR3(uint32_t x)
 {
-    return ((x >> 1) & 0x7F7F7F7FU) ^ ((x << 7) & 0x80808080U) ^
-           ((x << 1) & 0x80808080U);
+    return ((x >> 1) & 0x7F7F7F7FU) ^ (((x << 7) ^ (x << 1)) & 0x80808080U);
 }
 
 #endif // !USE_AVR_INLINE_ASM

@@ -25,14 +25,12 @@
 
 STATIC_INLINE uint32_t skinny64_LFSR2(uint32_t x)
 {
-    return ((x << 1) & 0xEEEEEEEEU) ^ ((x >> 3) & 0x11111111U) ^
-           ((x >> 2) & 0x11111111U);
+    return ((x << 1) & 0xEEEEEEEEU) ^ (((x >> 3) ^ (x >> 2)) & 0x11111111U);
 }
 
 STATIC_INLINE uint32_t skinny64_LFSR3(uint32_t x)
 {
-    return ((x >> 1) & 0x77777777U) ^ (x & 0x88888888U) ^
-           ((x << 3) & 0x88888888U);
+    return ((x >> 1) & 0x77777777U) ^ ((x ^ (x << 3)) & 0x88888888U);
 }
 
 STATIC_INLINE void skinny64_permute_tk(Skinny64Cells_t *tk)
