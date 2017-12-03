@@ -327,36 +327,38 @@ STATIC_INLINE uint64_t skinny64_sbox(uint64_t x)
 {
     /* Splitting the bits out individually gives better performance on
        64-bit platforms because we have more spare registers to work with.
-       This doesn't work as well on 32-bit platforms or with SIMD because
-       register spills start to impact performance.  See below. */
-    uint64_t bit0 = x;
-    uint64_t bit1 = x >> 1;
-    uint64_t bit2 = x >> 2;
-    uint64_t bit3 = x >> 3;
-    bit0 ^= ~(bit3 | bit2);
-    bit3 ^= ~(bit1 | bit2);
-    bit2 ^= ~(bit1 | bit0);
-    bit1 ^= ~(bit0 | bit3);
-    return ((bit0 << 3) & 0x8888888888888888ULL) |
-           ( bit1       & 0x1111111111111111ULL) |
-           ((bit2 << 1) & 0x2222222222222222ULL) |
-           ((bit3 << 2) & 0x4444444444444444ULL);
+       This doesn't work as well on 32-bit platforms because register
+       spills start to impact performance.  See below. */
+    uint64_t bit0 = ~x;
+    uint64_t bit1 = bit0 >> 1;
+    uint64_t bit2 = bit0 >> 2;
+    uint64_t bit3 = bit0 >> 3;
+    bit0 ^= bit3 & bit2;
+    bit3 ^= bit1 & bit2;
+    bit2 ^= bit1 & bit0;
+    bit1 ^= bit0 & bit3;
+    x = ((bit0 << 3) & 0x8888888888888888ULL) |
+        ( bit1       & 0x1111111111111111ULL) |
+        ((bit2 << 1) & 0x2222222222222222ULL) |
+        ((bit3 << 2) & 0x4444444444444444ULL);
+    return ~x;
 }
 
 STATIC_INLINE uint64_t skinny64_inv_sbox(uint64_t x)
 {
-    uint64_t bit0 = x;
-    uint64_t bit1 = x >> 1;
-    uint64_t bit2 = x >> 2;
-    uint64_t bit3 = x >> 3;
-    bit0 ^= ~(bit3 | bit2);
-    bit1 ^= ~(bit3 | bit0);
-    bit2 ^= ~(bit1 | bit0);
-    bit3 ^= ~(bit1 | bit2);
-    return ((bit0 << 1) & 0x2222222222222222ULL) |
-           ((bit1 << 2) & 0x4444444444444444ULL) |
-           ((bit2 << 3) & 0x8888888888888888ULL) |
-           ( bit3       & 0x1111111111111111ULL);
+    uint64_t bit0 = ~x;
+    uint64_t bit1 = bit0 >> 1;
+    uint64_t bit2 = bit0 >> 2;
+    uint64_t bit3 = bit0 >> 3;
+    bit0 ^= bit3 & bit2;
+    bit1 ^= bit3 & bit0;
+    bit2 ^= bit1 & bit0;
+    bit3 ^= bit1 & bit2;
+    x = ((bit0 << 1) & 0x2222222222222222ULL) |
+        ((bit1 << 2) & 0x4444444444444444ULL) |
+        ((bit2 << 3) & 0x8888888888888888ULL) |
+        ( bit3       & 0x1111111111111111ULL);
+    return ~x;
 }
 
 #else
@@ -387,11 +389,18 @@ STATIC_INLINE uint32_t skinny64_sbox(uint32_t x)
      * 32-bit platforms this causes extra register spills which slows down
      * the implementation more than the improvement gained by reducing the
      * number of bit operations.
+     *
+     * We can further reduce the number of NOT operations from 4 to 2
+     * using the technique from https://github.com/kste/skinny_avx to
+     * convert NOR-XOR operations into AND-XOR operations by converting
+     * the S-box into its NOT-inverse.
      */
-    x = ((~((x >> 3) | (x >> 2))) & 0x11111111U) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x88888888U) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x44444444U) ^ x;
-    x = ((~((x >> 2) | (x << 1))) & 0x22222222U) ^ x;
+    x = ~x;
+    x = (((x >> 3) & (x >> 2)) & 0x11111111U) ^ x;
+    x = (((x << 1) & (x << 2)) & 0x88888888U) ^ x;
+    x = (((x << 1) & (x << 2)) & 0x44444444U) ^ x;
+    x = (((x >> 2) & (x << 1)) & 0x22222222U) ^ x;
+    x = ~x;
     return ((x >> 1) & 0x77777777U) | ((x << 3) & 0x88888888U);
 }
 
@@ -411,15 +420,13 @@ STATIC_INLINE uint32_t skinny64_inv_sbox(uint32_t x)
      * x = SBOX_MIX(x);
      * x = SBOX_SHIFT_INV(x);
      * return SBOX_MIX(x);
-     *
-     * However, we can mix the bits in their original positions and then
-     * delay the SBOX_SHIFT_INV steps to be performed with one final rotation.
-     * This reduces the number of required shift operations from 14 to 10.
      */
-    x = ((~((x >> 3) | (x >> 2))) & 0x11111111U) ^ x;
-    x = ((~((x << 1) | (x >> 2))) & 0x22222222U) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x44444444U) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x88888888U) ^ x;
+    x = ~x;
+    x = (((x >> 3) & (x >> 2)) & 0x11111111U) ^ x;
+    x = (((x << 1) & (x >> 2)) & 0x22222222U) ^ x;
+    x = (((x << 1) & (x << 2)) & 0x44444444U) ^ x;
+    x = (((x << 1) & (x << 2)) & 0x88888888U) ^ x;
+    x = ~x;
     return ((x << 1) & 0xEEEEEEEEU) | ((x >> 3) & 0x11111111U);
 }
 

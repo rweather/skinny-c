@@ -197,11 +197,19 @@ STATIC_INLINE SkinnyVector8x16_t skinny64_rotate_right
 
 STATIC_INLINE SkinnyVector8x16_t skinny64_sbox(SkinnyVector8x16_t x)
 {
-    x = ((~((x >> 3) | (x >> 2))) & 0x1111U) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x8888U) ^ x;
-    x = ((~((x << 1) | (x << 2))) & 0x4444U) ^ x;
-    x = ((~((x >> 2) | (x << 1))) & 0x2222U) ^ x;
-    return ((x >> 1) & 0x7777U) | ((x << 3) & 0x8888U);
+    SkinnyVector8x16_t bit0 = ~x;
+    SkinnyVector8x16_t bit1 = bit0 >> 1;
+    SkinnyVector8x16_t bit2 = bit0 >> 2;
+    SkinnyVector8x16_t bit3 = bit0 >> 3;
+    bit0 ^= bit3 & bit2;
+    bit3 ^= bit1 & bit2;
+    bit2 ^= bit1 & bit0;
+    bit1 ^= bit0 & bit3;
+    x = ((bit0 << 3) & 0x8888U) |
+        ( bit1       & 0x1111U) |
+        ((bit2 << 1) & 0x2222U) |
+        ((bit3 << 2) & 0x4444U);
+    return ~x;
 }
 
 static void skinny64_ecb_encrypt_eight
