@@ -193,10 +193,13 @@ STATIC_INLINE SkinnyVector8x16_t mantis_sbox(SkinnyVector8x16_t d)
     SkinnyVector8x16_t a = (d >> 3);
     SkinnyVector8x16_t b = (d >> 2);
     SkinnyVector8x16_t c = (d >> 1);
-    SkinnyVector8x16_t aout = ~((c | (a & b)) & (a | d));
-    SkinnyVector8x16_t bout = (~(a | d)) | (b & c) | (a & c & d);
-    SkinnyVector8x16_t cout = (b & d) | ((b | d) & ~a);
-    SkinnyVector8x16_t dout = (a | b | c) & (~(a & b)) & (c | d);
+    SkinnyVector8x16_t not_a = ~a;
+    SkinnyVector8x16_t ab = not_a | (~b);
+    SkinnyVector8x16_t ad = not_a & (~d);
+    SkinnyVector8x16_t aout = (((~c) & ab) | ad);
+    SkinnyVector8x16_t bout = ad | (b & c) | (a & c & d);
+    SkinnyVector8x16_t cout = (b & d) | ((b | d) & not_a);
+    SkinnyVector8x16_t dout = (a | b | c) & ab & (c | d);
     return ((aout & 0x1111U) << 3) | ((bout & 0x1111U) << 2) |
            ((cout & 0x1111U) << 1) |  (dout & 0x1111U);
 }

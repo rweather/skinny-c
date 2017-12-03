@@ -260,10 +260,13 @@ STATIC_INLINE uint64_t mantis_sbox(uint64_t d)
     uint64_t a = (d >> 3);
     uint64_t b = (d >> 2);
     uint64_t c = (d >> 1);
-    uint64_t aout = ~((c | (a & b)) & (a | d));
-    uint64_t bout = (~(a | d)) | (b & c) | (a & c & d);
-    uint64_t cout = (b & d) | ((b | d) & ~a);
-    uint64_t dout = (a | b | c) & (~(a & b)) & (c | d);
+    uint64_t not_a = ~a;
+    uint64_t ab = not_a | (~b);
+    uint64_t ad = not_a & (~d);
+    uint64_t aout = (((~c) & ab) | ad);
+    uint64_t bout = ad | (b & c) | (a & c & d);
+    uint64_t cout = (b & d) | ((b | d) & not_a);
+    uint64_t dout = (a | b | c) & ab & (c | d);
     return ((aout & 0x1111111111111111U) << 3) |
            ((bout & 0x1111111111111111U) << 2) |
            ((cout & 0x1111111111111111U) << 1) |
@@ -287,10 +290,13 @@ STATIC_INLINE uint32_t mantis_sbox(uint32_t d)
     uint32_t a = (d >> 3);
     uint32_t b = (d >> 2);
     uint32_t c = (d >> 1);
-    uint32_t aout = ~((c | (a & b)) & (a | d));
-    uint32_t bout = (~(a | d)) | (b & c) | (a & c & d);
-    uint32_t cout = (b & d) | ((b | d) & ~a);
-    uint32_t dout = (a | b | c) & (~(a & b)) & (c | d);
+    uint32_t not_a = ~a;
+    uint32_t ab = not_a | (~b);
+    uint32_t ad = not_a & (~d);
+    uint32_t aout = (((~c) & ab) | ad);
+    uint32_t bout = ad | (b & c) | (a & c & d);
+    uint32_t cout = (b & d) | ((b | d) & not_a);
+    uint32_t dout = (a | b | c) & ab & (c | d);
     return ((aout & 0x11111111U) << 3) | ((bout & 0x11111111U) << 2) |
            ((cout & 0x11111111U) << 1) |  (dout & 0x11111111U);
 }
