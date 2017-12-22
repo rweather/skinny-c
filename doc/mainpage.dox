@@ -69,9 +69,9 @@ The API for Skinny-C is described on \ref using_skinny "this page".
 
 \section main_examples Examples
 
-There are two example programs, "skinny-ctr" and "skinny-tweak", in the
-"examples" directory of the repository.  See the README.md file in that
-directory for information on using the examples.
+There are three example programs, "skinny-ctr", "skinny-tweak", and
+"skinny-ecb" in the "examples" directory of the repository.  See the
+README.md file in that directory for information on using the examples.
 
 The "skinny-ctr" program is a simple example of encrypting and decrypting
 files using SKINNY in CTR mode.  Incrementing counter values are encrypted
@@ -82,6 +82,9 @@ increments the tweak each block and encrypts the plaintext directly
 using the key and tweak.  This is intended as an example of using
 SKINNY as a true tweakable block cipher, rather than a recommended
 method to use SKINNY in a realistic application.
+
+The "skinny-ecb" program is similar to "skinny-ctr" except that it
+encrypts the data in ECB mode.
 
 \section main_apiref API Reference
 

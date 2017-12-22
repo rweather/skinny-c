@@ -34,22 +34,32 @@ uint8_t tweak[MAX_TWEAK_SIZE];
 unsigned tweak_size = 0;
 int encrypt = 1;
 
-static void usage(const char *progname, int tweak_required)
+static void usage(const char *progname, int flags)
 {
-    fprintf(stderr, "Usage: %s [-b block-size] -k key %sinput-filename output-filename\n\n",
-            progname, tweak_required ? "[-t tweak] [-d] " : "[-c counter] ");
+    const char *extra_opts1 = "";
+    const char *extra_opts2 = "";
+    if (flags & OPT_NEED_TWEAK)
+        extra_opts1 = "[-t tweak] ";
+    else if ((flags & OPT_NO_COUNTER) == 0)
+        extra_opts1 = "[-c counter] ";
+    if (flags & OPT_DECRYPT)
+        extra_opts1 = "[-d] ";
+    fprintf(stderr, "Usage: %s [-b block-size] -k key %s%sinput-filename output-filename\n\n",
+            progname, extra_opts1, extra_opts2);
     fprintf(stderr, "-b block-size\n");
     fprintf(stderr, "    Specify the cipher block size: 64 or 128, default is 128.\n");
     fprintf(stderr, "-k key\n");
     fprintf(stderr, "    Specify the encryption key in hexadecimal (required).\n");
-    if (tweak_required) {
+    if (flags & OPT_NEED_TWEAK) {
         fprintf(stderr, "-t tweak\n");
         fprintf(stderr, "    Specify the initial tweak value in hexadecimal, default is all-zeroes.\n");
-        fprintf(stderr, "-d\n");
-        fprintf(stderr, "    Decrypt the input data, default is encrypt.\n");
-    } else {
+    } else if ((flags & OPT_NO_COUNTER) == 0) {
         fprintf(stderr, "-c counter\n");
         fprintf(stderr, "    Specify the initial counter block in hexadecimal, default is all-zeroes.\n");
+    }
+    if (flags & OPT_DECRYPT) {
+        fprintf(stderr, "-d\n");
+        fprintf(stderr, "    Decrypt the input data, default is encrypt.\n");
     }
 }
 
@@ -92,14 +102,14 @@ static void invalid_key_size(int from, int to)
             from, to);
 }
 
-int parse_options(int argc, char *argv[], int tweak_required)
+int parse_options(int argc, char *argv[], int flags)
 {
     const char *progname = argv[0];
     int opt;
     int have_key = 0;
 
     /* Parse the options from the command-line */
-    while ((opt = getopt(argc, argv, tweak_required ? "b:k:t:d" : "b:k:c:")) != -1) {
+    while ((opt = getopt(argc, argv, "b:k:t:c:d")) != -1) {
         switch (opt) {
         case 'b':
             if (!strcmp(optarg, "64")) {
@@ -107,7 +117,7 @@ int parse_options(int argc, char *argv[], int tweak_required)
             } else if (!strcmp(optarg, "128")) {
                 block_size = 16;
             } else {
-                usage(progname, tweak_required);
+                usage(progname, flags);
                 return 0;
             }
             break;
@@ -115,7 +125,7 @@ int parse_options(int argc, char *argv[], int tweak_required)
         case 'k':
             key_size = parse_hex(key, sizeof(key), optarg);
             if (!key_size) {
-                usage(progname, tweak_required);
+                usage(progname, flags);
                 return 0;
             }
             have_key = 1;
@@ -125,7 +135,7 @@ int parse_options(int argc, char *argv[], int tweak_required)
         case 't':
             tweak_size = parse_hex(tweak, sizeof(tweak), optarg);
             if (!tweak_size) {
-                usage(progname, tweak_required);
+                usage(progname, flags);
                 return 0;
             }
             break;
@@ -135,14 +145,14 @@ int parse_options(int argc, char *argv[], int tweak_required)
             break;
 
         default:
-            usage(progname, tweak_required);
+            usage(progname, flags);
             return 0;
         }
     }
 
     /* Check that we have input and output filenames */
     if ((optind + 2) > argc) {
-        usage(progname, tweak_required);
+        usage(progname, flags);
         return 0;
     }
     input_filename = argv[optind];
@@ -154,7 +164,7 @@ int parse_options(int argc, char *argv[], int tweak_required)
         return 0;
     }
     if (block_size == 8) {
-        if (tweak_required) {
+        if (flags & OPT_NEED_TWEAK) {
             if (key_size < 8 || key_size > 16) {
                 invalid_key_size(8, 16);
                 return 0;
@@ -166,7 +176,7 @@ int parse_options(int argc, char *argv[], int tweak_required)
             }
         }
     } else {
-        if (tweak_required) {
+        if (flags & OPT_NEED_TWEAK) {
             if (key_size < 16 || key_size > 32) {
                 invalid_key_size(16, 32);
                 return 0;
@@ -180,7 +190,7 @@ int parse_options(int argc, char *argv[], int tweak_required)
     }
     if (tweak_size > block_size) {
         fprintf(stderr, "invalid %s size, must be between 1 and %u bytes\n",
-                tweak_required ? "tweak" : "counter", block_size);
+                (flags & OPT_NEED_TWEAK) ? "tweak" : "counter", block_size);
         return 0;
     }
 

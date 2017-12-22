@@ -38,6 +38,10 @@ extern uint8_t tweak[MAX_TWEAK_SIZE];
 extern unsigned tweak_size;
 extern int encrypt;
 
-int parse_options(int argc, char *argv[], int tweak_required);
+#define OPT_NEED_TWEAK 1
+#define OPT_NO_COUNTER 2
+#define OPT_DECRYPT    4
+
+int parse_options(int argc, char *argv[], int flags);
 
 #endif

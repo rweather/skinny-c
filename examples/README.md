@@ -8,11 +8,16 @@ There are two example programs in this directory:
     skinny-tweak
         Same as skinny-ctr, but the cipher tweak is used for the counter.
 
+    skinny-ecb
+        Encrypts or decrypts a file using SKINNY in ECB mode.
+        Key only, no tweak.
+
 To get command-line usage information on the programs, run them without
 any arguments:
 
     ./skinny-ctr
     ./skinny-tweak
+    ./skinny-ecb
 
 To encrypt a file with "skinny-ctr", supply the block size, key, and files
 on the command-line:
