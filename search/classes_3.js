@@ -12,6 +12,7 @@ var searchData=
   ['skinny128ctrctx_5ft',['Skinny128CTRCtx_t',['../structSkinny128CTRCtx__t.html',1,'']]],
   ['skinny128halfcells_5ft',['Skinny128HalfCells_t',['../unionSkinny128HalfCells__t.html',1,'']]],
   ['skinny128key_5ft',['Skinny128Key_t',['../structSkinny128Key__t.html',1,'']]],
+  ['skinny128parallelecb_5ft',['Skinny128ParallelECB_t',['../structSkinny128ParallelECB__t.html',1,'']]],
   ['skinny128tweakedkey_5ft',['Skinny128TweakedKey_t',['../structSkinny128TweakedKey__t.html',1,'']]],
   ['skinny64',['Skinny64',['../classSkinny64.html',1,'']]],
   ['skinny64_5f128',['Skinny64_128',['../classSkinny64__128.html',1,'']]],
@@ -25,5 +26,6 @@ var searchData=
   ['skinny64ctrctx_5ft',['Skinny64CTRCtx_t',['../structSkinny64CTRCtx__t.html',1,'']]],
   ['skinny64halfcells_5ft',['Skinny64HalfCells_t',['../unionSkinny64HalfCells__t.html',1,'']]],
   ['skinny64key_5ft',['Skinny64Key_t',['../structSkinny64Key__t.html',1,'']]],
+  ['skinny64parallelecb_5ft',['Skinny64ParallelECB_t',['../structSkinny64ParallelECB__t.html',1,'']]],
   ['skinny64tweakedkey_5ft',['Skinny64TweakedKey_t',['../structSkinny64TweakedKey__t.html',1,'']]]
 ];

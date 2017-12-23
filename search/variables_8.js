@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['vtable',['vtable',['../structMantisCTR__t.html#ad538320d406ac5b88aee2374c87411f3',1,'MantisCTR_t::vtable()'],['../structSkinny128CTR__t.html#a9c89b1f92496392e22562dac8545b562',1,'Skinny128CTR_t::vtable()'],['../structSkinny64CTR__t.html#a5e819ab6b6741054dd220304053b2097',1,'Skinny64CTR_t::vtable()']]]
+  ['tweak',['tweak',['../structMantisKey__t.html#ad35e43f03b51f54ee6253d4fd72fdb1e',1,'MantisKey_t::tweak()'],['../structSkinny128TweakedKey__t.html#a6c2f9f788165154d85fd9a1bad34825a',1,'Skinny128TweakedKey_t::tweak()'],['../structSkinny64TweakedKey__t.html#aa62a3eb7f5cf45a8802d2214e6e3b4c9',1,'Skinny64TweakedKey_t::tweak()']]]
 ];

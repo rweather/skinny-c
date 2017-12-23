@@ -149,10 +149,27 @@ ECB mode</h1>
 <div class="fragment"><div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> ciphertext[16] = ...;</div>
 <div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> plaintext[16];</div>
 <div class="line"><a class="code" href="group__skinny128.html#ga9ccdfab6dc540fbbc34b44a9538d5651">skinny128_ecb_decrypt</a>(plaintext, ciphertext, &amp;ks);</div>
+</div><!-- fragment --><h1><a class="anchor" id="using_parallel_ecb"></a>
+Parallel ECB mode</h1>
+<p>The API for Skinny-C provides an alternative ECB interface that encrypts multiple blocks in parallel on platforms that have SIMD instruction support. This can be useful for implementing block cipher modes like <a href="https://en.wikipedia.org/wiki/OCB_mode">OCB</a> that operate on blocks in parallel.</p>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="using_skinny.html#using_ctr">CTR mode</a> also encrypts multiple blocks in parallel when SIMD support is available. There is dedicated support for <a class="el" href="classCTR.html" title="Implementation of the Counter (CTR) mode for 128-bit block ciphers. ">CTR</a> mode in the library so it isn't necessary to use the parallel ECB API for <a class="el" href="classCTR.html" title="Implementation of the Counter (CTR) mode for 128-bit block ciphers. ">CTR</a>.</dd></dl>
+<p>To perform parallel encryption, we start by initializing the parallel ECB context and then set the key:</p>
+<div class="fragment"><div class="line"><a class="code" href="structSkinny128ParallelECB__t.html">Skinny128ParallelECB_t</a> ecb;</div>
+<div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> key[32] = ...;</div>
+<div class="line"><a class="code" href="group__skinny128.html#gac74cbc82f842165d63a90a3971e28415">skinny128_parallel_ecb_init</a>(&amp;ecb);</div>
+<div class="line"><a class="code" href="group__skinny128.html#ga6eda4a097e289f2e7c5cf47b8d4f53da">skinny128_parallel_ecb_set_key</a>(&amp;ecb, key, 32);</div>
+</div><!-- fragment --><p>The <a class="el" href="group__skinny128.html#gac74cbc82f842165d63a90a3971e28415" title="Initializes Skinny-128 in parallel ECB mode. ">skinny128_parallel_ecb_init()</a> function chooses the best parallel ECB implementation for your platform at runtime. For example, the AVX2 backend will be used if your CPU supports AVX2 and the library was compiled with AVX2 support enabled.</p>
+<p>Encryption of eight blocks at a time is accomplished as follows (decryption is similar):</p>
+<div class="fragment"><div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> blocks[8 * <a class="code" href="group__skinny128.html#ga5f34e79e8a76d180e25d4e55b6a3c92d">SKINNY128_BLOCK_SIZE</a>] = ...;</div>
+<div class="line"><a class="code" href="group__skinny128.html#ga1fb57f4e11ceaac54eda38f79d39f02e">skinny128_parallel_ecb_encrypt</a>(blocks, blocks, <span class="keyword">sizeof</span>(blocks), &amp;ecb);</div>
+</div><!-- fragment --><p>The first two parameters are the output buffer for the ciphertext and the input buffer for the plaintext. In this example we are encrypting the data in-place within the same buffer but they can be different.</p>
+<p>The amount of parallelism is dependent upon the specific back end implementation. The best parallel block size (in bytes) is given by <code>ecb.parallel_size</code>. This can be used to tune the parallel block size at runtime.</p>
+<p>Once you have finished encrypting or decrypting data, you should clean up the parallel ECB control structure to free any dyanmically-allocated memory that was allocated by <a class="el" href="group__skinny128.html#gac74cbc82f842165d63a90a3971e28415" title="Initializes Skinny-128 in parallel ECB mode. ">skinny128_parallel_ecb_init()</a>:</p>
+<div class="fragment"><div class="line"><a class="code" href="group__skinny128.html#ga46c84618772e28352be43c2a092ff0d4">skinny128_parallel_ecb_cleanup</a>(&amp;ecb);</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Dec 4 2017 20:04:42 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Dec 24 2017 09:41:01 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
