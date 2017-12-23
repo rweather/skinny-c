@@ -569,3 +569,184 @@ void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks)
     WRITE_WORD16(output, 6, state.row[3]);
 #endif
 }
+
+void mantis_ecb_crypt_tweaked
+    (void *output, const void *input, const void *tweak, const MantisKey_t *ks)
+{
+#if RC_ROW_SIZE == 64
+    const uint64_t *r = &(rc[0]);
+#elif RC_ROW_SIZE == 32
+    const uint32_t *r = rc[0];
+#else
+    const uint16_t *r = rc[0];
+#endif
+    MantisCells_t tk;
+    MantisCells_t k1 = ks->k1;
+    MantisCells_t state;
+    unsigned index;
+
+    /* Read the input and tweak and convert little-endian to host-endian */
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    state.llrow = READ_WORD64(input, 0);
+    tk.llrow = READ_WORD64(tweak, 0);
+#elif SKINNY_LITTLE_ENDIAN
+    state.lrow[0] = READ_WORD32(input, 0);
+    state.lrow[1] = READ_WORD32(input, 4);
+    tk.lrow[0] = READ_WORD32(tweak, 0);
+    tk.lrow[1] = READ_WORD32(tweak, 4);
+#else
+    state.row[0] = READ_WORD16(input, 0);
+    state.row[1] = READ_WORD16(input, 2);
+    state.row[2] = READ_WORD16(input, 4);
+    state.row[3] = READ_WORD16(input, 6);
+    tk.row[0] = READ_WORD16(tweak, 0);
+    tk.row[1] = READ_WORD16(tweak, 2);
+    tk.row[2] = READ_WORD16(tweak, 4);
+    tk.row[3] = READ_WORD16(tweak, 6);
+#endif
+
+    /* XOR the initial whitening key k0 with the state,
+       together with k1 and the initial tweak value */
+#if SKINNY_64BIT
+    state.llrow ^= ks->k0.llrow ^ k1.llrow ^ tk.llrow;
+#else
+    state.lrow[0] ^= ks->k0.lrow[0] ^ k1.lrow[0] ^ tk.lrow[0];
+    state.lrow[1] ^= ks->k0.lrow[1] ^ k1.lrow[1] ^ tk.lrow[1];
+#endif
+
+    /* Perform all forward rounds */
+    for (index = ks->rounds; index > 0; --index) {
+        /* Update the tweak with the forward h function */
+        mantis_update_tweak(&tk);
+
+        /* Apply the S-box */
+#if SKINNY_64BIT
+        state.llrow = mantis_sbox(state.llrow);
+#else
+        state.lrow[0] = mantis_sbox(state.lrow[0]);
+        state.lrow[1] = mantis_sbox(state.lrow[1]);
+#endif
+
+        /* Add the round constant */
+#if RC_ROW_SIZE == 64
+        state.llrow ^= r[0];
+        ++r;
+#elif RC_ROW_SIZE == 32
+        state.lrow[0] ^= r[0];
+        state.lrow[1] ^= r[1];
+        r += 2;
+#else
+        state.row[0] ^= r[0];
+        state.row[1] ^= r[1];
+        state.row[2] ^= r[2];
+        state.row[3] ^= r[3];
+        r += 4;
+#endif
+
+        /* XOR with the key and tweak */
+#if SKINNY_64BIT
+        state.llrow ^= k1.llrow ^ tk.llrow;
+#else
+        state.lrow[0] ^= k1.lrow[0] ^ tk.lrow[0];
+        state.lrow[1] ^= k1.lrow[1] ^ tk.lrow[1];
+#endif
+
+        /* Shift the rows */
+        mantis_shift_rows(&state);
+
+        /* Mix the columns */
+        mantis_mix_columns(&state);
+    }
+
+    /* Half-way there: sbox, mix, sbox */
+#if SKINNY_64BIT
+    state.llrow = mantis_sbox(state.llrow);
+    mantis_mix_columns(&state);
+    state.llrow = mantis_sbox(state.llrow);
+#else
+    state.lrow[0] = mantis_sbox(state.lrow[0]);
+    state.lrow[1] = mantis_sbox(state.lrow[1]);
+    mantis_mix_columns(&state);
+    state.lrow[0] = mantis_sbox(state.lrow[0]);
+    state.lrow[1] = mantis_sbox(state.lrow[1]);
+#endif
+
+    /* Convert k1 into k1 XOR alpha for the reverse rounds */
+#if RC_ROW_SIZE == 64
+    k1.llrow ^= ALPHA;
+#elif RC_ROW_SIZE == 32
+    k1.lrow[0] ^= ALPHA_ROW0;
+    k1.lrow[1] ^= ALPHA_ROW1;
+#else
+    k1.row[0] ^= ALPHA_ROW0;
+    k1.row[1] ^= ALPHA_ROW1;
+    k1.row[2] ^= ALPHA_ROW2;
+    k1.row[3] ^= ALPHA_ROW3;
+#endif
+
+    /* Perform all reverse rounds */
+    for (index = ks->rounds; index > 0; --index) {
+        /* Inverse mix of the columns (same as the forward mix) */
+        mantis_mix_columns(&state);
+
+        /* Inverse shift of the rows */
+        mantis_shift_rows_inverse(&state);
+
+        /* XOR with the key and tweak */
+#if SKINNY_64BIT
+        state.llrow ^= k1.llrow ^ tk.llrow;
+#else
+        state.lrow[0] ^= k1.lrow[0] ^ tk.lrow[0];
+        state.lrow[1] ^= k1.lrow[1] ^ tk.lrow[1];
+#endif
+
+        /* Add the round constant */
+#if RC_ROW_SIZE == 64
+        --r;
+        state.llrow ^= r[0];
+#elif RC_ROW_SIZE == 32
+        r -= 2;
+        state.lrow[0] ^= r[0];
+        state.lrow[1] ^= r[1];
+#else
+        r -= 4;
+        state.row[0] ^= r[0];
+        state.row[1] ^= r[1];
+        state.row[2] ^= r[2];
+        state.row[3] ^= r[3];
+#endif
+
+        /* Apply the inverse S-box (which is the same as the forward S-box) */
+#if SKINNY_64BIT
+        state.llrow = mantis_sbox(state.llrow);
+#else
+        state.lrow[0] = mantis_sbox(state.lrow[0]);
+        state.lrow[1] = mantis_sbox(state.lrow[1]);
+#endif
+
+        /* Update the tweak with the reverse h function */
+        mantis_update_tweak_inverse(&tk);
+    }
+
+    /* XOR the final whitening key k0prime with the state,
+       together with k1alpha and the final tweak value */
+#if SKINNY_64BIT
+    state.llrow ^= ks->k0prime.llrow ^ k1.llrow ^ tk.llrow;
+#else
+    state.lrow[0] ^= ks->k0prime.lrow[0] ^ k1.lrow[0] ^ tk.lrow[0];
+    state.lrow[1] ^= ks->k0prime.lrow[1] ^ k1.lrow[1] ^ tk.lrow[1];
+#endif
+
+    /* Convert host-endian back into little-endian in the output buffer */
+#if SKINNY_64BIT && SKINNY_LITTLE_ENDIAN
+    WRITE_WORD64(output, 0, state.llrow);
+#elif SKINNY_LITTLE_ENDIAN
+    WRITE_WORD32(output, 0, state.lrow[0]);
+    WRITE_WORD32(output, 4, state.lrow[1]);
+#else
+    WRITE_WORD16(output, 0, state.row[0]);
+    WRITE_WORD16(output, 2, state.row[1]);
+    WRITE_WORD16(output, 4, state.row[2]);
+    WRITE_WORD16(output, 6, state.row[3]);
+#endif
+}

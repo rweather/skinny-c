@@ -182,4 +182,56 @@ unsigned char plaintext[16];
 skinny128_ecb_decrypt(plaintext, ciphertext, &ks);
 \endcode
 
+\section using_parallel_ecb Parallel ECB mode
+
+The API for Skinny-C provides an alternative ECB interface that
+encrypts multiple blocks in parallel on platforms that have
+SIMD instruction support.  This can be useful for implementing block
+cipher modes like <a href="https://en.wikipedia.org/wiki/OCB_mode">OCB</a>
+that operate on blocks in parallel.
+
+\note \ref using_ctr "CTR mode" also encrypts multiple blocks in parallel
+when SIMD support is available.  There is dedicated support for CTR mode
+in the library so it isn't necessary to use the parallel ECB API for CTR.
+
+To perform parallel encryption, we start by initializing the parallel
+ECB context and then set the key:
+
+\code
+Skinny128ParallelECB_t ecb;
+unsigned char key[32] = ...;
+skinny128_parallel_ecb_init(&ecb);
+skinny128_parallel_ecb_set_key(&ecb, key, 32);
+\endcode
+
+The skinny128_parallel_ecb_init() function chooses the best parallel ECB
+implementation for your platform at runtime.  For example, the AVX2 backend
+will be used if your CPU supports AVX2 and the library was compiled with
+AVX2 support enabled.
+
+Encryption of eight blocks at a time is accomplished as follows
+(decryption is similar):
+
+\code
+unsigned char blocks[8 * SKINNY128_BLOCK_SIZE] = ...;
+skinny128_parallel_ecb_encrypt(blocks, blocks, sizeof(blocks), &ecb);
+\endcode
+
+The first two parameters are the output buffer for the ciphertext and
+the input buffer for the plaintext.  In this example we are encrypting
+the data in-place within the same buffer but they can be different.
+
+The amount of parallelism is dependent upon the specific back end
+implementation.  The best parallel block size (in bytes) is given
+by <tt>ecb.parallel_size</tt>.  This can be used to tune the parallel
+block size at runtime.
+
+Once you have finished encrypting or decrypting data, you should clean
+up the parallel ECB control structure to free any dyanmically-allocated
+memory that was allocated by skinny128_parallel_ecb_init():
+
+\code
+skinny128_parallel_ecb_cleanup(&ecb);
+\endcode
+
 */

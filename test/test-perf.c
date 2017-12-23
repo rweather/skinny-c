@@ -21,8 +21,11 @@
  */
 
 #include "skinny128-cipher.h"
+#include "skinny128-parallel.h"
 #include "skinny64-cipher.h"
+#include "skinny64-parallel.h"
 #include "mantis-cipher.h"
+#include "mantis-parallel.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -126,15 +129,22 @@ void calibrate(void)
     } while (0)
 
 void report(const char *name, double set_key,
-            double enc, double dec, double ctr)
+            double enc, double dec, double ctr,
+            double penc, double pdec)
 {
     if (set_key >= 0) {
-        printf("%-20s %12.3f %12.3f %12.3f %12.3f\n",
+        printf("%-25s %12.3f %12.3f %12.3f %12.3f\n",
                name, set_key, enc, dec, ctr);
     } else {
         /* The set key operation is trivial, so no point reporting it */
-        printf("%-20s %12s %12.3f %12.3f %12.3f\n",
+        printf("%-25s %12s %12.3f %12.3f %12.3f\n",
                name, "", enc, dec, ctr);
+    }
+    if (penc != 0 || pdec != 0) {
+        char new_name[64];
+        snprintf(new_name, sizeof(new_name), "%s-Parallel", name);
+        printf("%-38s %12.3f %12.3f\n",
+               new_name, penc, pdec);
     }
 }
 
@@ -142,9 +152,10 @@ void skinny64_perf(const char *name, unsigned key_size)
 {
     uint8_t block[8] = {9, 8, 7, 6, 5, 4, 3, 2};
     uint8_t buffer[1024];
-    double set_key, enc, dec, ctr;
+    double set_key, enc, dec, ctr, penc, pdec;
     Skinny64Key_t ks;
     Skinny64CTR_t c;
+    Skinny64ParallelECB_t e;
 
     RUN_OP(set_key, skinny64_set_key(&ks, key_data, key_size));
     RUN_MB(enc, skinny64_ecb_encrypt(block, block, &ks), 8, 8);
@@ -156,7 +167,14 @@ void skinny64_perf(const char *name, unsigned key_size)
     RUN_MB(ctr, skinny64_ctr_encrypt(buffer, buffer, 1024, &c), 1024, 8);
     skinny64_ctr_cleanup(&c);
 
-    report(name, set_key, enc, dec, ctr);
+    skinny64_parallel_ecb_init(&e);
+    skinny64_parallel_ecb_set_key(&e, key_data, key_size);
+    memset(buffer, 0xBA, sizeof(buffer));
+    RUN_MB(penc, skinny64_parallel_ecb_encrypt(buffer, buffer, 1024, &e), 1024, 8);
+    RUN_MB(pdec, skinny64_parallel_ecb_decrypt(buffer, buffer, 1024, &e), 1024, 8);
+    skinny64_parallel_ecb_cleanup(&e);
+
+    report(name, set_key, enc, dec, ctr, penc, pdec);
 }
 
 void skinny128_perf(const char *name, unsigned key_size)
@@ -164,9 +182,10 @@ void skinny128_perf(const char *name, unsigned key_size)
     uint8_t block[16] = {9, 8, 7, 6, 5, 4, 3, 2,
                          1, 0, 9, 8, 7, 6, 5, 4};
     uint8_t buffer[1024];
-    double set_key, enc, dec, ctr;
+    double set_key, enc, dec, ctr, penc, pdec;
     Skinny128Key_t ks;
     Skinny128CTR_t c;
+    Skinny128ParallelECB_t e;
 
     RUN_OP(set_key, skinny128_set_key(&ks, key_data, key_size));
     RUN_MB(enc, skinny128_ecb_encrypt(block, block, &ks), 16, 16);
@@ -178,16 +197,26 @@ void skinny128_perf(const char *name, unsigned key_size)
     RUN_MB(ctr, skinny128_ctr_encrypt(buffer, buffer, 1024, &c), 1024, 16);
     skinny128_ctr_cleanup(&c);
 
-    report(name, set_key, enc, dec, ctr);
+    skinny128_parallel_ecb_init(&e);
+    skinny128_parallel_ecb_set_key(&e, key_data, key_size);
+    memset(buffer, 0xBA, sizeof(buffer));
+    RUN_MB(penc, skinny128_parallel_ecb_encrypt(buffer, buffer, 1024, &e), 1024, 8);
+    RUN_MB(pdec, skinny128_parallel_ecb_decrypt(buffer, buffer, 1024, &e), 1024, 8);
+    skinny128_parallel_ecb_cleanup(&e);
+
+    report(name, set_key, enc, dec, ctr, penc, pdec);
 }
 
 void mantis_perf(const char *name, unsigned rounds)
 {
     uint8_t block[8] = {9, 8, 7, 6, 5, 4, 3, 2};
     uint8_t buffer[1024];
-    double enc, dec, ctr;
+    uint8_t tweak[1024];
+    double enc, dec, ctr, penc, pdec;
     MantisKey_t ks;
     MantisCTR_t c;
+    MantisParallelECB_t e;
+    unsigned index;
 
     mantis_set_key(&ks, key_data, 16, rounds, MANTIS_ENCRYPT);
     RUN_MB(enc, mantis_ecb_crypt(block, block, &ks), 8, 8);
@@ -200,7 +229,20 @@ void mantis_perf(const char *name, unsigned rounds)
     RUN_MB(ctr, mantis_ctr_encrypt(buffer, buffer, 1024, &c), 1024, 8);
     mantis_ctr_cleanup(&c);
 
-    report(name, -1, enc, dec, ctr);
+    mantis_parallel_ecb_init(&e);
+    mantis_parallel_ecb_set_key
+        (&e, key_data, MANTIS_KEY_SIZE, rounds, MANTIS_ENCRYPT);
+    memset(buffer, 0xBA, sizeof(buffer));
+    for (index = 0; index < sizeof(tweak); ++index)
+        tweak[index] = (uint8_t)(index % 251);
+    RUN_MB(penc, mantis_parallel_ecb_crypt
+                    (buffer, buffer, tweak, 1024, &e), 1024, 8);
+    mantis_parallel_ecb_swap_modes(&e);
+    RUN_MB(pdec, mantis_parallel_ecb_crypt
+                    (buffer, buffer, tweak, 1024, &e), 1024, 8);
+    mantis_parallel_ecb_cleanup(&e);
+
+    report(name, -1, enc, dec, ctr, penc, pdec);
 }
 
 int main(int argc, char *argv[])
@@ -209,7 +251,7 @@ int main(int argc, char *argv[])
     calibrate();
 
     printf("\n");
-    printf("                  Set Key (ops/s)  ENC (MiB/s)  DEC (MiB/s)  CTR (MiB/s)\n");
+    printf("                       Set Key (ops/s)  ENC (MiB/s)  DEC (MiB/s)  CTR (MiB/s)\n");
 
     skinny64_perf("Skinny-64-64", 8);
     skinny64_perf("Skinny-64-128", 16);

@@ -21,8 +21,11 @@
  */
 
 #include "skinny128-cipher.h"
+#include "skinny128-parallel.h"
 #include "skinny64-cipher.h"
+#include "skinny64-parallel.h"
 #include "mantis-cipher.h"
+#include "mantis-parallel.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -261,6 +264,54 @@ static void skinny64CtrTest(const SkinnyTestVector *test)
     }
 }
 
+static void skinny64ParallelEcbTest(const SkinnyTestVector *test)
+{
+    Skinny64Key_t ks;
+    Skinny64ParallelECB_t ctx;
+    uint8_t plaintext[SKINNY64_BLOCK_SIZE * 128];
+    uint8_t ciphertext[SKINNY64_BLOCK_SIZE * 128];
+    uint8_t rplaintext[SKINNY64_BLOCK_SIZE * 128];
+    int plaintext_ok, ciphertext_ok;
+    unsigned index;
+
+    printf("%s Parallel ECB: ", test->name);
+    fflush(stdout);
+
+    for (index = 0; index < sizeof(plaintext); ++index) {
+        plaintext[index] = (uint8_t)(index % 251);
+    }
+
+    skinny64_parallel_ecb_init(&ctx);
+    skinny64_parallel_ecb_set_key(&ctx, test->key, test->key_size);
+    skinny64_parallel_ecb_encrypt(ciphertext, plaintext, sizeof(plaintext), &ctx);
+    skinny64_parallel_ecb_decrypt(rplaintext, ciphertext, sizeof(ciphertext), &ctx);
+    skinny64_parallel_ecb_cleanup(&ctx);
+
+    plaintext_ok = memcmp(rplaintext, plaintext, sizeof(plaintext)) == 0;
+
+    skinny64_set_key(&ks, test->key, test->key_size);
+    for (index = 0; index < sizeof(plaintext); index += SKINNY64_BLOCK_SIZE) {
+        skinny64_ecb_encrypt(rplaintext + index, plaintext + index, &ks);
+    }
+
+    ciphertext_ok = memcmp(rplaintext, ciphertext, sizeof(ciphertext)) == 0;
+
+    if (plaintext_ok && ciphertext_ok) {
+        printf("ok");
+    } else {
+        error = 1;
+        if (plaintext_ok)
+            printf("plaintext ok");
+        else
+            printf("plaintext INCORRECT");
+        if (ciphertext_ok)
+            printf(", ciphertext ok");
+        else
+            printf(", ciphertext INCORRECT");
+    }
+    printf("\n");
+}
+
 static void skinny128EcbTest(const SkinnyTestVector *test)
 {
     Skinny128Key_t ks;
@@ -374,6 +425,54 @@ static void skinny128CtrTest(const SkinnyTestVector *test)
     }
 }
 
+static void skinny128ParallelEcbTest(const SkinnyTestVector *test)
+{
+    Skinny128Key_t ks;
+    Skinny128ParallelECB_t ctx;
+    uint8_t plaintext[SKINNY128_BLOCK_SIZE * 128];
+    uint8_t ciphertext[SKINNY128_BLOCK_SIZE * 128];
+    uint8_t rplaintext[SKINNY128_BLOCK_SIZE * 128];
+    int plaintext_ok, ciphertext_ok;
+    unsigned index;
+
+    printf("%s Parallel ECB: ", test->name);
+    fflush(stdout);
+
+    for (index = 0; index < sizeof(plaintext); ++index) {
+        plaintext[index] = (uint8_t)(index % 251);
+    }
+
+    skinny128_parallel_ecb_init(&ctx);
+    skinny128_parallel_ecb_set_key(&ctx, test->key, test->key_size);
+    skinny128_parallel_ecb_encrypt(ciphertext, plaintext, sizeof(plaintext), &ctx);
+    skinny128_parallel_ecb_decrypt(rplaintext, ciphertext, sizeof(ciphertext), &ctx);
+    skinny128_parallel_ecb_cleanup(&ctx);
+
+    plaintext_ok = memcmp(rplaintext, plaintext, sizeof(plaintext)) == 0;
+
+    skinny128_set_key(&ks, test->key, test->key_size);
+    for (index = 0; index < sizeof(plaintext); index += SKINNY128_BLOCK_SIZE) {
+        skinny128_ecb_encrypt(rplaintext + index, plaintext + index, &ks);
+    }
+
+    ciphertext_ok = memcmp(rplaintext, ciphertext, sizeof(ciphertext)) == 0;
+
+    if (plaintext_ok && ciphertext_ok) {
+        printf("ok");
+    } else {
+        error = 1;
+        if (plaintext_ok)
+            printf("plaintext ok");
+        else
+            printf("plaintext INCORRECT");
+        if (ciphertext_ok)
+            printf(", ciphertext ok");
+        else
+            printf(", ciphertext INCORRECT");
+    }
+    printf("\n");
+}
+
 static void mantisEcbTest(const MantisTestVector *test)
 {
     MantisKey_t ks;
@@ -409,6 +508,32 @@ static void mantisEcbTest(const MantisTestVector *test)
     ciphertext_ok =
         memcmp(ciphertext1, test->ciphertext, MANTIS_BLOCK_SIZE) == 0 &&
         memcmp(ciphertext2, test->ciphertext, MANTIS_BLOCK_SIZE) == 0;
+
+    /* Do the above again, but supply the tweak during encryption */
+    memset(plaintext1, 0, sizeof(plaintext1));
+    memset(plaintext2, 0, sizeof(plaintext2));
+    memset(ciphertext1, 0, sizeof(ciphertext1));
+    memset(ciphertext2, 0, sizeof(ciphertext2));
+    mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE,
+                   test->rounds, MANTIS_ENCRYPT);
+    mantis_ecb_crypt_tweaked(ciphertext1, test->plaintext, test->tweak, &ks);
+    mantis_swap_modes(&ks);
+    mantis_ecb_crypt_tweaked(plaintext1, test->ciphertext, test->tweak, &ks);
+    mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE,
+                   test->rounds, MANTIS_DECRYPT);
+    mantis_ecb_crypt_tweaked(plaintext2, test->ciphertext, test->tweak, &ks);
+    mantis_swap_modes(&ks);
+    mantis_ecb_crypt_tweaked(ciphertext2, test->plaintext, test->tweak, &ks);
+
+    /* Check the results */
+    plaintext_ok &=
+        memcmp(plaintext1, test->plaintext, MANTIS_BLOCK_SIZE) == 0 &&
+        memcmp(plaintext2, test->plaintext, MANTIS_BLOCK_SIZE) == 0;
+    ciphertext_ok &=
+        memcmp(ciphertext1, test->ciphertext, MANTIS_BLOCK_SIZE) == 0 &&
+        memcmp(ciphertext2, test->ciphertext, MANTIS_BLOCK_SIZE) == 0;
+
+    /* Report the results */
     if (plaintext_ok && ciphertext_ok) {
         printf("ok");
     } else {
@@ -507,6 +632,62 @@ static void mantisCtrTest(const MantisTestVector *test)
     }
 }
 
+static void mantisParallelEcbTest(const MantisTestVector *test)
+{
+    MantisKey_t ks;
+    MantisParallelECB_t ctx;
+    uint8_t plaintext[MANTIS_BLOCK_SIZE * 128];
+    uint8_t ciphertext[MANTIS_BLOCK_SIZE * 128];
+    uint8_t rplaintext[MANTIS_BLOCK_SIZE * 128];
+    uint8_t tweak[MANTIS_BLOCK_SIZE * 128];
+    int plaintext_ok, ciphertext_ok;
+    unsigned index;
+
+    printf("%s Parallel ECB: ", test->name);
+    fflush(stdout);
+
+    for (index = 0; index < sizeof(plaintext); ++index) {
+        plaintext[index] = (uint8_t)(index % 251);
+        tweak[sizeof(tweak) - 1 - index] = (uint8_t)(index % 251);
+    }
+
+    mantis_parallel_ecb_init(&ctx);
+    mantis_parallel_ecb_set_key
+        (&ctx, test->key, MANTIS_KEY_SIZE, test->rounds, MANTIS_ENCRYPT);
+    mantis_parallel_ecb_crypt
+        (ciphertext, plaintext, tweak, sizeof(plaintext), &ctx);
+    mantis_parallel_ecb_swap_modes(&ctx);
+    mantis_parallel_ecb_crypt
+        (rplaintext, ciphertext, tweak, sizeof(ciphertext), &ctx);
+    mantis_parallel_ecb_cleanup(&ctx);
+
+    plaintext_ok = memcmp(rplaintext, plaintext, sizeof(plaintext)) == 0;
+
+    mantis_set_key(&ks, test->key, MANTIS_KEY_SIZE,
+                   test->rounds, MANTIS_ENCRYPT);
+    for (index = 0; index < sizeof(plaintext); index += MANTIS_BLOCK_SIZE) {
+        mantis_set_tweak(&ks, tweak + index, MANTIS_TWEAK_SIZE);
+        mantis_ecb_crypt(rplaintext + index, plaintext + index, &ks);
+    }
+
+    ciphertext_ok = memcmp(rplaintext, ciphertext, sizeof(ciphertext)) == 0;
+
+    if (plaintext_ok && ciphertext_ok) {
+        printf("ok");
+    } else {
+        error = 1;
+        if (plaintext_ok)
+            printf("plaintext ok");
+        else
+            printf("plaintext INCORRECT");
+        if (ciphertext_ok)
+            printf(", ciphertext ok");
+        else
+            printf(", ciphertext INCORRECT");
+    }
+    printf("\n");
+}
+
 /* Define to 1 to include the sbox generator */
 #define GEN_SBOX 0
 
@@ -524,6 +705,10 @@ int main(int argc, char **argv)
     skinny64CtrTest(&testVector64_128);
     skinny64CtrTest(&testVector64_192);
 
+    skinny64ParallelEcbTest(&testVector64_64);
+    skinny64ParallelEcbTest(&testVector64_128);
+    skinny64ParallelEcbTest(&testVector64_192);
+
     skinny128EcbTest(&testVector128_128);
     skinny128EcbTest(&testVector128_256);
     skinny128EcbTest(&testVector128_384);
@@ -531,6 +716,10 @@ int main(int argc, char **argv)
     skinny128CtrTest(&testVector128_128);
     skinny128CtrTest(&testVector128_256);
     skinny128CtrTest(&testVector128_384);
+
+    skinny128ParallelEcbTest(&testVector128_128);
+    skinny128ParallelEcbTest(&testVector128_256);
+    skinny128ParallelEcbTest(&testVector128_384);
 
     mantisEcbTest(&testMantis5);
     mantisEcbTest(&testMantis6);
@@ -541,6 +730,11 @@ int main(int argc, char **argv)
     mantisCtrTest(&testMantis6);
     mantisCtrTest(&testMantis7);
     mantisCtrTest(&testMantis8);
+
+    mantisParallelEcbTest(&testMantis5);
+    mantisParallelEcbTest(&testMantis6);
+    mantisParallelEcbTest(&testMantis7);
+    mantisParallelEcbTest(&testMantis8);
 
 #if GEN_SBOX
     generate_sboxes();

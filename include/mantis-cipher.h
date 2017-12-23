@@ -199,10 +199,40 @@ void mantis_swap_modes(MantisKey_t *ks);
  * The \a input and \a output blocks are allowed to overlap.
  *
  * The encryption or decryption mode is selected when the key schedule
- * is setup by mantis_set_key() or mantis_set_key_and_tweak().
- * The mode can also be altered on the fly by calling mantis_swap_modes().
+ * is setup by mantis_set_key().  The mode can also be altered on the
+ * fly by calling mantis_swap_modes().
+ *
+ * \sa mantis_ecb_crypt_tweaked()
  */
 void mantis_ecb_crypt(void *output, const void *input, const MantisKey_t *ks);
+
+/**
+ * \brief Encrypts or decrypts a single block using the Mantis block
+ * cipher in ECB mode, with the tweak supplied explicitly.
+ *
+ * \param output The output block, which must contain at least
+ * MANTIS_BLOCK_SIZE bytes of space for the ciphertext.
+ * \param input The input block, which must contain at least
+ * MANTIS_BLOCK_SIZE bytes of plaintext data.
+ * \param tweak The tweak block, which must contain at least
+ * MANTIS_BLOCK_SIZE bytes of tweak data.
+ * \param ks The key schedule that was set up by mantis_set_key().
+ *
+ * The \a input and \a output blocks are allowed to overlap.
+ *
+ * The encryption or decryption mode is selected when the key schedule
+ * is setup by mantis_set_key().  The mode can also be altered on the
+ * fly by calling mantis_swap_modes().
+ *
+ * This function differs from mantis_ecb_crypt() in that the tweak is
+ * supplied explicitly to the function rather than via mantis_set_tweak().
+ * This can be useful if every block that is encrypted or decrypted
+ * has its own block-specific tweak.
+ *
+ * \sa mantis_ecb_crypt()
+ */
+void mantis_ecb_crypt_tweaked
+    (void *output, const void *input, const void *tweak, const MantisKey_t *ks);
 
 /**
  * \brief Initializes Mantis in CTR mode.
