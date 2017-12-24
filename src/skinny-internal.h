@@ -278,4 +278,7 @@ int _skinny_has_vec128(void);
 /* Determine if this platform supports 256-bit SIMD vector operations */
 int _skinny_has_vec256(void);
 
+/* Allocate cleared memory and guarantee SIMD-compatible alignment */
+void *skinny_calloc(size_t size, void **base_ptr);
+
 #endif /* SKINNY_INTERNAL_H */

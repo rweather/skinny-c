@@ -45,13 +45,18 @@ typedef struct
     /** Offset into ecounter where the previous request left off */
     unsigned offset;
 
+    /** Base pointer for unaligned memory allocation */
+    void *base_ptr;
+
 } MantisCTRVec128Ctx_t;
 
 static int mantis_ctr_vec128_init(MantisCTR_t *ctr)
 {
     MantisCTRVec128Ctx_t *ctx;
-    if ((ctx = calloc(1, sizeof(MantisCTRVec128Ctx_t))) == NULL)
+    void *base_ptr;
+    if ((ctx = skinny_calloc(sizeof(MantisCTRVec128Ctx_t), &base_ptr)) == NULL)
         return 0;
+    ctx->base_ptr = base_ptr;
     ctx->offset = MANTIS_CTR_BLOCK_SIZE;
     ctr->ctx = ctx;
     return 1;
@@ -60,8 +65,10 @@ static int mantis_ctr_vec128_init(MantisCTR_t *ctr)
 static void mantis_ctr_vec128_cleanup(MantisCTR_t *ctr)
 {
     if (ctr->ctx) {
-        skinny_cleanse(ctr->ctx, sizeof(MantisCTRVec128Ctx_t));
-        free(ctr->ctx);
+        MantisCTRVec128Ctx_t *ctx = ctr->ctx;
+        void *base_ptr = ctx->base_ptr;
+        skinny_cleanse(ctx, sizeof(MantisCTRVec128Ctx_t));
+        free(base_ptr);
         ctr->ctx = 0;
     }
 }

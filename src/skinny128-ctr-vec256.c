@@ -45,13 +45,18 @@ typedef struct
     /** Offset into ecounter where the previous request left off */
     unsigned offset;
 
+    /** Base pointer for unaligned memory allocation */
+    void *base_ptr;
+
 } Skinny128CTRVec256Ctx_t;
 
 static int skinny128_ctr_vec256_init(Skinny128CTR_t *ctr)
 {
     Skinny128CTRVec256Ctx_t *ctx;
-    if ((ctx = calloc(1, sizeof(Skinny128CTRVec256Ctx_t))) == NULL)
+    void *base_ptr;
+    if ((ctx = skinny_calloc(sizeof(Skinny128CTRVec256Ctx_t), &base_ptr)) == NULL)
         return 0;
+    ctx->base_ptr = base_ptr;
     ctx->offset = SKINNY128_CTR_BLOCK_SIZE;
     ctr->ctx = ctx;
     return 1;
@@ -60,8 +65,10 @@ static int skinny128_ctr_vec256_init(Skinny128CTR_t *ctr)
 static void skinny128_ctr_vec256_cleanup(Skinny128CTR_t *ctr)
 {
     if (ctr->ctx) {
-        skinny_cleanse(ctr->ctx, sizeof(Skinny128CTRVec256Ctx_t));
-        free(ctr->ctx);
+        Skinny128CTRVec256Ctx_t *ctx = ctr->ctx;
+        void *base_ptr = ctx->base_ptr;
+        skinny_cleanse(ctx, sizeof(Skinny128CTRVec256Ctx_t));
+        free(base_ptr);
         ctr->ctx = 0;
     }
 }

@@ -21,6 +21,7 @@
  */
 
 #include "skinny-internal.h"
+#include <stdlib.h>
 
 #if defined(__x86_64) || defined(__x86_64__) || \
     defined(__i386) || defined(__i386__)
@@ -75,4 +76,16 @@ int _skinny_has_vec256(void)
 #endif
 #endif
     return detected;
+}
+
+void *skinny_calloc(size_t size, void **base_ptr)
+{
+    /* We use 256-bit aligned structures in some of the back ends but
+       calloc() may align to less than that.  This wrapper fixes things */
+    void *ptr = calloc(1, size + 31);
+    if (ptr) {
+        *base_ptr = ptr;
+        ptr = (void *)((((uintptr_t)ptr) + 31) & ~((uintptr_t)31));
+    }
+    return ptr;
 }
