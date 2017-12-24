@@ -21,7 +21,9 @@
  */
 
 #include "skinny128-cipher.h"
+#include "skinny128-parallel.h"
 #include "skinny64-cipher.h"
+#include "skinny64-parallel.h"
 #include "options.h"
 #include <stdio.h>
 #include <string.h>
@@ -32,9 +34,8 @@ int main(int argc, char *argv[])
     FILE *outfile;
     uint8_t buffer[1024];
     size_t read_size;
-    size_t posn;
-    Skinny128Key_t ks128;
-    Skinny64Key_t ks64;
+    Skinny128ParallelECB_t ks128;
+    Skinny64ParallelECB_t ks64;
 
     /* Parse the command-line options */
     if (!parse_options(argc, argv, OPT_NO_COUNTER | OPT_DECRYPT)) {
@@ -53,32 +54,39 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize the key schedule */
-    if (block_size == 8) {
-        skinny64_set_key(&ks64, key, key_size);
-    } else {
-        skinny128_set_key(&ks128, key, key_size);
-    }
+    skinny64_parallel_ecb_init(&ks64);
+    skinny128_parallel_ecb_init(&ks128);
+    if (block_size == 8)
+        skinny64_parallel_ecb_set_key(&ks64, key, key_size);
+    else
+        skinny128_parallel_ecb_set_key(&ks128, key, key_size);
 
     /* Read and encrypt/decrypt blocks from the file */
     while (!feof(infile) && (read_size = fread(buffer, 1, sizeof(buffer), infile)) > 0) {
-        for (posn = 0; (posn + block_size) <= read_size; posn += block_size) {
-            if (encrypt) {
-                if (block_size == 8)
-                    skinny64_ecb_encrypt(buffer + posn, buffer + posn, &ks64);
-                else
-                    skinny128_ecb_encrypt(buffer + posn, buffer + posn, &ks128);
-            } else {
-                if (block_size == 8)
-                    skinny64_ecb_decrypt(buffer + posn, buffer + posn, &ks64);
-                else
-                    skinny128_ecb_decrypt(buffer + posn, buffer + posn, &ks128);
-            }
+        /* Round the read size down to a multiple of the block size */
+        read_size -= (read_size % block_size);
+
+        /* Encrypt or decrypt using the configured algorithm */
+        if (encrypt) {
+            if (block_size == 8)
+                skinny64_parallel_ecb_encrypt(buffer, buffer, read_size, &ks64);
+            else
+                skinny128_parallel_ecb_encrypt(buffer, buffer, read_size, &ks128);
+        } else {
+            if (block_size == 8)
+                skinny64_parallel_ecb_decrypt(buffer, buffer, read_size, &ks64);
+            else
+                skinny128_parallel_ecb_decrypt(buffer, buffer, read_size, &ks128);
         }
-        fwrite(buffer, 1, posn, outfile);
+
+        /* Write the encrypted/decrypted data to the output file */
+        fwrite(buffer, 1, read_size, outfile);
     }
 
     /* Clean up and exit */
     fclose(infile);
     fclose(outfile);
+    skinny64_parallel_ecb_cleanup(&ks64);
+    skinny128_parallel_ecb_cleanup(&ks128);
     return 0;
 }
