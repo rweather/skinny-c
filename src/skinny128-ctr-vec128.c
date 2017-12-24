@@ -487,4 +487,9 @@ Skinny128CTRVtable_t const _skinny128_ctr_vec128 = {
     skinny128_ctr_vec128_encrypt
 };
 
-#endif /* SKINNY_VEC128_MATH */
+#else /* !SKINNY_VEC128_MATH */
+
+/* Stubbed out */
+Skinny128CTRVtable_t const _skinny128_ctr_vec128;
+
+#endif /* !SKINNY_VEC128_MATH */

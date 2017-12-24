@@ -215,14 +215,10 @@ int skinny128_ctr_init(Skinny128CTR_t *ctr)
 
     /* Choose a backend implementation */
     vtable = &skinny128_ctr_def;
-#if SKINNY_VEC128_MATH
     if (_skinny_has_vec128())
         vtable = &_skinny128_ctr_vec128;
-#endif
-#if SKINNY_VEC256_MATH
     if (_skinny_has_vec256())
         vtable = &_skinny128_ctr_vec256;
-#endif
     ctr->vtable = vtable;
 
     /* Initialize the CTR mode context */

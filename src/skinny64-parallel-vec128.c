@@ -259,4 +259,24 @@ void _skinny64_parallel_decrypt_vec128
     WRITE_WORD16(output, 62, row3[7]);
 }
 
-#endif /* SKINNY_VEC128_MATH */
+#else /* !SKINNY_VEC128_MATH */
+
+/* Stubbed out */
+
+void _skinny64_parallel_encrypt_vec128
+    (void *output, const void *input, const Skinny64Key_t *ks)
+{
+    (void)output;
+    (void)input;
+    (void)ks;
+}
+
+void _skinny64_parallel_decrypt_vec128
+    (void *output, const void *input, const Skinny64Key_t *ks)
+{
+    (void)output;
+    (void)input;
+    (void)ks;
+}
+
+#endif /* !SKINNY_VEC128_MATH */

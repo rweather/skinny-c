@@ -37,16 +37,15 @@ typedef struct
 
 } Skinny64ParallelECBVtable_t;
 
-#if SKINNY_VEC128_MATH
 void _skinny64_parallel_encrypt_vec128
     (void *output, const void *input, const Skinny64Key_t *ks);
 void _skinny64_parallel_decrypt_vec128
     (void *output, const void *input, const Skinny64Key_t *ks);
+
 static Skinny64ParallelECBVtable_t const skinny64_parallel_ecb_vec128 = {
     _skinny64_parallel_encrypt_vec128,
     _skinny64_parallel_decrypt_vec128
 };
-#endif
 
 /** @endcond */
 
@@ -58,10 +57,8 @@ int skinny64_parallel_ecb_init(Skinny64ParallelECB_t *ecb)
     ecb->vtable = 0;
     ecb->ctx = ctx;
     ecb->parallel_size = 8 * SKINNY64_BLOCK_SIZE;
-#if SKINNY_VEC128_MATH
     if (_skinny_has_vec128())
         ecb->vtable = &skinny64_parallel_ecb_vec128;
-#endif
     return 1;
 }
 

@@ -37,13 +37,12 @@ typedef struct
 
 } MantisParallelECBVtable_t;
 
-#if SKINNY_VEC128_MATH
 void _mantis_parallel_crypt_vec128
     (void *output, const void *input, const void *tweak, const MantisKey_t *ks);
+
 static MantisParallelECBVtable_t const mantis_parallel_ecb_vec128 = {
     _mantis_parallel_crypt_vec128
 };
-#endif
 
 /** @endcond */
 
@@ -55,10 +54,8 @@ int mantis_parallel_ecb_init(MantisParallelECB_t *ecb)
     ecb->vtable = 0;
     ecb->ctx = ctx;
     ecb->parallel_size = 8 * MANTIS_BLOCK_SIZE;
-#if SKINNY_VEC128_MATH
     if (_skinny_has_vec128())
         ecb->vtable = &mantis_parallel_ecb_vec128;
-#endif
     return 1;
 }
 

@@ -415,4 +415,24 @@ void _skinny128_parallel_decrypt_vec256
 #endif
 }
 
-#endif /* SKINNY_VEC256_MATH */
+#else /* !SKINNY_VEC256_MATH */
+
+/* Stubbed out */
+
+void _skinny128_parallel_encrypt_vec256
+    (void *output, const void *input, const Skinny128Key_t *ks)
+{
+    (void)output;
+    (void)input;
+    (void)ks;
+}
+
+void _skinny128_parallel_decrypt_vec256
+    (void *output, const void *input, const Skinny128Key_t *ks)
+{
+    (void)output;
+    (void)input;
+    (void)ks;
+}
+
+#endif /* !SKINNY_VEC256_MATH */

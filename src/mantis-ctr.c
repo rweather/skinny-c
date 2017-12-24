@@ -194,10 +194,8 @@ int mantis_ctr_init(MantisCTR_t *ctr)
 
     /* Choose a backend implementation */
     vtable = &mantis_ctr_def;
-#if SKINNY_VEC128_MATH
     if (_skinny_has_vec128())
         vtable = &_mantis_ctr_vec128;
-#endif
     ctr->vtable = vtable;
 
     /* Initialize the CTR mode context */

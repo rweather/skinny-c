@@ -372,4 +372,16 @@ void _mantis_parallel_crypt_vec128
     WRITE_WORD16(output, 62, state.row[3][7]);
 }
 
+#else /* !SKINNY_VEC128_MATH */
+
+/* Stubbed out */
+void _mantis_parallel_crypt_vec128
+    (void *output, const void *input, const void *tweak, const MantisKey_t *ks)
+{
+    (void)output;
+    (void)input;
+    (void)tweak;
+    (void)ks;
+}
+
 #endif /* SKINNY_VEC128_MATH */

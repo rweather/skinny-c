@@ -589,4 +589,9 @@ MantisCTRVtable_t const _mantis_ctr_vec128 = {
     mantis_ctr_vec128_encrypt
 };
 
+#else /* !SKINNY_VEC128_MATH */
+
+/* Stubbed out */
+MantisCTRVtable_t const _mantis_ctr_vec128;
+
 #endif /* SKINNY_VEC128_MATH */
