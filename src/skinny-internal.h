@@ -249,7 +249,7 @@ STATIC_INLINE SkinnyVector4x32_t skinny_to_vec4x32(uint32_t x)
 }
 
 /* Convert a scalar value into a 8x16 SIMD vector */
-STATIC_INLINE SkinnyVector8x16_t skinny_to_vec8x16(uint32_t x)
+STATIC_INLINE SkinnyVector8x16_t skinny_to_vec8x16(uint16_t x)
 {
     return (SkinnyVector8x16_t){x, x, x, x, x, x, x, x};
 }
