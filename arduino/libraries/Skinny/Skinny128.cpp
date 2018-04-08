@@ -130,11 +130,15 @@ size_t Skinny128::blockSize() const
 
 #if USE_AVR_INLINE_ASM
 
+// Force the sboxes to be aligned on a 256-byte boundary.
+// This makes sbox lookups more efficient.
+#define ALIGN256 __attribute__((aligned(256)))
+
 // S-box tables for Skinny-128.  We only use this for AVR platforms,
 // as there will be issues with constant cache behaviour on ARM.
 // It would be nice to avoid this for AVR as well, but the S-box
 // operations are simply too slow using bit operations on AVR.
-static uint8_t const sbox[256] PROGMEM = {
+static uint8_t const sbox[256] PROGMEM ALIGN256 = {
     0x65, 0x4c, 0x6a, 0x42, 0x4b, 0x63, 0x43, 0x6b, 0x55, 0x75, 0x5a, 0x7a, 
     0x53, 0x73, 0x5b, 0x7b, 0x35, 0x8c, 0x3a, 0x81, 0x89, 0x33, 0x80, 0x3b, 
     0x95, 0x25, 0x98, 0x2a, 0x90, 0x23, 0x99, 0x2b, 0xe5, 0xcc, 0xe8, 0xc1, 
@@ -158,7 +162,7 @@ static uint8_t const sbox[256] PROGMEM = {
     0xe2, 0xca, 0xee, 0xc6, 0xcf, 0xe7, 0xc7, 0xef, 0xd2, 0xf2, 0xde, 0xfe, 
     0xd7, 0xf7, 0xdf, 0xff, 
 };
-static uint8_t const sbox_inv[256] PROGMEM = {
+static uint8_t const sbox_inv[256] PROGMEM ALIGN256 = {
     0xac, 0xe8, 0x68, 0x3c, 0x6c, 0x38, 0xa8, 0xec, 0xaa, 0xae, 0x3a, 0x3e, 
     0x6a, 0x6e, 0xea, 0xee, 0xa6, 0xa3, 0x33, 0x36, 0x66, 0x63, 0xe3, 0xe6, 
     0xe1, 0xa4, 0x61, 0x34, 0x31, 0x64, 0xa1, 0xe4, 0x8d, 0xc9, 0x49, 0x1d, 
@@ -186,38 +190,20 @@ static uint8_t const sbox_inv[256] PROGMEM = {
 // Figure out how to do lookups from a pgmspace sbox table on this platform.
 #if defined(RAMPZ)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "adc r24,__zero_reg__\n" \
-    "out %5,r24\n" \
-    "elpm r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "sbc r24,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "elpm " reg ",Z\n"
 #elif defined(__AVR_HAVE_LPMX__)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "lpm r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "lpm " reg ",Z\n"
 #elif defined(__AVR_TINY__)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "ld r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "ld " reg ",Z\n"
 #else
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
+    "mov r30," reg "\n" \
     "lpm\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
     "mov " reg ",r0\n"
 #endif
 
@@ -382,20 +368,19 @@ void Skinny128::encryptBlock(uint8_t *output, const uint8_t *input)
         "ldd r23,Z+15\n"
 
         // Set up Z to point to the start of the sbox table.
+        "ldd r30,%A3\n"
+        "ldd r31,%B3\n"
 #if defined(RAMPZ)
         "in __tmp_reg__,%5\n"
         "push __tmp_reg__\n"
+        "ldd __tmp_reg__,%C3\n"
+        "out %5,__tmp_reg__\n"
 #endif
-        "ldd r30,%A3\n"
-        "ldd r31,%B3\n"
 
         // Top of the loop.
         "1:\n"
 
         // Transform the state using the sbox.
-#if defined(RAMPZ)
-        "ldd r24,%C3\n"
-#endif
         SBOX("r8")
         SBOX("r9")
         SBOX("r10")
@@ -571,12 +556,14 @@ void Skinny128::decryptBlock(uint8_t *output, const uint8_t *input)
         "ldd r23,Z+15\n"
 
         // Set up Z to point to the start of the sbox table.
+        "ldd r30,%A3\n"
+        "ldd r31,%B3\n"
 #if defined(RAMPZ)
         "in __tmp_reg__,%5\n"
         "push __tmp_reg__\n"
+        "ldd __tmp_reg__,%C3\n"
+        "out %5,__tmp_reg__\n"
 #endif
-        "ldd r30,%A3\n"
-        "ldd r31,%B3\n"
 
         // Top of the loop.
         "1:\n"
@@ -626,9 +613,6 @@ void Skinny128::decryptBlock(uint8_t *output, const uint8_t *input)
         "eor r16,r24\n"
 
         // Transform the state using the inverse sbox.
-#if defined(RAMPZ)
-        "ldd r24,%C3\n"
-#endif
         SBOX("r8")
         SBOX("r9")
         SBOX("r10")

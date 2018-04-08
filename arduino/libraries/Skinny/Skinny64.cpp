@@ -130,13 +130,17 @@ size_t Skinny64::blockSize() const
 
 #if USE_AVR_INLINE_ASM
 
+// Force the sboxes to be aligned on a 256-byte boundary.
+// This makes sbox lookups more efficient.
+#define ALIGN256 __attribute__((aligned(256)))
+
 // S-box tables for Skinny-64.  We only use this for AVR platforms,
 // as there will be issues with constant cache behaviour on ARM.
 // It would be nice to avoid this for AVR as well, but the S-box
 // operations are simply too slow using bit operations on AVR.
 // Technically the S-boxes for Skinny-64 are 4-bit but we expand
 // them to 8-bit to make the lookups easier.
-static uint8_t const sbox[256] PROGMEM = {
+static uint8_t const sbox[256] PROGMEM ALIGN256 = {
     0xcc, 0xc6, 0xc9, 0xc0, 0xc1, 0xca, 0xc2, 0xcb, 0xc3, 0xc8, 0xc5, 0xcd,
     0xc4, 0xce, 0xc7, 0xcf, 0x6c, 0x66, 0x69, 0x60, 0x61, 0x6a, 0x62, 0x6b,
     0x63, 0x68, 0x65, 0x6d, 0x64, 0x6e, 0x67, 0x6f, 0x9c, 0x96, 0x99, 0x90,
@@ -160,7 +164,7 @@ static uint8_t const sbox[256] PROGMEM = {
     0xfc, 0xf6, 0xf9, 0xf0, 0xf1, 0xfa, 0xf2, 0xfb, 0xf3, 0xf8, 0xf5, 0xfd,
     0xf4, 0xfe, 0xf7, 0xff
 };
-static uint8_t const sbox_inv[256] PROGMEM = {
+static uint8_t const sbox_inv[256] PROGMEM ALIGN256 = {
     0x33, 0x34, 0x36, 0x38, 0x3c, 0x3a, 0x31, 0x3e, 0x39, 0x32, 0x35, 0x37,
     0x30, 0x3b, 0x3d, 0x3f, 0x43, 0x44, 0x46, 0x48, 0x4c, 0x4a, 0x41, 0x4e,
     0x49, 0x42, 0x45, 0x47, 0x40, 0x4b, 0x4d, 0x4f, 0x63, 0x64, 0x66, 0x68,
@@ -188,38 +192,20 @@ static uint8_t const sbox_inv[256] PROGMEM = {
 // Figure out how to do lookups from a pgmspace sbox table on this platform.
 #if defined(RAMPZ)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "adc r24,__zero_reg__\n" \
-    "out %5,r24\n" \
-    "elpm r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "sbc r24,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "elpm " reg ",Z\n"
 #elif defined(__AVR_HAVE_LPMX__)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "lpm r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "lpm " reg ",Z\n"
 #elif defined(__AVR_TINY__)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "ld r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "ld " reg ",Z\n"
 #else
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
+    "mov r30," reg "\n" \
     "lpm\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
     "mov " reg ",r0\n"
 #endif
 
@@ -383,20 +369,19 @@ void Skinny64::encryptBlock(uint8_t *output, const uint8_t *input)
         LOAD_BLOCK()
 
         // Set up Z to point to the start of the sbox table.
+        "ldd r30,%A3\n"
+        "ldd r31,%B3\n"
 #if defined(RAMPZ)
         "in __tmp_reg__,%5\n"
         "push __tmp_reg__\n"
+        "ldd __tmp_reg__,%C3\n"
+        "out %5,__tmp_reg__\n"
 #endif
-        "ldd r30,%A3\n"
-        "ldd r31,%B3\n"
 
         // Top of the loop.
         "1:\n"
 
         // Transform the state using the sbox.
-#if defined(RAMPZ)
-        "ldd r24,%C3\n"
-#endif
         SBOX("r16")
         SBOX("r17")
         SBOX("r18")
@@ -524,12 +509,14 @@ void Skinny64::decryptBlock(uint8_t *output, const uint8_t *input)
         LOAD_BLOCK()
 
         // Set up Z to point to the start of the sbox table.
+        "ldd r30,%A3\n"
+        "ldd r31,%B3\n"
 #if defined(RAMPZ)
         "in __tmp_reg__,%5\n"
         "push __tmp_reg__\n"
+        "ldd __tmp_reg__,%C3\n"
+        "out %5,__tmp_reg__\n"
 #endif
-        "ldd r30,%A3\n"
-        "ldd r31,%B3\n"
 
         // Top of the loop.
         "1:\n"
@@ -576,9 +563,6 @@ void Skinny64::decryptBlock(uint8_t *output, const uint8_t *input)
         "eor r20,r24\n"
 
         // Transform the state using the inverse sbox.
-#if defined(RAMPZ)
-        "ldd r24,%C3\n"
-#endif
         SBOX("r16")
         SBOX("r17")
         SBOX("r18")

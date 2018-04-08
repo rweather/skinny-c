@@ -348,12 +348,16 @@ void Mantis8::swapModes()
     RC_EXTRACT_BYTE((x),  8), \
     RC_EXTRACT_BYTE((x),  0)
 
+// Force the sboxes to be aligned on a 256-byte boundary.
+// This makes sbox lookups more efficient.
+#define ALIGN256 __attribute__((aligned(256)))
+
 // MIDORI Sb0, expanded from 4 bits to 8 bits for easier byte lookup.
 // We only use this for AVR platforms, as there will be issues with
 // constant cache behaviour on ARM.  It would be nice to avoid this
 // for AVR as well, but the S-box operations are simply too slow using
 // bit operations on AVR.
-static uint8_t const sbox[256 + 64] PROGMEM = {
+static uint8_t const sbox[256 + 64] PROGMEM ALIGN256 = {
     0xcc, 0xca, 0xcd, 0xc3, 0xce, 0xcb, 0xcf, 0xc7, 0xc8, 0xc9, 0xc1, 0xc5,
     0xc0, 0xc2, 0xc4, 0xc6, 0xac, 0xaa, 0xad, 0xa3, 0xae, 0xab, 0xaf, 0xa7,
     0xa8, 0xa9, 0xa1, 0xa5, 0xa0, 0xa2, 0xa4, 0xa6, 0xdc, 0xda, 0xdd, 0xd3,
@@ -392,24 +396,17 @@ static uint8_t const sbox[256 + 64] PROGMEM = {
 // Figure out how to do lookups from a pgmspace sbox table on this platform.
 #if defined(RAMPZ)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "adc r24,__zero_reg__\n" \
+    "mov r30," reg "\n" \
     "out %6,r24\n" \
-    "elpm r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "sbc r24,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "elpm " reg ",Z\n"
 #define RC_SETUP(reg) \
     "ldi r25,1\n" \
-    "add r30," reg "\n" \
-    "adc r31,r25\n" \
+    "mov r30," reg "\n" \
+    "add r31,r25\n" \
     "adc r24,__zero_reg__\n" \
     "out %6,r24\n"
 #define RC_CLEANUP(reg) \
-    "sub r30," reg "\n" \
-    "sbc r31,r25\n" \
+    "sub r31,r25\n" \
     "sbc r24,__zero_reg__\n" \
     "sbiw r30,8\n" \
     "sbc r24,__zero_reg__\n"
@@ -418,57 +415,43 @@ static uint8_t const sbox[256 + 64] PROGMEM = {
     "eor " reg ",r0\n"
 #elif defined(__AVR_HAVE_LPMX__)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "lpm r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "lpm " reg ",Z\n"
 #define RC_SETUP(reg) \
     "ldi r25,1\n" \
-    "add r30," reg "\n" \
-    "adc r31,r25\n"
+    "mov r30," reg "\n" \
+    "add r31,r25\n"
 #define RC_CLEANUP(reg) \
-    "sub r30," reg "\n" \
-    "sbc r31,r25\n" \
+    "sub r31,r25\n" \
     "sbiw r30,8\n"
 #define RC_ADD(reg)   \
     "lpm r0,Z+\n" \
     "eor " reg ",r0\n"
 #elif defined(__AVR_TINY__)
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
-    "ld r0,Z\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
-    "mov " reg ",r0\n"
+    "mov r30," reg "\n" \
+    "ld " reg ",Z\n"
 #define RC_SETUP(reg) \
     "ldi r25,1\n" \
-    "add r30," reg "\n" \
-    "adc r31,r25\n"
+    "mov r30," reg "\n" \
+    "add r31,r25\n"
 #define RC_CLEANUP(reg) \
-    "sub r30," reg "\n" \
-    "sbc r31,r25\n" \
+    "sub r31,r25\n" \
     "sbiw r30,8\n"
 #define RC_ADD(reg)   \
     "ld r0,Z+\n" \
     "eor " reg ",r0\n"
 #else
 #define SBOX(reg)   \
-    "add r30," reg "\n" \
-    "adc r31,__zero_reg__\n" \
+    "mov r30," reg "\n" \
     "lpm\n" \
-    "sub r30," reg "\n" \
-    "sbc r31,__zero_reg__\n" \
     "mov " reg ",r0\n"
 #define RC_SETUP(reg) \
     "ldi r25,1\n" \
-    "add r30," reg "\n" \
-    "adc r31,r25\n"
+    "mov r30," reg "\n" \
+    "add r31,r25\n"
 #define RC_CLEANUP(reg) \
-    "sub r30," reg "\n" \
-    "sbc r31,r25\n" \
+    "sub r31,r25\n" \
     "sbiw r30,8\n"
 #define RC_ADD(reg)   \
     "lpm\n" \
