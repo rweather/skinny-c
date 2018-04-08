@@ -121,111 +121,108 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;} MantisParallelECBVtable_t;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor">#if SKINNY_VEC128_MATH</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor"></span><span class="keywordtype">void</span> _mantis_parallel_crypt_vec128</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keywordtype">void</span> _mantis_parallel_crypt_vec128</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword">static</span> MantisParallelECBVtable_t <span class="keyword">const</span> mantis_parallel_ecb_vec128 = {</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    _mantis_parallel_crypt_vec128</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;};</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="group__mantis.html#ga0ca223d383abf657fd81c3ef4cd41310">   50</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga0ca223d383abf657fd81c3ef4cd41310">mantis_parallel_ecb_init</a>(<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ctx;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordflow">if</span> ((ctx = calloc(1, <span class="keyword">sizeof</span>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a>))) == NULL)</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">vtable</a> = 0;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a> = ctx;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#abd07d78979cddca11eb72216df78a203">parallel_size</a> = 8 * <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#if SKINNY_VEC128_MATH</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor"></span>    <span class="keywordflow">if</span> (_skinny_has_vec128())</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">vtable</a> = &amp;mantis_parallel_ecb_vec128;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor"></span>    <span class="keywordflow">return</span> 1;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;}</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="group__mantis.html#gacea26ba74ac1717d01cb0c2f29128375">   65</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gacea26ba74ac1717d01cb0c2f29128375">mantis_parallel_ecb_cleanup</a>(<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;{</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keywordflow">if</span> (ecb &amp;&amp; ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>) {</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        skinny_cleanse(ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>, <span class="keyword">sizeof</span>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a>));</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        free(ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>);</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a> = 0;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    }</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#gac6d8640a45c3e1237b699afeda55d63c">mantis_parallel_ecb_set_key</a></div>
-<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="group__mantis.html#gac6d8640a45c3e1237b699afeda55d63c">   75</a></span>&#160;    (<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb, <span class="keyword">const</span> <span class="keywordtype">void</span> *key, <span class="keywordtype">unsigned</span> size,</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;     <span class="keywordtype">unsigned</span> rounds, <span class="keywordtype">int</span> mode)</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;{</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">if</span> (!ecb || !ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>)</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    ks = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540">mantis_set_key</a>(ks, key, size, rounds, mode);</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="group__mantis.html#ga7357b7f9b446cc7536d7f27792fde8b1">   85</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#ga7357b7f9b446cc7536d7f27792fde8b1">mantis_parallel_ecb_swap_modes</a>(<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;{</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keywordflow">if</span> (!ecb || !ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>)</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    ks = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <a class="code" href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127">mantis_swap_modes</a>(ks);</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#gacdf2b32cea6064770ffc50476fc10ba1">mantis_parallel_ecb_crypt</a></div>
-<div class="line"><a name="l00095"></a><span class="lineno"><a class="line" href="group__mantis.html#gacdf2b32cea6064770ffc50476fc10ba1">   95</a></span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keywordtype">size_t</span> size,</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;     <span class="keyword">const</span> <a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keyword">const</span> MantisParallelECBVtable_t *vtable;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="comment">/* Validate the parameters */</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordflow">if</span> (!ecb || !ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a> || (size % <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>) != 0)</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    ks = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="comment">/* Process major blocks with the vectorized back end */</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    vtable = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">vtable</a>;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordflow">if</span> (vtable) {</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        <span class="keywordtype">size_t</span> psize = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#abd07d78979cddca11eb72216df78a203">parallel_size</a>;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        <span class="keywordflow">while</span> (size &gt;= psize) {</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;            (*(vtable-&gt;crypt))(output, input, tweak, ks);</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            output += psize;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;            input += psize;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            tweak += psize;</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;            size -= psize;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        }</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    }</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="comment">/* Process any left-over blocks with the non-parallel implementation */</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="keywordflow">while</span> (size &gt;= MANTIS_BLOCK_SIZE) {</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        <a class="code" href="group__mantis.html#ga6617001075fa51b87a8f3d422f0491fb">mantis_ecb_crypt_tweaked</a>(output, input, tweak, ks);</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        output += <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        input += <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        tweak += <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        size -= <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    }</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keywordflow">return</span> 1;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;}</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="group__mantis.html#ga0ca223d383abf657fd81c3ef4cd41310">   49</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#ga0ca223d383abf657fd81c3ef4cd41310">mantis_parallel_ecb_init</a>(<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;{</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ctx;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">if</span> ((ctx = calloc(1, <span class="keyword">sizeof</span>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a>))) == NULL)</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">vtable</a> = 0;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a> = ctx;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#abd07d78979cddca11eb72216df78a203">parallel_size</a> = 8 * <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordflow">if</span> (_skinny_has_vec128())</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">vtable</a> = &amp;mantis_parallel_ecb_vec128;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="group__mantis.html#gacea26ba74ac1717d01cb0c2f29128375">   62</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#gacea26ba74ac1717d01cb0c2f29128375">mantis_parallel_ecb_cleanup</a>(<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordflow">if</span> (ecb &amp;&amp; ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>) {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        skinny_cleanse(ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>, <span class="keyword">sizeof</span>(<a class="code" href="structMantisKey__t.html">MantisKey_t</a>));</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        free(ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a> = 0;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#gac6d8640a45c3e1237b699afeda55d63c">mantis_parallel_ecb_set_key</a></div>
+<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="group__mantis.html#gac6d8640a45c3e1237b699afeda55d63c">   72</a></span>&#160;    (<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb, <span class="keyword">const</span> <span class="keywordtype">void</span> *key, <span class="keywordtype">unsigned</span> size,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;     <span class="keywordtype">unsigned</span> rounds, <span class="keywordtype">int</span> mode)</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;{</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keywordflow">if</span> (!ecb || !ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>)</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    ks = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540">mantis_set_key</a>(ks, key, size, rounds, mode);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
+<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="group__mantis.html#ga7357b7f9b446cc7536d7f27792fde8b1">   82</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="group__mantis.html#ga7357b7f9b446cc7536d7f27792fde8b1">mantis_parallel_ecb_swap_modes</a>(<a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;{</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keywordflow">if</span> (!ecb || !ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>)</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    ks = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127">mantis_swap_modes</a>(ks);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;}</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="keywordtype">int</span> <a class="code" href="group__mantis.html#gacdf2b32cea6064770ffc50476fc10ba1">mantis_parallel_ecb_crypt</a></div>
+<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="group__mantis.html#gacdf2b32cea6064770ffc50476fc10ba1">   92</a></span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keywordtype">size_t</span> size,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;     <span class="keyword">const</span> <a class="code" href="structMantisParallelECB__t.html">MantisParallelECB_t</a> *ecb)</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;{</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keyword">const</span> MantisParallelECBVtable_t *vtable;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="comment">/* Validate the parameters */</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordflow">if</span> (!ecb || !ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a> || (size % <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>) != 0)</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    ks = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">ctx</a>;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="comment">/* Process major blocks with the vectorized back end */</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    vtable = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">vtable</a>;</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">if</span> (vtable) {</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <span class="keywordtype">size_t</span> psize = ecb-&gt;<a class="code" href="structMantisParallelECB__t.html#abd07d78979cddca11eb72216df78a203">parallel_size</a>;</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="keywordflow">while</span> (size &gt;= psize) {</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;            (*(vtable-&gt;crypt))(output, input, tweak, ks);</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;            output += psize;</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;            input += psize;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;            tweak += psize;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            size -= psize;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        }</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    }</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="comment">/* Process any left-over blocks with the non-parallel implementation */</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keywordflow">while</span> (size &gt;= MANTIS_BLOCK_SIZE) {</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <a class="code" href="group__mantis.html#ga6617001075fa51b87a8f3d422f0491fb">mantis_ecb_crypt_tweaked</a>(output, input, tweak, ks);</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        output += <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        input += <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        tweak += <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        size -= <a class="code" href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a>;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    }</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;}</div>
 <div class="ttc" id="structMantisParallelECB__t_html"><div class="ttname"><a href="structMantisParallelECB__t.html">MantisParallelECB_t</a></div><div class="ttdoc">State information for Mantis in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8h_source.html#l00040">mantis-parallel.h:40</a></div></div>
 <div class="ttc" id="group__mantis_html_gaeac06e3d3eab2bbded1b9c02d8037127"><div class="ttname"><a href="group__mantis.html#gaeac06e3d3eab2bbded1b9c02d8037127">mantis_swap_modes</a></div><div class="ttdeci">void mantis_swap_modes(MantisKey_t *ks)</div><div class="ttdoc">Swaps the encryption and decryption modes on a Mantis key schedule. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00225">mantis-cipher.c:225</a></div></div>
-<div class="ttc" id="group__mantis_html_gacea26ba74ac1717d01cb0c2f29128375"><div class="ttname"><a href="group__mantis.html#gacea26ba74ac1717d01cb0c2f29128375">mantis_parallel_ecb_cleanup</a></div><div class="ttdeci">void mantis_parallel_ecb_cleanup(MantisParallelECB_t *ecb)</div><div class="ttdoc">Cleans up a parallel ECB control block for Mantis. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00065">mantis-parallel.c:65</a></div></div>
-<div class="ttc" id="group__mantis_html_ga0ca223d383abf657fd81c3ef4cd41310"><div class="ttname"><a href="group__mantis.html#ga0ca223d383abf657fd81c3ef4cd41310">mantis_parallel_ecb_init</a></div><div class="ttdeci">int mantis_parallel_ecb_init(MantisParallelECB_t *ecb)</div><div class="ttdoc">Initializes Mantis in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00050">mantis-parallel.c:50</a></div></div>
-<div class="ttc" id="group__mantis_html_ga7357b7f9b446cc7536d7f27792fde8b1"><div class="ttname"><a href="group__mantis.html#ga7357b7f9b446cc7536d7f27792fde8b1">mantis_parallel_ecb_swap_modes</a></div><div class="ttdeci">void mantis_parallel_ecb_swap_modes(MantisParallelECB_t *ecb)</div><div class="ttdoc">Swaps the encryption and decryption modes on a parallel Mantis key schedule. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00085">mantis-parallel.c:85</a></div></div>
+<div class="ttc" id="group__mantis_html_gacea26ba74ac1717d01cb0c2f29128375"><div class="ttname"><a href="group__mantis.html#gacea26ba74ac1717d01cb0c2f29128375">mantis_parallel_ecb_cleanup</a></div><div class="ttdeci">void mantis_parallel_ecb_cleanup(MantisParallelECB_t *ecb)</div><div class="ttdoc">Cleans up a parallel ECB control block for Mantis. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00062">mantis-parallel.c:62</a></div></div>
+<div class="ttc" id="group__mantis_html_ga0ca223d383abf657fd81c3ef4cd41310"><div class="ttname"><a href="group__mantis.html#ga0ca223d383abf657fd81c3ef4cd41310">mantis_parallel_ecb_init</a></div><div class="ttdeci">int mantis_parallel_ecb_init(MantisParallelECB_t *ecb)</div><div class="ttdoc">Initializes Mantis in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00049">mantis-parallel.c:49</a></div></div>
+<div class="ttc" id="group__mantis_html_ga7357b7f9b446cc7536d7f27792fde8b1"><div class="ttname"><a href="group__mantis.html#ga7357b7f9b446cc7536d7f27792fde8b1">mantis_parallel_ecb_swap_modes</a></div><div class="ttdeci">void mantis_parallel_ecb_swap_modes(MantisParallelECB_t *ecb)</div><div class="ttdoc">Swaps the encryption and decryption modes on a parallel Mantis key schedule. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00082">mantis-parallel.c:82</a></div></div>
 <div class="ttc" id="structMantisParallelECB__t_html_a528d3c2879c97ad8554fff3ed2019b49"><div class="ttname"><a href="structMantisParallelECB__t.html#a528d3c2879c97ad8554fff3ed2019b49">MantisParallelECB_t::vtable</a></div><div class="ttdeci">const void * vtable</div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8h_source.html#l00043">mantis-parallel.h:43</a></div></div>
 <div class="ttc" id="group__mantis_html_gaf09160a0f1a21378517a67268c099a5f"><div class="ttname"><a href="group__mantis.html#gaf09160a0f1a21378517a67268c099a5f">MANTIS_BLOCK_SIZE</a></div><div class="ttdeci">#define MANTIS_BLOCK_SIZE</div><div class="ttdoc">Size of a block for Mantis block ciphers. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00059">mantis-cipher.h:59</a></div></div>
 <div class="ttc" id="structMantisParallelECB__t_html_abd07d78979cddca11eb72216df78a203"><div class="ttname"><a href="structMantisParallelECB__t.html#abd07d78979cddca11eb72216df78a203">MantisParallelECB_t::parallel_size</a></div><div class="ttdeci">size_t parallel_size</div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8h_source.html#l00051">mantis-parallel.h:51</a></div></div>
 <div class="ttc" id="structMantisParallelECB__t_html_a596a58a9be6dffbef5e6f37c8e0fe7f8"><div class="ttname"><a href="structMantisParallelECB__t.html#a596a58a9be6dffbef5e6f37c8e0fe7f8">MantisParallelECB_t::ctx</a></div><div class="ttdeci">void * ctx</div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8h_source.html#l00046">mantis-parallel.h:46</a></div></div>
 <div class="ttc" id="group__mantis_html_gabf16426f434b2f774bb6fd2bcfa52540"><div class="ttname"><a href="group__mantis.html#gabf16426f434b2f774bb6fd2bcfa52540">mantis_set_key</a></div><div class="ttdeci">int mantis_set_key(MantisKey_t *ks, const void *key, unsigned size, unsigned rounds, int mode)</div><div class="ttdoc">Sets the key schedule for a Mantis block cipher. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00157">mantis-cipher.c:157</a></div></div>
-<div class="ttc" id="group__mantis_html_gacdf2b32cea6064770ffc50476fc10ba1"><div class="ttname"><a href="group__mantis.html#gacdf2b32cea6064770ffc50476fc10ba1">mantis_parallel_ecb_crypt</a></div><div class="ttdeci">int mantis_parallel_ecb_crypt(void *output, const void *input, const void *tweak, size_t size, const MantisParallelECB_t *ecb)</div><div class="ttdoc">Encrypts or decrypts a block of data using Mantis in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00095">mantis-parallel.c:95</a></div></div>
+<div class="ttc" id="group__mantis_html_gacdf2b32cea6064770ffc50476fc10ba1"><div class="ttname"><a href="group__mantis.html#gacdf2b32cea6064770ffc50476fc10ba1">mantis_parallel_ecb_crypt</a></div><div class="ttdeci">int mantis_parallel_ecb_crypt(void *output, const void *input, const void *tweak, size_t size, const MantisParallelECB_t *ecb)</div><div class="ttdoc">Encrypts or decrypts a block of data using Mantis in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00092">mantis-parallel.c:92</a></div></div>
 <div class="ttc" id="structMantisKey__t_html"><div class="ttname"><a href="structMantisKey__t.html">MantisKey_t</a></div><div class="ttdoc">Key schedule for Mantis block ciphers. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00108">mantis-cipher.h:108</a></div></div>
 <div class="ttc" id="group__mantis_html_ga6617001075fa51b87a8f3d422f0491fb"><div class="ttname"><a href="group__mantis.html#ga6617001075fa51b87a8f3d422f0491fb">mantis_ecb_crypt_tweaked</a></div><div class="ttdeci">void mantis_ecb_crypt_tweaked(void *output, const void *input, const void *tweak, const MantisKey_t *ks)</div><div class="ttdoc">Encrypts or decrypts a single block using the Mantis block cipher in ECB mode, with the tweak supplie...</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8c_source.html#l00574">mantis-cipher.c:574</a></div></div>
-<div class="ttc" id="group__mantis_html_gac6d8640a45c3e1237b699afeda55d63c"><div class="ttname"><a href="group__mantis.html#gac6d8640a45c3e1237b699afeda55d63c">mantis_parallel_ecb_set_key</a></div><div class="ttdeci">int mantis_parallel_ecb_set_key(MantisParallelECB_t *ecb, const void *key, unsigned size, unsigned rounds, int mode)</div><div class="ttdoc">Sets the key schedule for a Mantis block cipher in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00075">mantis-parallel.c:75</a></div></div>
+<div class="ttc" id="group__mantis_html_gac6d8640a45c3e1237b699afeda55d63c"><div class="ttname"><a href="group__mantis.html#gac6d8640a45c3e1237b699afeda55d63c">mantis_parallel_ecb_set_key</a></div><div class="ttdeci">int mantis_parallel_ecb_set_key(MantisParallelECB_t *ecb, const void *key, unsigned size, unsigned rounds, int mode)</div><div class="ttdoc">Sets the key schedule for a Mantis block cipher in parallel ECB mode. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-parallel_8c_source.html#l00072">mantis-parallel.c:72</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 24 2017 09:41:01 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Apr 8 2018 13:55:24 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

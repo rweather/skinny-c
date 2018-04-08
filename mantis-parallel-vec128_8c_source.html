@@ -459,7 +459,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    WRITE_WORD16(output, 62, state.row[3][7]);</div>
 <div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;}</div>
 <div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_VEC128_MATH */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;<span class="preprocessor">#else </span><span class="comment">/* !SKINNY_VEC128_MATH */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;<span class="comment">/* Stubbed out */</span></div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;<span class="keywordtype">void</span> _mantis_parallel_crypt_vec128</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <span class="keywordtype">void</span> *tweak, <span class="keyword">const</span> <a class="code" href="structMantisKey__t.html">MantisKey_t</a> *ks)</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;{</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    (void)output;</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    (void)input;</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    (void)tweak;</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;    (void)ks;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;}</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_VEC128_MATH */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="structMantisKey__t_html_a2c6cf99ef00a05a1b27e3f21b8ab1cce"><div class="ttname"><a href="structMantisKey__t.html#a2c6cf99ef00a05a1b27e3f21b8ab1cce">MantisKey_t::k1</a></div><div class="ttdeci">MantisCells_t k1</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00117">mantis-cipher.h:117</a></div></div>
 <div class="ttc" id="group__mantis_html_gac46f5fab8df104be99ef260154fb4581"><div class="ttname"><a href="group__mantis.html#gac46f5fab8df104be99ef260154fb4581">MANTIS_MAX_ROUNDS</a></div><div class="ttdeci">#define MANTIS_MAX_ROUNDS</div><div class="ttdoc">Maximum number of rounds for Mantis block ciphers. </div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00082">mantis-cipher.h:82</a></div></div>
 <div class="ttc" id="structMantisKey__t_html_a3c78972dac254635c537588a9635ba65"><div class="ttname"><a href="structMantisKey__t.html#a3c78972dac254635c537588a9635ba65">MantisKey_t::rounds</a></div><div class="ttdeci">unsigned rounds</div><div class="ttdef"><b>Definition:</b> <a href="mantis-cipher_8h_source.html#l00123">mantis-cipher.h:123</a></div></div>
@@ -471,7 +483,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 24 2017 09:41:01 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Apr 8 2018 13:55:24 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

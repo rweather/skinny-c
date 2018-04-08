@@ -339,7 +339,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;}</div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;</div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;<span class="comment">/* Convert a scalar value into a 8x16 SIMD vector */</span></div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;STATIC_INLINE SkinnyVector8x16_t skinny_to_vec8x16(uint32_t x)</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;STATIC_INLINE SkinnyVector8x16_t skinny_to_vec8x16(uint16_t x)</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;{</div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <span class="keywordflow">return</span> (SkinnyVector8x16_t){x, x, x, x, x, x, x, x};</div>
 <div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;}</div>
@@ -368,11 +368,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;<span class="comment">/* Determine if this platform supports 256-bit SIMD vector operations */</span></div>
 <div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;<span class="keywordtype">int</span> _skinny_has_vec256(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_INTERNAL_H */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="comment">/* Allocate cleared memory and guarantee SIMD-compatible alignment */</span></div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="keywordtype">void</span> *skinny_calloc(<span class="keywordtype">size_t</span> size, <span class="keywordtype">void</span> **base_ptr);</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_INTERNAL_H */</span><span class="preprocessor"></span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 24 2017 09:41:01 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Apr 8 2018 13:55:24 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

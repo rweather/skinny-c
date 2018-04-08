@@ -349,7 +349,27 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    WRITE_WORD16(output, 62, row3[7]);</div>
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;}</div>
 <div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SKINNY_VEC128_MATH */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="preprocessor">#else </span><span class="comment">/* !SKINNY_VEC128_MATH */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;<span class="comment">/* Stubbed out */</span></div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;<span class="keywordtype">void</span> _skinny64_parallel_encrypt_vec128</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <a class="code" href="structSkinny64Key__t.html">Skinny64Key_t</a> *ks)</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;{</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    (void)output;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    (void)input;</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;    (void)ks;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;}</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;<span class="keywordtype">void</span> _skinny64_parallel_decrypt_vec128</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    (<span class="keywordtype">void</span> *output, <span class="keyword">const</span> <span class="keywordtype">void</span> *input, <span class="keyword">const</span> <a class="code" href="structSkinny64Key__t.html">Skinny64Key_t</a> *ks)</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;{</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    (void)output;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    (void)input;</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    (void)ks;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;}</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* !SKINNY_VEC128_MATH */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="structSkinny64Key__t_html_a19a99880e115f759b45fbc0426dbd099"><div class="ttname"><a href="structSkinny64Key__t.html#a19a99880e115f759b45fbc0426dbd099">Skinny64Key_t::rounds</a></div><div class="ttdeci">unsigned rounds</div><div class="ttdef"><b>Definition:</b> <a href="skinny64-cipher_8h_source.html#l00081">skinny64-cipher.h:81</a></div></div>
 <div class="ttc" id="unionSkinny64HalfCells__t_html_ad413932230a0d13d3a8b56cc24aa7912"><div class="ttname"><a href="unionSkinny64HalfCells__t.html#ad413932230a0d13d3a8b56cc24aa7912">Skinny64HalfCells_t::row</a></div><div class="ttdeci">uint16_t row[2]</div><div class="ttdef"><b>Definition:</b> <a href="skinny64-cipher_8h_source.html#l00070">skinny64-cipher.h:70</a></div></div>
 <div class="ttc" id="structSkinny64Key__t_html_a66355090594d452c6bdd688110206b59"><div class="ttname"><a href="structSkinny64Key__t.html#a66355090594d452c6bdd688110206b59">Skinny64Key_t::schedule</a></div><div class="ttdeci">Skinny64HalfCells_t schedule[SKINNY64_MAX_ROUNDS]</div><div class="ttdef"><b>Definition:</b> <a href="skinny64-cipher_8h_source.html#l00084">skinny64-cipher.h:84</a></div></div>
@@ -358,7 +378,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 24 2017 09:41:01 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Apr 8 2018 13:55:24 for Skinny-C by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
