@@ -26,7 +26,7 @@ behaviour.  In particular, there are no lookup tables for the S-boxes.
 Skinny-C is distributed under the terms of the MIT license.
 
 For instructions on how to build and use Skinny-C, see the
-<a href="http://rweather.github.com/skinny-c/index.html">documentation</a>.
+<a href="http://rweather.github.io/skinny-c/index.html">documentation</a>.
 
 For more information on this code, to report bugs, or to suggest
 improvements, please contact the author Rhys Weatherley via
