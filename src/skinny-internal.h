@@ -221,7 +221,7 @@ STATIC_INLINE void skinny_cleanse(void *ptr, size_t size)
 {
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
     /* C11 added memset_s() explicitly for the memory cleanse use case */
-    memset_s(ptr, 0, size);
+    memset_s(ptr, size, 0, size);
 #else
     /* We don't have memset_s(), so do the best we can to cleanse memory */
     uint8_t volatile *p = (uint8_t volatile *)ptr;
